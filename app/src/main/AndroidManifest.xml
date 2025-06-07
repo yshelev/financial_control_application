@@ -35,6 +35,11 @@
             android:exported="false"
             android:theme="@style/Theme.MyApplication" />
 
+        <activity
+            android:name=".DashboardActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication" />
+
     </application>
 
 </manifest>

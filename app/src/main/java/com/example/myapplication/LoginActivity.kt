@@ -28,7 +28,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         loginButton.setOnClickListener {
-
+            startActivity(Intent(this, DashboardActivity::class.java))
         }
 
         goToRegister.setOnClickListener {
