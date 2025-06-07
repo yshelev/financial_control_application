@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class DashboardActivity : AppCompatActivity() {
 
@@ -46,5 +47,16 @@ class DashboardActivity : AppCompatActivity() {
 
         transactionsRecycler.layoutManager = LinearLayoutManager(this)
         transactionsRecycler.adapter = TransactionsAdapter(sampleTransactions)
+
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        bottomNavigation.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.nav_home -> { /* TODO: open home */ true }
+                R.id.nav_cards -> { true }
+                R.id.nav_settings -> { /* TODO: open settings */ true }
+                else -> false
+            }
+        }
+
     }
 }

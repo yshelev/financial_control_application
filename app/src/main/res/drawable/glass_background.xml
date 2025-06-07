@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Свечение по краям -->
+
     <item>
         <shape android:shape="rectangle">
             <gradient
@@ -11,10 +11,9 @@
         </shape>
     </item>
 
-    <!-- Полупрозрачное "стекло" -->
     <item android:left="2dp" android:top="2dp" android:right="2dp" android:bottom="2dp">
         <shape android:shape="rectangle">
-            <solid android:color="#26FFFFFF" /> <!-- 15% белый -->
+            <solid android:color="#26FFFFFF" />
             <corners android:radius="22dp" />
         </shape>
     </item>
