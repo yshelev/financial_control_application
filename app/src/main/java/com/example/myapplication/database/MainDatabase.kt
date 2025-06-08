@@ -6,11 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.myapplication.database.dao.TransactionDao
 import com.example.myapplication.database.dao.UserDao
-import com.example.myapplication.database.entities.Transaction
+import com.example.myapplication.database.entities.UserTransaction
 import com.example.myapplication.database.entities.User
 
 @Database(
-    entities = [User::class, Transaction::class],
+    entities = [User::class, UserTransaction::class],
     version = 1,
     exportSchema = false
 )

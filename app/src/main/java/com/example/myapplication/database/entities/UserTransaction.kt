@@ -14,7 +14,7 @@ import androidx.room.Index
     )],
     indices = [Index("userId"), Index("transactionDate")]
     )
-data class Transaction(
+data class UserTransaction(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val userId: Long,
     val type: String,
