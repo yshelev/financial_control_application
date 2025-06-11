@@ -7,9 +7,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AuthBaseActivity() {
 
     private var isPasswordVisible = false
 
@@ -17,6 +17,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        val emailInput = findViewById<EditText>(R.id.emailInput)
         val passwordInput = findViewById<EditText>(R.id.passwordInput)
         val passwordToggle = findViewById<ImageView>(R.id.passwordToggle)
         val loginButton = findViewById<Button>(R.id.loginButton)
@@ -28,17 +29,33 @@ class LoginActivity : AppCompatActivity() {
         }
 
         loginButton.setOnClickListener {
-            startActivity(Intent(this, DashboardActivity::class.java))
+            val email = emailInput.text.toString().trim()
+            val password = passwordInput.text.toString()
+
+            authController.loginAccount(
+                email = email,
+                password = password,
+                onSuccess = {
+                    Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, DashboardActivity::class.java))
+                    finish()
+                },
+                onFailure = { errorMessage ->
+                    Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+                }
+            )
         }
 
         goToRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
+            finish()
         }
     }
 
     private fun togglePasswordVisibility(editText: EditText, toggle: ImageView, visible: Boolean) {
         if (visible) {
-            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            editText.inputType =
+                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             toggle.setImageResource(R.drawable.ic_eye)
         } else {
             editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD

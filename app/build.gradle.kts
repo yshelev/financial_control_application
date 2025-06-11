@@ -47,6 +47,7 @@ dependencies {
     implementation ("androidx.room:room-ktx:2.7.1")
     implementation ("com.google.android.material:material:1.11.0")
     implementation ("androidx.viewpager2:viewpager2:1.0.0")
+    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
     implementation (libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
