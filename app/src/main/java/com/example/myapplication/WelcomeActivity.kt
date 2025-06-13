@@ -11,14 +11,6 @@ class WelcomeActivity : AuthBaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_welcome)
 
-        if (authController.isUserLoggedIn()) {
-            startActivity(Intent(this, DashboardActivity::class.java))
-            finish()
-        } else {
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }
-
         val startButton = findViewById<Button>(R.id.startButton)
         val registerLink = findViewById<TextView>(R.id.registerLink)
 
@@ -26,9 +18,17 @@ class WelcomeActivity : AuthBaseActivity() {
             startActivity(Intent(this, LoginActivity::class.java))
         }
 
-
         registerLink.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        if (authController.isUserLoggedIn()) {
+            startActivity(Intent(this, DashboardActivity::class.java))
+            finish()
+        }
+    }
 }
+
