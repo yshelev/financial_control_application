@@ -5,7 +5,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
-class WelcomeActivity : AppCompatActivity() {
+class WelcomeActivity : AuthBaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,14 +15,20 @@ class WelcomeActivity : AppCompatActivity() {
         val registerLink = findViewById<TextView>(R.id.registerLink)
 
         startButton.setOnClickListener {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, LoginActivity::class.java))
         }
 
-
         registerLink.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, RegisterActivity::class.java))
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (authController.isUserLoggedIn()) {
+            startActivity(Intent(this, DashboardActivity::class.java))
+            finish()
         }
     }
 }
+
