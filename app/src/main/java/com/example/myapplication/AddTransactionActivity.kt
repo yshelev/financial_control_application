@@ -35,13 +35,16 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private val activeIncomeBg = Color.parseColor("#50FF9D")
     private val activeIncomeText = Color.BLACK
-
     private val activeExpenseBg = Color.parseColor("#FF6E6E")
     private val activeExpenseText = Color.BLACK
-
     private val inactiveBg = Color.TRANSPARENT
     private val inactiveIncomeText = Color.parseColor("#50FF9D")
     private val inactiveExpenseText = Color.parseColor("#FF6E6E")
+
+    private val incomeCategories = listOf("Salary", "Gift", "Investment")
+    private val expenseCategories = listOf(
+        "Food", "Transport", "Clothes", "Education", "Health", "Entertainment")
+
     val db = App.database
     val transactionDao = db.transactionDao()
 
@@ -67,7 +70,6 @@ class AddTransactionActivity : AppCompatActivity() {
         }
 
         val cards = listOf("T-bank 0567", "Sber 8989", "Alfa 6666")
-
         val cardsAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, cards) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
@@ -77,26 +79,7 @@ class AddTransactionActivity : AppCompatActivity() {
         }
         cardSpinner.adapter = cardsAdapter
 
-        val categories = listOf("Food", "Transport", "Clothes", "Education")
-        val categoryIcons = listOf(
-            R.drawable.ic_food,
-            R.drawable.ic_transport,
-            R.drawable.ic_clothes,
-            R.drawable.ic_education
-        )
-
-        val categoriesAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(Color.parseColor("#D0B8F5"))
-                return view
-            }
-        }
-
-        categorySpinner.adapter = categoriesAdapter
-
         val currencies = listOf("RUB", "USD", "EUR")
-
         val currencyAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencies) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
@@ -104,7 +87,6 @@ class AddTransactionActivity : AppCompatActivity() {
                 return view
             }
         }
-
         currencySpinner.adapter = currencyAdapter
 
         updateDateLabel()
@@ -116,14 +98,17 @@ class AddTransactionActivity : AppCompatActivity() {
         incomeToggle.setOnClickListener {
             isIncomeSelected = true
             updateToggleButtons("income")
+            updateCategorySpinner()
         }
 
         expenseToggle.setOnClickListener {
             isIncomeSelected = false
             updateToggleButtons("expense")
+            updateCategorySpinner()
         }
 
         updateToggleButtons("income")
+        updateCategorySpinner()
 
         saveButton.setOnClickListener {
             if (validateInputs()) {
@@ -132,8 +117,21 @@ class AddTransactionActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateCategorySpinner() {
+        val categories = if (isIncomeSelected) incomeCategories else expenseCategories
+
+        val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.setTextColor(Color.parseColor("#D0B8F5"))
+                return view
+            }
+        }
+
+        categorySpinner.adapter = adapter
+    }
+
     private fun validateInputs(): Boolean {
-        // Validate amount
         val amountText = amountEditText.text.toString().trim()
         if (amountText.isEmpty()) {
             amountEditText.error = "Please enter an amount"
@@ -155,23 +153,31 @@ class AddTransactionActivity : AppCompatActivity() {
     }
 
     private fun saveTransaction() {
-        // Get all values from inputs
         val amount = amountEditText.text.toString().toDouble()
         val currency = currencySpinner.selectedItem.toString()
         val category = categorySpinner.selectedItem.toString()
         val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
         val dateInMillis = selectedDate.timeInMillis
 
-        // Get the appropriate icon based on category
-        val iconResId = when (category) {
-            "Food" -> R.drawable.ic_food
-            "Transport" -> R.drawable.ic_transport
-            "Clothes" -> R.drawable.ic_clothes
-            "Education" -> R.drawable.ic_education
-            else -> R.drawable.ic_default
+        val iconResId = if (isIncomeSelected) {
+            when (category) {
+                "Salary" -> R.drawable.ic_salary
+                "Gift" -> R.drawable.ic_gift
+                "Investment" -> R.drawable.ic_investment
+                else -> R.drawable.ic_default
+            }
+        } else {
+            when (category) {
+                "Food" -> R.drawable.ic_food
+                "Transport" -> R.drawable.ic_transport
+                "Clothes" -> R.drawable.ic_clothes
+                "Education" -> R.drawable.ic_education
+                "Health" -> R.drawable.ic_health
+                "Entertainment" -> R.drawable.ic_entertainment
+                else -> R.drawable.ic_default
+            }
         }
 
-        // Create the transaction object
         val transaction = UserTransaction(
             isIncome = isIncomeSelected,
             amount = amount,
@@ -181,9 +187,11 @@ class AddTransactionActivity : AppCompatActivity() {
             date = dateInMillis,
             iconResId = iconResId
         )
+
         lifecycleScope.launch {
             transactionDao.insert(transaction)
         }
+
         finish()
     }
 
