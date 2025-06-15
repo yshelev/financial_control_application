@@ -1,19 +1,12 @@
 package com.example.myapplication
-import android.app.Activity
+
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.entities.Card
@@ -49,14 +42,13 @@ class AddCardActivity : AppCompatActivity() {
         ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(Color.parseColor("#FFFFFF"))
-                view.setHintTextColor(Color.parseColor("#AAAAAA"))
+                view.setTextColor(Color.WHITE)
                 return view
             }
 
             override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getDropDownView(position, convertView, parent) as TextView
-                view.setTextColor(Color.parseColor("#FFFFFF"))
+                view.setTextColor(Color.WHITE)
                 return view
             }
         }
@@ -72,23 +64,30 @@ class AddCardActivity : AppCompatActivity() {
                 if (isEditing) return
                 isEditing = true
                 s?.let {
-                    val text = it.toString()
-                    val digits = text.replace("[^\\d/]".toRegex(), "")
-                    if (digits.length == 2 && !digits.endsWith("/")) {
-                        val newText = digits + "/"
-                        expiryDateEditText.setText(newText)
-                        expiryDateEditText.setSelection(newText.length)
-                    } else if (digits.length > 2 && !digits.contains("/")) {
-                        val newText = digits.substring(0, 2) + "/" + digits.substring(2)
-                        expiryDateEditText.setText(newText)
-                        expiryDateEditText.setSelection(newText.length)
-                    } else {
-                        expiryDateEditText.setSelection(digits.length)
+                    val digits = it.toString().replace("[^\\d/]".toRegex(), "")
+                    val newText = when {
+                        digits.length == 2 && !digits.endsWith("/") -> digits + "/"
+                        digits.length > 2 && !digits.contains("/") ->
+                            digits.substring(0, 2) + "/" + digits.substring(2)
+                        else -> digits
                     }
+                    expiryDateEditText.setText(newText)
+                    expiryDateEditText.setSelection(newText.length)
                 }
                 isEditing = false
             }
         })
+
+        // Очистка ошибок при вводе
+        listOf(cardNameEditText, last4DigitsEditText, expiryDateEditText, balanceEditText).forEach { editText ->
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    editText.error = null
+                }
+                override fun afterTextChanged(s: Editable?) {}
+            })
+        }
 
         backButton.setOnClickListener {
             finish()
@@ -106,10 +105,7 @@ class AddCardActivity : AppCompatActivity() {
             }
 
             try {
-                var balance = 0.0
-                if (!balanceStr.isEmpty()) {
-                    balance = balanceStr.toDouble()
-                }
+                val balance = if (balanceStr.isNotEmpty()) balanceStr.toDouble() else 0.0
 
                 val card = Card(
                     name = name,
@@ -121,46 +117,42 @@ class AddCardActivity : AppCompatActivity() {
 
                 lifecycleScope.launch {
                     App.database.cardDao().insert(card)
+                    finish()
                 }
-                finish()
 
             } catch (e: Exception) {
-                showToast("Ошибка при сохранении карты: ${e.message}")
+                balanceEditText.error = "Ошибка при сохранении: ${e.message}"
             }
         }
     }
 
     private fun validateInputs(name: String, last4: String, date: String, balanceStr: String): Boolean {
+        var isValid = true
+
         if (name.isEmpty()) {
-            showToast("Введите название карты")
-            cardNameEditText.requestFocus()
-            return false
+            cardNameEditText.error = "Введите название карты"
+            isValid = false
         }
 
         if (last4.length != 4 || !last4.all { it.isDigit() }) {
-            showToast("Введите последние 4 цифры карты")
-            last4DigitsEditText.requestFocus()
-            return false
+            last4DigitsEditText.error = "Введите 4 цифры"
+            isValid = false
         }
 
         if (!date.matches(Regex("""^(0[1-9]|1[0-2])\/\d{2}$"""))) {
-            showToast("Введите дату в формате MM/YY")
-            expiryDateEditText.requestFocus()
-            return false
+            expiryDateEditText.error = "Формат MM/YY"
+            isValid = false
         }
 
-        try {
-            balanceStr.toDouble()
-        } catch (e: NumberFormatException) {
-            showToast("Баланс должен быть числом")
-            balanceEditText.requestFocus()
-            return false
+        if (balanceStr.isNotEmpty()) {
+            try {
+                balanceStr.toDouble()
+            } catch (e: NumberFormatException) {
+                balanceEditText.error = "Баланс должен быть числом"
+                isValid = false
+            }
         }
 
-        return true
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        return isValid
     }
 }
