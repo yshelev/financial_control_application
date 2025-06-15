@@ -3,6 +3,7 @@ package com.example.myapplication
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.LifecycleOwner
@@ -17,7 +18,8 @@ import java.util.*
 
 class TransactionsAdapter(
     private val lifecycleOwner: LifecycleOwner,
-    private val transactionsFlow: Flow<List<UserTransaction>>
+    private val transactionsFlow: Flow<List<UserTransaction>>,
+    private val onDeleteClicked: (UserTransaction) -> Unit
 ) : RecyclerView.Adapter<TransactionsAdapter.TransactionViewHolder>() {
 
     private val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -37,6 +39,7 @@ class TransactionsAdapter(
         val title: TextView = view.findViewById(R.id.transactionTitle)
         val date: TextView = view.findViewById(R.id.transactionDate)
         val amount: TextView = view.findViewById(R.id.transactionAmount)
+        val deleteButton: ImageButton = view.findViewById(R.id.deleteButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -49,13 +52,25 @@ class TransactionsAdapter(
         val tx = transactions[position]
         holder.title.text = tx.category
         holder.date.text = dateFormatter.format(Date(tx.date))
-        holder.amount.text = if (tx.isIncome) "+${tx.amount}${tx.currency}" else "-${tx.amount}${tx.currency}"
+
+        val currencySymbol = when (tx.currency.uppercase()) {
+            "RUB" -> "₽"
+            "EUR" -> "€"
+            "USD" -> "$"
+            else -> tx.currency
+        }
+
+        holder.amount.text = if (tx.isIncome) "+${tx.amount}${currencySymbol}" else "-${tx.amount}${tx.currency}"
         holder.amount.setTextColor(
             holder.itemView.context.getColor(
                 if (tx.isIncome) R.color.green else R.color.red
             )
         )
         holder.icon.setImageResource(tx.iconResId)
+
+        holder.deleteButton.setOnClickListener {
+            onDeleteClicked(tx)
+        }
     }
 
     override fun getItemCount(): Int = transactions.size

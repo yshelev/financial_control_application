@@ -7,8 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.database.entities.UserTransaction
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,8 +30,8 @@ class AddTransactionActivity : AppCompatActivity() {
     private lateinit var currencySpinner: Spinner
     private lateinit var backButton: ImageButton
 
-
     private var selectedDate: Calendar = Calendar.getInstance()
+    private var isIncomeSelected: Boolean = true
 
     private val activeIncomeBg = Color.parseColor("#50FF9D")
     private val activeIncomeText = Color.BLACK
@@ -39,6 +42,8 @@ class AddTransactionActivity : AppCompatActivity() {
     private val inactiveBg = Color.TRANSPARENT
     private val inactiveIncomeText = Color.parseColor("#50FF9D")
     private val inactiveExpenseText = Color.parseColor("#FF6E6E")
+    val db = App.database
+    val transactionDao = db.transactionDao()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +66,14 @@ class AddTransactionActivity : AppCompatActivity() {
             finish()
         }
 
-        val categories = listOf("Food", "Transport", "Clothes", "Education") // добавить поменять
+
+        val categories = listOf("Food", "Transport", "Clothes", "Education")
+        val categoryIcons = listOf(
+            R.drawable.ic_food, // Make sure you have these icons in your resources
+            R.drawable.ic_transport,
+            R.drawable.ic_clothes,
+            R.drawable.ic_education
+        )
 
         val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -81,11 +93,9 @@ class AddTransactionActivity : AppCompatActivity() {
                 view.setTextColor(Color.parseColor("#D0B8F5"))
                 return view
             }
-
         }
 
         currencySpinner.adapter = currencyAdapter
-
 
         updateDateLabel()
 
@@ -94,16 +104,84 @@ class AddTransactionActivity : AppCompatActivity() {
         }
 
         incomeToggle.setOnClickListener {
+            isIncomeSelected = true
             updateToggleButtons("income")
         }
 
         expenseToggle.setOnClickListener {
+            isIncomeSelected = false
             updateToggleButtons("expense")
         }
 
         updateToggleButtons("income")
 
+        saveButton.setOnClickListener {
+            if (validateInputs()) {
+                saveTransaction()
+            }
+        }
+    }
 
+    private fun validateInputs(): Boolean {
+        // Validate card name
+        val name = cardName.text.toString().trim()
+        if (name.isEmpty()) {
+            cardName.error = "Please enter a card name"
+            return false
+        }
+
+        // Validate amount
+        val amountText = amountEditText.text.toString().trim()
+        if (amountText.isEmpty()) {
+            amountEditText.error = "Please enter an amount"
+            return false
+        }
+
+        try {
+            val amount = amountText.toDouble()
+            if (amount <= 0) {
+                amountEditText.error = "Amount must be greater than 0"
+                return false
+            }
+        } catch (e: NumberFormatException) {
+            amountEditText.error = "Please enter a valid number"
+            return false
+        }
+
+        return true
+    }
+
+    private fun saveTransaction() {
+        // Get all values from inputs
+        val amount = amountEditText.text.toString().toDouble()
+        val currency = currencySpinner.selectedItem.toString()
+        val category = categorySpinner.selectedItem.toString()
+        val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
+        val dateInMillis = selectedDate.timeInMillis
+
+        // Get the appropriate icon based on category
+        val iconResId = when (category) {
+            "Food" -> R.drawable.ic_food
+            "Transport" -> R.drawable.ic_transport
+            "Clothes" -> R.drawable.ic_clothes
+            "Education" -> R.drawable.ic_education
+            else -> R.drawable.ic_default // Make sure you have a default icon
+        }
+
+        // Create the transaction object
+        val transaction = UserTransaction(
+            isIncome = isIncomeSelected,
+            amount = amount,
+            currency = currency,
+            category = category,
+            description = description,
+            date = dateInMillis,
+            iconResId = iconResId
+        )
+        lifecycleScope.launch {
+            transactionDao.insert(transaction)
+        }
+        finish()
     }
 
     private fun showDatePicker() {
@@ -140,4 +218,3 @@ class AddTransactionActivity : AppCompatActivity() {
         }
     }
 }
-

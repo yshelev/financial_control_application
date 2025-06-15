@@ -69,23 +69,20 @@ class DashboardActivity : AuthBaseActivity() {
 
         transactionsRecycler.layoutManager = LinearLayoutManager(this)
         val transactionDao = db.transactionDao()
-        transactionsRecycler.adapter = TransactionsAdapter(this, transactionDao.getAllTransactions())
+        transactionsRecycler.adapter = TransactionsAdapter(
+            this,
+            transactionDao.getAllTransactions(),
+            onDeleteClicked = { transaction ->
+                lifecycleScope.launch {
+                    transactionDao.delete(transaction)
+                }
+            }
+        )
 
         addTransactionButton.setOnClickListener {
             val intent = Intent(this, AddTransactionActivity::class.java)
             startActivity(intent)
 
-            val trans = UserTransaction(
-                isIncome = true,
-                amount = 3200.0,
-                currency = "Рубли",
-                category = "food",
-                description = "Тест",
-                iconResId = R.drawable.ic_eye
-            )
-            lifecycleScope.launch {
-                transactionDao.insert(trans)
-            }
         }
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
