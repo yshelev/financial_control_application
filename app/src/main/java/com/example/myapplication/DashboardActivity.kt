@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import Card
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -59,7 +60,11 @@ class DashboardActivity : AuthBaseActivity() {
             Card("Visa Classic", "**** 1234", "01/33", "₽", 120000.0),
             Card("Mastercard Gold", "**** 5678", "11/25", "₽", 45000.0)
         )
-        cardsViewPager.adapter = CardsAdapter(sampleCards)
+        cardsViewPager.adapter = CardsAdapter(sampleCards) {
+            val intent = Intent(this, AddCardActivity::class.java)
+            startActivity(intent)
+        }
+
         cardsViewPager.setPageTransformer(CompositePageTransformer().apply {
             addTransformer(MarginPageTransformer(dpToPx(16f)))
         })

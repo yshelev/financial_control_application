@@ -3,4 +3,10 @@
     <string name="currency_rub">₽</string>
     <string name="currency_usd">$</string>
     <string name="currency_eur">€</string>
+    <string-array name="currencies">
+        <item>₽</item>
+        <item>$</item>
+        <item>€</item>
+    </string-array>
+
 </resources>

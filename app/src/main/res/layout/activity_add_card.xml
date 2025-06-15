@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/background_gradient"
+    android:padding="24dp">
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:src="@drawable/ic_back" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_margin="16dp"
+        android:padding="24dp"
+        app:cardCornerRadius="20dp"
+        app:cardBackgroundColor="#2E2E2E"
+        app:cardElevation="12dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <EditText
+                android:id="@+id/cardNameEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:hint="Card Name"
+                android:textColorHint="#AAAAAA"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:background="@null"
+                android:inputType="text"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true" />
+
+            <EditText
+                android:id="@+id/last4DigitsEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:hint="****"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#AAAAAA"
+                android:textSize="22sp"
+                android:inputType="number"
+                android:maxLength="4"
+                android:background="@null"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true" />
+
+            <EditText
+                android:id="@+id/expiryDateEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:hint="MM/YY"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#AAAAAA"
+                android:textSize="18sp"
+                android:inputType="text"
+                android:maxLength="5"
+                android:background="@null"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true" />
+
+            <LinearLayout
+                android:id="@+id/balanceLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/balanceEditText"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:hint="Balance"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#AAAAAA"
+                    android:textSize="22sp"
+                    android:background="@null"
+                    android:inputType="numberDecimal" />
+
+                <Spinner
+                    android:id="@+id/currencySpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:popupBackground="#2E2E2E"
+                    android:padding="8dp"
+                    android:entries="@array/currencies"
+                    android:background="@drawable/spinner_background"/>
+            </LinearLayout>
+
+
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <Button
+        android:id="@+id/saveCardButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Card"
+        android:layout_alignParentBottom="true"
+        style="@style/CandyButton" />
+</RelativeLayout>

@@ -1,4 +1,4 @@
-package com.example.myapplication
+import java.io.Serializable
 
 data class Card(
     val name: String,
@@ -6,4 +6,4 @@ data class Card(
     val date: String,
     val currency: String,
     val balance: Double
-)
+) : Serializable
