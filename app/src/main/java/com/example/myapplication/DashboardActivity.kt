@@ -90,6 +90,11 @@ class DashboardActivity : AuthBaseActivity() {
             onAddCardClicked = {
                 val intent = Intent(this@DashboardActivity, AddCardActivity::class.java)
                 startActivity(intent)
+            },
+            onDeleteCardClicked = { card ->
+                lifecycleScope.launch {
+                    db.cardDao().delete(card)
+                }
             }
         )
 

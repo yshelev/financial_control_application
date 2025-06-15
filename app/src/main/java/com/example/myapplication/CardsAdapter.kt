@@ -3,6 +3,8 @@ package com.example.myapplication
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.database.entities.Card
@@ -15,9 +17,9 @@ import kotlinx.coroutines.launch
 class CardsAdapter(
     private val cardsFlow: Flow<List<Card>>,
     private val coroutineScope: CoroutineScope,
-    private val onAddCardClicked: () -> Unit
+    private val onAddCardClicked: () -> Unit,
+    private val onDeleteCardClicked: (Card) -> Unit // Добавляем callback для удаления
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
     private var cards: List<Card> = emptyList()
 
     private val VIEW_TYPE_CARD = 0
@@ -36,11 +38,23 @@ class CardsAdapter(
         }
     }
 
-    class CardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class CardViewHolder(
+        view: View,
+        private val onDeleteCardClicked: (Card) -> Unit // Добавляем параметр в конструктор
+    ) : RecyclerView.ViewHolder(view) {
         val balanceText: TextView = view.findViewById(R.id.cardBalance)
         val cardName: TextView = view.findViewById(R.id.cardName)
         val cardNumber: TextView = view.findViewById(R.id.cardNumber)
         val cardDate: TextView = view.findViewById(R.id.cardDate)
+        val deleteButton: ImageButton = view.findViewById(R.id.deleteButton)
+
+        fun bind(card: Card) {
+            balanceText.text = "${card.balance}${card.currency}"
+            cardName.text = card.name
+            cardNumber.text = card.maskedNumber
+            cardDate.text = card.date
+            deleteButton.setOnClickListener { onDeleteCardClicked(card) }
+        }
     }
 
     class AddCardViewHolder(view: View, onAddCardClicked: () -> Unit) : RecyclerView.ViewHolder(view) {
@@ -59,7 +73,7 @@ class CardsAdapter(
         return if (viewType == VIEW_TYPE_CARD) {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_card, parent, false)
-            CardViewHolder(view)
+            CardViewHolder(view, onDeleteCardClicked) // Передаем callback в ViewHolder
         } else {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_add_card, parent, false)
@@ -69,11 +83,7 @@ class CardsAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is CardViewHolder && position < cards.size) {
-            val card = cards[position]
-            holder.balanceText.text = "${card.balance}${card.currency}"
-            holder.cardName.text = card.name
-            holder.cardNumber.text = card.maskedNumber
-            holder.cardDate.text = card.date
+            holder.bind(cards[position]) // Используем метод bind
         }
     }
 
