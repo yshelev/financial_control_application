@@ -41,6 +41,12 @@
             android:exported="false"
             android:theme="@style/Theme.MyApplication" />
 
+        <activity
+            android:name=".AddTransactionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication"/>
+
+
     </application>
 
 </manifest>

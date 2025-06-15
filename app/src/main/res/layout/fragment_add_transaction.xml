@@ -1,0 +1,130 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_gradient"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        android:elevation="8dp"
+        android:clipToOutline="true"
+        android:outlineProvider="background">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/dateCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#2E2E2E"
+            app:cardElevation="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:padding="14dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:src="@drawable/calendar"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp" />
+
+                <TextView
+                    android:id="@+id/selectDateText"
+                    android:text="Choose date"
+                    android:textColor="#D0B8F5"
+                    android:textSize="16sp"
+                    android:layout_marginStart="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <EditText
+            android:id="@+id/cardName"
+            style="@style/GlassInput"
+            android:hint="Card name"
+            android:layout_marginBottom="20dp"
+            android:textColor="#FFFFFF" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/typeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:checkedButton="@+id/incomeToggle"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/incomeToggle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Income"
+                android:textColor="#50FF9D"
+                app:backgroundTint="@android:color/transparent"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/expenseToggle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Expense"
+                android:textColor="#FF6E6E"
+                app:backgroundTint="@android:color/transparent"
+                app:cornerRadius="12dp" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textColor="#D0B8F5"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <Spinner
+            android:id="@+id/categorySpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#D0B8F5"
+            android:popupBackground="#D0B8F5"
+            android:layout_marginBottom="20dp"
+            android:textColor="#D0B8F5"/>
+
+        <EditText
+            android:id="@+id/descriptionEditText"
+            style="@style/GlassInput"
+            android:hint="Description"
+            android:layout_marginBottom="20dp"
+            android:textColor="#FFFFFF" />
+
+        <EditText
+            android:id="@+id/amountEditText"
+            style="@style/GlassInput"
+            android:hint="Amount"
+            android:inputType="numberDecimal"
+            android:layout_marginBottom="28dp"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            style="@style/CandyButton"
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save" />
+    </LinearLayout>
+</ScrollView>
+
