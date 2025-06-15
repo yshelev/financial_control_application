@@ -1,5 +1,4 @@
 package com.example.myapplication
-import Card
 import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
@@ -16,6 +15,9 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.database.entities.Card
+import kotlinx.coroutines.launch
 
 class AddCardActivity : AppCompatActivity() {
 
@@ -25,7 +27,7 @@ class AddCardActivity : AppCompatActivity() {
     private lateinit var balanceEditText: EditText
     private lateinit var saveCardButton: Button
     private lateinit var backButton: ImageButton
-
+    private lateinit var currencySpinner: Spinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +39,7 @@ class AddCardActivity : AppCompatActivity() {
         balanceEditText = findViewById(R.id.balanceEditText)
         saveCardButton = findViewById(R.id.saveCardButton)
         backButton = findViewById(R.id.backButton)
-        val currencySpinner: Spinner = findViewById(R.id.currencySpinner)
+        currencySpinner = findViewById(R.id.currencySpinner)
 
         val currencies = listOf("₽", "$", "€")
         val spinnerAdapter = object : ArrayAdapter<String>(
@@ -87,6 +89,7 @@ class AddCardActivity : AppCompatActivity() {
                 isEditing = false
             }
         })
+
         backButton.setOnClickListener {
             finish()
         }
@@ -96,32 +99,64 @@ class AddCardActivity : AppCompatActivity() {
             val last4 = last4DigitsEditText.text.toString().trim()
             val date = expiryDateEditText.text.toString().trim()
             val balanceStr = balanceEditText.text.toString().trim()
+            val currency = currencySpinner.selectedItem.toString()
+
+            if (!validateInputs(name, last4, date, balanceStr)) {
+                return@setOnClickListener
+            }
+
+            try {
+                var balance = 0.0
+                if (!balanceStr.isEmpty()) {
+                    balance = balanceStr.toDouble()
+                }
+
+                val card = Card(
+                    name = name,
+                    maskedNumber = last4,
+                    date = date,
+                    currency = currency,
+                    balance = balance
+                )
+
+                lifecycleScope.launch {
+                    App.database.cardDao().insert(card)
+                }
+                finish()
+
+            } catch (e: Exception) {
+                showToast("Ошибка при сохранении карты: ${e.message}")
+            }
         }
     }
 
     private fun validateInputs(name: String, last4: String, date: String, balanceStr: String): Boolean {
         if (name.isEmpty()) {
             showToast("Введите название карты")
+            cardNameEditText.requestFocus()
             return false
         }
+
         if (last4.length != 4 || !last4.all { it.isDigit() }) {
             showToast("Введите последние 4 цифры карты")
+            last4DigitsEditText.requestFocus()
             return false
         }
+
         if (!date.matches(Regex("""^(0[1-9]|1[0-2])\/\d{2}$"""))) {
             showToast("Введите дату в формате MM/YY")
+            expiryDateEditText.requestFocus()
             return false
         }
-        if (balanceStr.isEmpty()) {
-            showToast("Введите баланс карты")
-            return false
-        }
+
         try {
             balanceStr.toDouble()
         } catch (e: NumberFormatException) {
             showToast("Баланс должен быть числом")
+            balanceEditText.requestFocus()
             return false
         }
+
         return true
     }
 

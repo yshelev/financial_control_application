@@ -1,19 +1,40 @@
 package com.example.myapplication
 
-import Card
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.database.entities.Card
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CardsAdapter(
-    private val cards: List<Card>,
+    private val cardsFlow: Flow<List<Card>>,
+    private val coroutineScope: CoroutineScope,
     private val onAddCardClicked: () -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    private var cards: List<Card> = emptyList()
+
     private val VIEW_TYPE_CARD = 0
     private val VIEW_TYPE_ADD_BUTTON = 1
+
+    init {
+        observeCards()
+    }
+
+    private fun observeCards() {
+        coroutineScope.launch(Dispatchers.Main) {
+            cardsFlow.collectLatest { newCards ->
+                cards = newCards
+                notifyDataSetChanged()
+            }
+        }
+    }
 
     class CardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val balanceText: TextView = view.findViewById(R.id.cardBalance)
@@ -41,7 +62,7 @@ class CardsAdapter(
             CardViewHolder(view)
         } else {
             val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_add_card, parent, false)  // layout с кнопкой "Добавить карту"
+                .inflate(R.layout.item_add_card, parent, false)
             AddCardViewHolder(view, onAddCardClicked)
         }
     }
@@ -49,7 +70,7 @@ class CardsAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is CardViewHolder && position < cards.size) {
             val card = cards[position]
-            holder.balanceText.text = "${card.balance}₽"
+            holder.balanceText.text = "${card.balance}${card.currency}"
             holder.cardName.text = card.name
             holder.cardNumber.text = card.maskedNumber
             holder.cardDate.text = card.date

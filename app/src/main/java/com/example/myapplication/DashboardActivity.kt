@@ -84,14 +84,14 @@ class DashboardActivity : AuthBaseActivity() {
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         }
 
-        val sampleCards = listOf(
-            Card("Visa Classic", "**** 1234", "01/33", "₽", 120000.0),
-            Card("Mastercard Gold", "**** 5678", "11/25", "₽", 45000.0)
+        cardsViewPager.adapter = CardsAdapter(
+            db.cardDao().getAllCards(),
+            lifecycleScope,
+            onAddCardClicked = {
+                val intent = Intent(this@DashboardActivity, AddCardActivity::class.java)
+                startActivity(intent)
+            }
         )
-        cardsViewPager.adapter = CardsAdapter(sampleCards) {
-            val intent = Intent(this, AddCardActivity::class.java)
-            startActivity(intent)
-        }
 
         cardsViewPager.setPageTransformer(CompositePageTransformer().apply {
             addTransformer(MarginPageTransformer(dpToPx(16f)))
