@@ -11,7 +11,7 @@ import com.example.myapplication.database.entities.User
 
 @Database(
     entities = [User::class, UserTransaction::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class MainDatabase : RoomDatabase() {

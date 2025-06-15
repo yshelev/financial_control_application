@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_gradient">
@@ -27,10 +28,11 @@
 
     <LinearLayout
         android:id="@+id/summaryLayout"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="16dp"
+        android:gravity="center"
         app:layout_constraintTop_toBottomOf="@id/cardsViewPager"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -43,11 +45,13 @@
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:textSize="16sp"
+            android:gravity="center"
             android:layout_weight="1" />
 
         <TextView
             android:id="@+id/income"
             android:layout_width="0dp"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text="Income:\n+45,000₽"
             android:textColor="#50FF9D"
@@ -57,6 +61,7 @@
         <TextView
             android:id="@+id/expenses"
             android:layout_width="0dp"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text="Expenses:\n−32,000₽"
             android:textColor="#FF6E6E"
@@ -74,7 +79,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+"
+            app:layout_constraintBottom_toBottomOf="@+id/transactionsRecycler"
+            app:layout_constraintEnd_toEndOf="@+id/transactionsRecycler" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 <com.google.android.material.bottomnavigation.BottomNavigationView
 android:id="@+id/bottomNavigation"

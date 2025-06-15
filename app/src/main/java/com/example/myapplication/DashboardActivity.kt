@@ -3,12 +3,17 @@ package com.example.myapplication
 import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
+import com.example.myapplication.database.entities.UserTransaction
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.launch
 
 class DashboardActivity : AuthBaseActivity() {
 
@@ -19,6 +24,17 @@ class DashboardActivity : AuthBaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
 
+        val db = App.database
+        val transactions = db.transactionDao().getAllTransactions().asLiveData()
+
+        val button = findViewById<Button>(R.id.button)
+        button.setOnClickListener {
+            val trans = UserTransaction(isIncome =  true, amount =  3200.0, currency =  "Рубли", category =  "food", description = "1", iconResId =  R.drawable.ic_eye)
+            lifecycleScope.launch {
+                db.transactionDao().insert(trans)
+            }
+        }
+
         cardsViewPager = findViewById(R.id.cardsViewPager)
         transactionsRecycler = findViewById(R.id.transactionsRecycler)
 
@@ -28,9 +44,9 @@ class DashboardActivity : AuthBaseActivity() {
         )
 
         val sampleTransactions = listOf(
-            Transaction("Products", "June 5", 3200, false, R.drawable.ic_eye),
-            Transaction("Salary", "June 1", 45000, true, R.drawable.ic_eye),
-            Transaction("Education", "May 31", 599, false, R.drawable.ic_eye)
+            UserTransaction(isIncome =  true, amount =  3200.0, currency =  "Рубли", category =  "food", description = "1", iconResId =  R.drawable.ic_eye),
+            UserTransaction(isIncome =  true, amount =  3200.0, currency =  "Рубли", category =  "food", description = "1", iconResId =  R.drawable.ic_eye),
+            UserTransaction(isIncome =  true, amount =  3200.0, currency =  "Рубли", category =  "food", description = "1", iconResId =  R.drawable.ic_eye),
         )
 
         cardsViewPager.adapter = CardsAdapter(sampleCards)
@@ -49,7 +65,7 @@ class DashboardActivity : AuthBaseActivity() {
 
 
         transactionsRecycler.layoutManager = LinearLayoutManager(this)
-        transactionsRecycler.adapter = TransactionsAdapter(sampleTransactions)
+        transactionsRecycler.adapter = TransactionsAdapter(this, db.transactionDao().getAllTransactions())
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNavigation.setOnItemSelectedListener {
