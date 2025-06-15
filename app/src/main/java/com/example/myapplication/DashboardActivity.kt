@@ -31,6 +31,7 @@ class DashboardActivity : AuthBaseActivity() {
     private lateinit var transactionsRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var timeFilterSpinner: Spinner
     private lateinit var addTransactionButton: FloatingActionButton
+    private lateinit var transactionsAdapter: TransactionsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +44,7 @@ class DashboardActivity : AuthBaseActivity() {
         timeFilterSpinner = findViewById(R.id.timeFilterSpinner)
         addTransactionButton = findViewById(R.id.addTransactionButton)
 
-        val timeOptions = listOf("All", "Today", "Week", "Month", "Year")
+        val timeOptions = listOf("All", "Today", "Week", "Month", "Year", "Custom period")
 
         val timeAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, timeOptions) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
