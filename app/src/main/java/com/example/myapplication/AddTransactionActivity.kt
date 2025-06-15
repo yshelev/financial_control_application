@@ -24,6 +24,9 @@ class AddTransactionActivity : AppCompatActivity() {
     private lateinit var descriptionEditText: EditText
     private lateinit var amountEditText: EditText
     private lateinit var saveButton: Button
+    private lateinit var currencySpinner: Spinner
+    private lateinit var backButton: ImageButton
+
 
     private var selectedDate: Calendar = Calendar.getInstance()
 
@@ -50,7 +53,13 @@ class AddTransactionActivity : AppCompatActivity() {
         categorySpinner = findViewById(R.id.categorySpinner)
         descriptionEditText = findViewById(R.id.descriptionEditText)
         amountEditText = findViewById(R.id.amountEditText)
+        currencySpinner = findViewById(R.id.currencySpinner)
+        backButton = findViewById(R.id.backButton)
         saveButton = findViewById(R.id.saveButton)
+
+        backButton.setOnClickListener {
+            finish()
+        }
 
         val categories = listOf("Food", "Transport", "Clothes", "Education") // добавить поменять
 
@@ -63,6 +72,19 @@ class AddTransactionActivity : AppCompatActivity() {
         }
 
         categorySpinner.adapter = adapter
+
+        val currencies = listOf("RUB", "USD", "EUR")
+
+        val currencyAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencies) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.setTextColor(Color.parseColor("#D0B8F5"))
+                return view
+            }
+
+        }
+
+        currencySpinner.adapter = currencyAdapter
 
 
         updateDateLabel()

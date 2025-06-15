@@ -17,6 +17,15 @@
         android:clipToOutline="true"
         android:outlineProvider="background">
 
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Back"
+            android:layout_marginBottom="16dp" />
+
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/dateCard"
             android:layout_width="match_parent"
@@ -84,7 +93,6 @@
                 android:textColor="#FF6E6E"
                 app:backgroundTint="@android:color/transparent"
                 app:cornerRadius="12dp" />
-
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <TextView
@@ -101,8 +109,7 @@
             android:layout_height="wrap_content"
             android:backgroundTint="#D0B8F5"
             android:popupBackground="#D0B8F5"
-            android:layout_marginBottom="20dp"
-            android:textColor="#D0B8F5"/>
+            android:layout_marginBottom="20dp" />
 
         <EditText
             android:id="@+id/descriptionEditText"
@@ -116,8 +123,25 @@
             style="@style/GlassInput"
             android:hint="Amount"
             android:inputType="numberDecimal"
-            android:layout_marginBottom="28dp"
+            android:layout_marginBottom="20dp"
             android:textColor="#FFFFFF" />
+
+        <!-- 💱 Spinner для выбора валюты -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Currency"
+            android:textColor="#D0B8F5"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <Spinner
+            android:id="@+id/currencySpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#D0B8F5"
+            android:popupBackground="#D0B8F5"
+            android:layout_marginBottom="20dp" />
 
         <Button
             style="@style/CandyButton"
@@ -127,4 +151,5 @@
             android:text="Save" />
     </LinearLayout>
 </ScrollView>
+
 
