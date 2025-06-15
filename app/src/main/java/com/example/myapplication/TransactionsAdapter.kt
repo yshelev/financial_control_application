@@ -48,6 +48,11 @@ class TransactionsAdapter(
         return TransactionViewHolder(view)
     }
 
+    fun updateTransactions(newTransactions: List<UserTransaction>) {
+        this.transactions = newTransactions
+        notifyDataSetChanged()
+    }
+
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val tx = transactions[position]
         holder.title.text = tx.category
