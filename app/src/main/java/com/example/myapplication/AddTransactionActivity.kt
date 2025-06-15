@@ -19,7 +19,7 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private lateinit var dateCard: MaterialCardView
     private lateinit var selectDateText: TextView
-    private lateinit var cardName: EditText
+    private lateinit var cardSpinner: Spinner
     private lateinit var incomeToggle: Button
     private lateinit var expenseToggle: Button
     private lateinit var typeGroup: MaterialButtonToggleGroup
@@ -51,7 +51,7 @@ class AddTransactionActivity : AppCompatActivity() {
 
         dateCard = findViewById(R.id.dateCard)
         selectDateText = findViewById(R.id.selectDateText)
-        cardName = findViewById(R.id.cardName)
+        cardSpinner = findViewById(R.id.cardSpinner)
         incomeToggle = findViewById(R.id.incomeToggle)
         expenseToggle = findViewById(R.id.expenseToggle)
         typeGroup = findViewById(R.id.typeGroup)
@@ -66,16 +66,26 @@ class AddTransactionActivity : AppCompatActivity() {
             finish()
         }
 
+        val cards = listOf("T-bank 0567", "Sber 8989", "Alfa 6666")
+
+        val cardsAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, cards) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.setTextColor(Color.parseColor("#D0B8F5"))
+                return view
+            }
+        }
+        cardSpinner.adapter = cardsAdapter
 
         val categories = listOf("Food", "Transport", "Clothes", "Education")
         val categoryIcons = listOf(
-            R.drawable.ic_food, // Make sure you have these icons in your resources
+            R.drawable.ic_food,
             R.drawable.ic_transport,
             R.drawable.ic_clothes,
             R.drawable.ic_education
         )
 
-        val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories) {
+        val categoriesAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
                 view.setTextColor(Color.parseColor("#D0B8F5"))
@@ -83,7 +93,7 @@ class AddTransactionActivity : AppCompatActivity() {
             }
         }
 
-        categorySpinner.adapter = adapter
+        categorySpinner.adapter = categoriesAdapter
 
         val currencies = listOf("RUB", "USD", "EUR")
 
@@ -123,13 +133,6 @@ class AddTransactionActivity : AppCompatActivity() {
     }
 
     private fun validateInputs(): Boolean {
-        // Validate card name
-        val name = cardName.text.toString().trim()
-        if (name.isEmpty()) {
-            cardName.error = "Please enter a card name"
-            return false
-        }
-
         // Validate amount
         val amountText = amountEditText.text.toString().trim()
         if (amountText.isEmpty()) {
@@ -165,7 +168,7 @@ class AddTransactionActivity : AppCompatActivity() {
             "Transport" -> R.drawable.ic_transport
             "Clothes" -> R.drawable.ic_clothes
             "Education" -> R.drawable.ic_education
-            else -> R.drawable.ic_default // Make sure you have a default icon
+            else -> R.drawable.ic_default
         }
 
         // Create the transaction object

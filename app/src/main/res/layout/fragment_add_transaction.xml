@@ -59,12 +59,21 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <EditText
-            android:id="@+id/cardName"
-            style="@style/GlassInput"
-            android:hint="Card name"
-            android:layout_marginBottom="20dp"
-            android:textColor="#FFFFFF" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Card Name"
+            android:textColor="#D0B8F5"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <Spinner
+            android:id="@+id/cardSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#D0B8F5"
+            android:popupBackground="#D0B8F5"
+            android:layout_marginBottom="20dp" />
 
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/typeGroup"
@@ -126,7 +135,6 @@
             android:layout_marginBottom="20dp"
             android:textColor="#FFFFFF" />
 
-        <!-- 💱 Spinner для выбора валюты -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
