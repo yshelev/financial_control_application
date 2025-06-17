@@ -113,8 +113,14 @@ class DashboardActivity : AuthBaseActivity() {
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNavigation.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.nav_home -> true
-                R.id.nav_cards -> true
+                R.id.nav_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
+                R.id.nav_settings -> {
+                    startActivity(Intent(this, DashboardActivity::class.java))
+                    true
+                }
                 else -> false
             }
         }

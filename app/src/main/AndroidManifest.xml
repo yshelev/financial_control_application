@@ -51,6 +51,11 @@
             android:exported="false"
             android:theme="@style/Theme.MyApplication"/>
 
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication"/>
+
 
     </application>
 
