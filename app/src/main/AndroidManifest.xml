@@ -24,12 +24,10 @@
             </intent-filter>
         </activity>
 
-
         <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.MyApplication" />
-
 
         <activity
             android:name=".RegisterActivity"
@@ -56,6 +54,10 @@
             android:exported="false"
             android:theme="@style/Theme.MyApplication"/>
 
+        <activity
+            android:name=".CreateCategoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MyApplication"/>
 
     </application>
 

@@ -1,11 +1,14 @@
 package com.example.myapplication
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.entities.UserTransaction
@@ -30,6 +33,8 @@ class AddTransactionActivity : AppCompatActivity() {
     private lateinit var currencySpinner: Spinner
     private lateinit var backButton: ImageButton
 
+    private lateinit var createCategoryLauncher: ActivityResultLauncher<Intent>
+
     private var selectedDate: Calendar = Calendar.getInstance()
     private var isIncomeSelected: Boolean = true
 
@@ -41,9 +46,9 @@ class AddTransactionActivity : AppCompatActivity() {
     private val inactiveIncomeText = Color.parseColor("#50FF9D")
     private val inactiveExpenseText = Color.parseColor("#FF6E6E")
 
-    private val incomeCategories = listOf("Salary", "Gift", "Investment")
-    private val expenseCategories = listOf(
-        "Food", "Transport", "Clothes", "Education", "Health", "Entertainment")
+    private val incomeCategories = mutableListOf("Salary", "Gift", "Investment", "Create category")
+    private val expenseCategories = mutableListOf(
+        "Food", "Transport", "Clothes", "Education", "Health", "Entertainment", "Create category")
 
     val db = App.database
     val transactionDao = db.transactionDao()
@@ -65,8 +70,25 @@ class AddTransactionActivity : AppCompatActivity() {
         backButton = findViewById(R.id.backButton)
         saveButton = findViewById(R.id.saveButton)
 
-        backButton.setOnClickListener {
-            finish()
+        backButton.setOnClickListener { finish() }
+
+        // Initialize ActivityResultLauncher
+        createCategoryLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val newCategory = result.data?.getStringExtra("newCategory")
+                newCategory?.let {
+                    if (isIncomeSelected) {
+                        incomeCategories.add(incomeCategories.size - 1, it)
+                    } else {
+                        expenseCategories.add(expenseCategories.size - 1, it)
+                    }
+                    updateCategorySpinner()
+                    val index = (categorySpinner.adapter as ArrayAdapter<String>).getPosition(it)
+                    categorySpinner.setSelection(index)
+                }
+            }
         }
 
         val cards = listOf("T-bank 0567", "Sber 8989", "Alfa 6666")
@@ -91,9 +113,7 @@ class AddTransactionActivity : AppCompatActivity() {
 
         updateDateLabel()
 
-        dateCard.setOnClickListener {
-            showDatePicker()
-        }
+        dateCard.setOnClickListener { showDatePicker() }
 
         incomeToggle.setOnClickListener {
             isIncomeSelected = true
@@ -105,6 +125,19 @@ class AddTransactionActivity : AppCompatActivity() {
             isIncomeSelected = false
             updateToggleButtons("expense")
             updateCategorySpinner()
+        }
+
+        categorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?, view: View?, position: Int, id: Long
+            ) {
+                val selected = categorySpinner.selectedItem.toString()
+                if (selected == "Create category") {
+                    openCreateCategoryScreen()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         updateToggleButtons("income")
@@ -128,7 +161,14 @@ class AddTransactionActivity : AppCompatActivity() {
             }
         }
 
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         categorySpinner.adapter = adapter
+    }
+
+    private fun openCreateCategoryScreen() {
+        val intent = Intent(this, CreateCategoryActivity::class.java)
+        intent.putExtra("isIncome", isIncomeSelected)
+        createCategoryLauncher.launch(intent)
     }
 
     private fun validateInputs(): Boolean {
@@ -229,3 +269,4 @@ class AddTransactionActivity : AppCompatActivity() {
         }
     }
 }
+
