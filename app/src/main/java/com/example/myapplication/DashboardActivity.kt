@@ -265,9 +265,16 @@ class DashboardActivity : AuthBaseActivity() {
         startDatePicker.show()
     }
 
-    private fun updateBalanceStats(transactions: List<UserTransaction>) {
+    private suspend fun updateBalanceStats(transactions: List<UserTransaction>) {
         var totalIncome = 0.0
         var totalExpenses = 0.0
+        var totalBalance = 0.0
+
+        // Считаем общий начальный баланс всех карт
+        val cards = App.database.cardDao().getAllCardsOnce() // Предполагаем, что у вас есть такой метод
+        cards.forEach { card ->
+            totalBalance += card.balance
+        }
 
         transactions.forEach { transaction ->
             if (transaction.isIncome) {
@@ -277,9 +284,6 @@ class DashboardActivity : AuthBaseActivity() {
             }
         }
 
-        val totalBalance = totalIncome - totalExpenses
-
-        // Форматируем числа с разделителями тысяч
         val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
 
         totalBalanceTextView.text = "Balance: ${numberFormat.format(totalBalance)}₽"

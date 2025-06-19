@@ -29,4 +29,7 @@ interface CardDao {
 
     @Query("SELECT * FROM cards WHERE id = :cardId")
     suspend fun getCardById(cardId: Long): Card?
+
+    @Query("SELECT * FROM cards")
+    suspend fun getAllCardsOnce(): List<Card>
 }
