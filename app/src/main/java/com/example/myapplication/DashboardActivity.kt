@@ -116,7 +116,11 @@ class DashboardActivity : AuthBaseActivity() {
             },
             onDeleteCardClicked = { card ->
                 lifecycleScope.launch {
+                    // Удаляем карту из базы данных
                     db.cardDao().delete(card)
+
+                    // Обновляем статистику баланса после удаления карты
+                    updateBalanceStats(emptyList())
                 }
             }
         )
@@ -265,13 +269,14 @@ class DashboardActivity : AuthBaseActivity() {
         startDatePicker.show()
     }
 
+
     private suspend fun updateBalanceStats(transactions: List<UserTransaction>) {
         var totalIncome = 0.0
         var totalExpenses = 0.0
         var totalBalance = 0.0
 
         // Считаем общий начальный баланс всех карт
-        val cards = App.database.cardDao().getAllCardsOnce() // Предполагаем, что у вас есть такой метод
+        val cards = App.database.cardDao().getAllCardsOnce()
         cards.forEach { card ->
             totalBalance += card.balance
         }
@@ -286,11 +291,12 @@ class DashboardActivity : AuthBaseActivity() {
 
         val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
 
-        totalBalanceTextView.text = "Balance: ${numberFormat.format(totalBalance)}₽"
-        incomeTextView.text = "Income:\n+${numberFormat.format(totalIncome)}₽"
-        expensesTextView.text = "Expenses:\n-${numberFormat.format(totalExpenses)}₽"
+        runOnUiThread {
+            totalBalanceTextView.text = "Balance: ${numberFormat.format(totalBalance)}₽"
+            incomeTextView.text = "Income:\n+${numberFormat.format(totalIncome)}₽"
+            expensesTextView.text = "Expenses:\n-${numberFormat.format(totalExpenses)}₽"
+        }
     }
-
     // Добавляем extension-функцию для форматирования даты
     fun Date.toShortDateString(): String {
         return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(this)
@@ -317,10 +323,10 @@ class DashboardActivity : AuthBaseActivity() {
     override fun onResume() {
         super.onResume()
 
-        // Также обновляем список карт (если они могли измениться)
         lifecycleScope.launch {
+            val cards = App.database.cardDao().getAllCards()
             cardsViewPager.adapter = CardsAdapter(
-                App.database.cardDao().getAllCards(),
+                cards,
                 lifecycleScope,
                 onAddCardClicked = {
                     val intent = Intent(this@DashboardActivity, AddCardActivity::class.java)
@@ -328,11 +334,21 @@ class DashboardActivity : AuthBaseActivity() {
                 },
                 onDeleteCardClicked = { card ->
                     lifecycleScope.launch {
+                        // Удаляем карту из базы данных
                         App.database.cardDao().delete(card)
+
+                        // Обновляем статистику баланса после удаления карты
+                        updateBalanceStats(emptyList())
                     }
                 }
             )
+
+            // Обновляем статистику баланса
+            updateBalanceStats(emptyList()) // Передаем пустой список, так как нам нужен только баланс карт
         }
+
+        // Обновляем транзакции с текущим фильтром
+        updateTransactionsByPeriod(currentFilter)
     }
 
     fun logout() {

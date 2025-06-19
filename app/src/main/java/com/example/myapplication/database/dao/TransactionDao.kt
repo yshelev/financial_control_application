@@ -1,6 +1,7 @@
 package com.example.myapplication.database.dao
 
 import androidx.room.*
+import com.example.myapplication.database.entities.Card
 import com.example.myapplication.database.entities.UserTransaction
 import kotlinx.coroutines.flow.Flow
 
