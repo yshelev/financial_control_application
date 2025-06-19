@@ -7,6 +7,7 @@ import android.widget.GridView
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.myapplication.repositories.TransactionRepository
 
 class CreateCategoryActivity : AppCompatActivity() {
 
@@ -51,6 +52,7 @@ class CreateCategoryActivity : AppCompatActivity() {
                 Toast.makeText(this, "Fill in all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
 
             // TODO: Сохранить категорию в БД
             Toast.makeText(this, "Category \"$name\" saved", Toast.LENGTH_SHORT).show()

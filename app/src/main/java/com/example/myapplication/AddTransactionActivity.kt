@@ -53,6 +53,10 @@ class AddTransactionActivity : AppCompatActivity() {
     val db = App.database
     val transactionDao = db.transactionDao()
 
+    private val transactionRepository by lazy {
+        (applicationContext as App).transactionRepository
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_add_transaction)
@@ -228,8 +232,12 @@ class AddTransactionActivity : AppCompatActivity() {
             iconResId = iconResId
         )
 
+//        lifecycleScope.launch {
+//            transactionDao.insert(transaction)
+//        } жоско меняем transactionDao на transactionRepository
+
         lifecycleScope.launch {
-            transactionDao.insert(transaction)
+            transactionRepository.addTransaction(transaction)
         }
 
         finish()
