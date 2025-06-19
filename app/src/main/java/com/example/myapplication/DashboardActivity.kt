@@ -82,6 +82,15 @@ class DashboardActivity : AuthBaseActivity() {
             App.database.transactionDao().getAllTransactions(),
             onDeleteClicked = { transaction ->
                 lifecycleScope.launch {
+                    val card = db.cardDao().getCardById(transaction.cardId)
+                    if (card != null) {
+                        val newBalance = if (transaction.isIncome) {
+                            card.balance - transaction.amount
+                        } else {
+                            card.balance + transaction.amount
+                        }
+                        db.cardDao().update(card.copy(balance = newBalance))
+                    }
                     db.transactionDao().delete(transaction)
                 }
             }
