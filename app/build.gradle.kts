@@ -42,6 +42,7 @@ android {
 }
 
 dependencies {
+
     implementation ("androidx.room:room-runtime:2.7.1")
     kapt ("androidx.room:room-compiler:2.7.1")
     implementation ("androidx.room:room-ktx:2.7.1")
@@ -58,6 +59,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
+    implementation(libs.bundles.network)
+    implementation(libs.bundles.coroutines)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
