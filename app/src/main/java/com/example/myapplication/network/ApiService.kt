@@ -8,13 +8,13 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
-    @GET("users/{id}")
+    @GET("users/{id}/")
     suspend fun getUserById(@Path("id") userId: Int): Response<User>
 
-    @GET("users/{email}")
+    @GET("users/{email}/")
     suspend fun getUserByEmail(@Path("email") email: String): Response<User>
 
-    @POST("users")
+    @POST("users/")
     suspend fun registerUser(@Body user: User): Response<User>
 
     @POST("users/login")
@@ -23,18 +23,18 @@ interface ApiService {
         @Query("password") password: String
     ): Response<User>
 
-    @GET("users/{id}/cards")
+    @GET("users/{id}/cards/")
     suspend fun getCardsByUserId(@Path("id") userId: Int): Response<List<Card>>
 
-    @POST("cards")
+    @POST("cards/")
     suspend fun addCard(@Body card: Card): Response<Card>
 
-    @DELETE("cards/{id}")
+    @DELETE("cards/{id}/")
     suspend fun deleteCard(@Path("id") cardId: Int): Response<Void>
 
-    @GET("users/{id}/transactions")
+    @GET("users/{id}/transactions/")
     suspend fun getUserTransactions(@Path("id") userId: Int): Response<List<UserTransaction>>
 
-    @POST("transactions")
+    @POST("transactions/")
     suspend fun addTransaction(@Body transaction: UserTransaction): Response<UserTransaction>
 }
