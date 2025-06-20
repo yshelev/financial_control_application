@@ -1,7 +1,6 @@
 package com.example.myapplication
 
 import android.app.DatePickerDialog
-import Card
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -22,29 +21,44 @@ import com.example.myapplication.database.entities.UserTransaction
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
 class DashboardActivity : AuthBaseActivity() {
 
+    private var currentFilter = "All"
     private lateinit var cardsViewPager: ViewPager2
     private lateinit var transactionsRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var timeFilterSpinner: Spinner
     private lateinit var addTransactionButton: FloatingActionButton
     private lateinit var transactionsAdapter: TransactionsAdapter
+    private lateinit var totalBalanceTextView: TextView
+    private lateinit var incomeTextView: TextView
+    private lateinit var expensesTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
 
+        currentFilter = savedInstanceState?.getString("CURRENT_FILTER", "All") ?: "All"
+
         val db = App.database
 
+
+        totalBalanceTextView = findViewById(R.id.totalBalance)
+        incomeTextView = findViewById(R.id.income)
+        expensesTextView = findViewById(R.id.expenses)
         cardsViewPager = findViewById(R.id.cardsViewPager)
         transactionsRecycler = findViewById(R.id.transactionsRecycler)
         timeFilterSpinner = findViewById(R.id.timeFilterSpinner)
         addTransactionButton = findViewById(R.id.addTransactionButton)
 
         val timeOptions = listOf("All", "Today", "Week", "Month", "Year", "Custom period")
+        val selectedPosition = timeOptions.indexOf(currentFilter)
+        if (selectedPosition >= 0) {
+            timeFilterSpinner.setSelection(selectedPosition)
+        }
 
         val timeAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, timeOptions) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -68,6 +82,15 @@ class DashboardActivity : AuthBaseActivity() {
             App.database.transactionDao().getAllTransactions(),
             onDeleteClicked = { transaction ->
                 lifecycleScope.launch {
+                    val card = db.cardDao().getCardById(transaction.cardId)
+                    if (card != null) {
+                        val newBalance = if (transaction.isIncome) {
+                            card.balance - transaction.amount
+                        } else {
+                            card.balance + transaction.amount
+                        }
+                        db.cardDao().update(card.copy(balance = newBalance))
+                    }
                     db.transactionDao().delete(transaction)
                 }
             }
@@ -93,7 +116,11 @@ class DashboardActivity : AuthBaseActivity() {
             },
             onDeleteCardClicked = { card ->
                 lifecycleScope.launch {
+                    // Удаляем карту из базы данных
                     db.cardDao().delete(card)
+
+                    // Обновляем статистику баланса после удаления карты
+                    updateBalanceStats(emptyList())
                 }
             }
         )
@@ -125,11 +152,11 @@ class DashboardActivity : AuthBaseActivity() {
             }
         }
 
-        // Загружаем все транзакции при старте
         updateTransactionsByPeriod("All")
     }
 
     private fun updateTransactionsByPeriod(period: String) {
+        currentFilter = period
         when (period) {
             "Custom period" -> showDateRangeDialog()
             else -> {
@@ -176,11 +203,13 @@ class DashboardActivity : AuthBaseActivity() {
                         else -> { // "All"
                             App.database.transactionDao().getAllTransactions().collect { transactions ->
                                 transactionsAdapter.updateTransactions(transactions)
+                                updateBalanceStats(transactions)
                             }
                             return@launch
                         }
                     }
 
+                    updateBalanceStats(transactions)
                     transactionsAdapter.updateTransactions(transactions)
                 }
             }
@@ -240,6 +269,34 @@ class DashboardActivity : AuthBaseActivity() {
         startDatePicker.show()
     }
 
+
+    private suspend fun updateBalanceStats(transactions: List<UserTransaction>) {
+        var totalIncome = 0.0
+        var totalExpenses = 0.0
+        var totalBalance = 0.0
+
+        // Считаем общий начальный баланс всех карт
+        val cards = App.database.cardDao().getAllCardsOnce()
+        cards.forEach { card ->
+            totalBalance += card.balance
+        }
+
+        transactions.forEach { transaction ->
+            if (transaction.isIncome) {
+                totalIncome += transaction.amount
+            } else {
+                totalExpenses += transaction.amount
+            }
+        }
+
+        val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
+
+        runOnUiThread {
+            totalBalanceTextView.text = "Balance: ${numberFormat.format(totalBalance)}₽"
+            incomeTextView.text = "Income:\n+${numberFormat.format(totalIncome)}₽"
+            expensesTextView.text = "Expenses:\n-${numberFormat.format(totalExpenses)}₽"
+        }
+    }
     // Добавляем extension-функцию для форматирования даты
     fun Date.toShortDateString(): String {
         return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(this)
@@ -249,6 +306,7 @@ class DashboardActivity : AuthBaseActivity() {
             val transactions = App.database.transactionDao()
                 .getTransactionsByDateRange(startDate, endDate)
             transactionsAdapter.updateTransactions(transactions)
+            updateBalanceStats(transactions)
         }
     }
 
@@ -256,6 +314,41 @@ class DashboardActivity : AuthBaseActivity() {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics
         ).toInt()
+    }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("CURRENT_FILTER", currentFilter)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        lifecycleScope.launch {
+            val cards = App.database.cardDao().getAllCards()
+            cardsViewPager.adapter = CardsAdapter(
+                cards,
+                lifecycleScope,
+                onAddCardClicked = {
+                    val intent = Intent(this@DashboardActivity, AddCardActivity::class.java)
+                    startActivity(intent)
+                },
+                onDeleteCardClicked = { card ->
+                    lifecycleScope.launch {
+                        // Удаляем карту из базы данных
+                        App.database.cardDao().delete(card)
+
+                        // Обновляем статистику баланса после удаления карты
+                        updateBalanceStats(emptyList())
+                    }
+                }
+            )
+
+            // Обновляем статистику баланса
+            updateBalanceStats(emptyList()) // Передаем пустой список, так как нам нужен только баланс карт
+        }
+
+        // Обновляем транзакции с текущим фильтром
+        updateTransactionsByPeriod(currentFilter)
     }
 
     fun logout() {

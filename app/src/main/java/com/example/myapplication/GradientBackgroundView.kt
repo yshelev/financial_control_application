@@ -63,7 +63,7 @@ class GradientBackgroundView @JvmOverloads constructor(
         SpotPosition(0.25f, 0.60f, 0.50f),
         SpotPosition(0.22f, 0.28f, 0.42f),
         SpotPosition(0.75f, 0.65f, 0.33f),
-        SpotPosition(0.85f, 0.28f, 0.30f),
+        SpotPosition(0.85f, 0.32f, 0.30f),
         SpotPosition(0.75f, 0.10f, 0.20f),
         SpotPosition(0.40f, 0.85f, 0.28f)
     )

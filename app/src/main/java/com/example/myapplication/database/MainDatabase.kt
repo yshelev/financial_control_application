@@ -13,7 +13,7 @@ import com.example.myapplication.database.entities.Card
 
 @Database(
     entities = [User::class, UserTransaction::class, Card::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class MainDatabase : RoomDatabase() {

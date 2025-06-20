@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.GridView
+import android.widget.ImageButton
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.myapplication.repositories.TransactionRepository
 
 class CreateCategoryActivity : AppCompatActivity() {
 
@@ -31,12 +33,17 @@ class CreateCategoryActivity : AppCompatActivity() {
         typeRadioGroup = findViewById(R.id.typeRadioGroup)
         iconGridView = findViewById(R.id.iconGridView)
         saveButton = findViewById(R.id.saveCategoryButton)
+        val backButton = findViewById<ImageButton>(R.id.backButton)
 
         iconGridView.adapter = IconAdapter(this, iconList)
 
         iconGridView.setOnItemClickListener { _, _, position, _ ->
             selectedIconResId = iconList[position]
             Toast.makeText(this, "Icon selected", Toast.LENGTH_SHORT).show()
+        }
+
+        backButton.setOnClickListener {
+            finish()
         }
 
         saveButton.setOnClickListener {
@@ -51,6 +58,7 @@ class CreateCategoryActivity : AppCompatActivity() {
                 Toast.makeText(this, "Fill in all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
 
             // TODO: Сохранить категорию в БД
             Toast.makeText(this, "Category \"$name\" saved", Toast.LENGTH_SHORT).show()

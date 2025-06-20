@@ -23,4 +23,13 @@ interface CardDao {
 
     @Query("SELECT * FROM cards")
     fun getAllCards(): Flow<List<Card>>
+
+    @Query("SELECT * FROM cards WHERE name = :name")
+    suspend fun getCardByName(name: String): Card?
+
+    @Query("SELECT * FROM cards WHERE id = :cardId")
+    suspend fun getCardById(cardId: Long): Card?
+
+    @Query("SELECT * FROM cards")
+    suspend fun getAllCardsOnce(): List<Card>
 }

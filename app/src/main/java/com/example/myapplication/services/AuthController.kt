@@ -68,37 +68,30 @@ class AuthController(private val context: Context, private val database: MainDat
         onFailure: (String) -> Unit
     ) {
         if (email.isEmpty()) {
-            onFailure("Email are required")
+            onFailure("Email is required")
             return
         }
 
         if (password.isEmpty()) {
-            onFailure("Password are required")
+            onFailure("Password is required")
             return
         }
 
         (context as? AppCompatActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
             val user = database.userDao().getUserByEmail(email)
+
             if (user == null) {
-                context.runOnUiThread {
-                    onFailure("Invalid email")
-                }
-            }
-            if (user != null && !verify(user.password, password)) {
-                context.runOnUiThread {
-                    onFailure("Invalid password")
-                }
+                context.runOnUiThread { onFailure("Invalid email") }
                 return@launch
             }
 
-            context.runOnUiThread {
-                onSuccess()
+            if (!verify(user.password, password)) {
+                context.runOnUiThread { onFailure("Invalid password") }
+                return@launch
             }
 
-            if (user != null && verify(user.password, password)) {
-                saveLoginState(email)
-                context.runOnUiThread { onSuccess() }
-            }
+            saveLoginState(email)
+            context.runOnUiThread { onSuccess() }
         }
     }
 

@@ -38,6 +38,8 @@ class AddTransactionActivity : AppCompatActivity() {
     private var selectedDate: Calendar = Calendar.getInstance()
     private var isIncomeSelected: Boolean = true
 
+    private var cardsMap: Map<String, Long> = emptyMap()
+
     private val activeIncomeBg = Color.parseColor("#50FF9D")
     private val activeIncomeText = Color.BLACK
     private val activeExpenseBg = Color.parseColor("#FF6E6E")
@@ -52,6 +54,11 @@ class AddTransactionActivity : AppCompatActivity() {
 
     val db = App.database
     val transactionDao = db.transactionDao()
+    val cardDao = db.cardDao()
+
+    private val transactionRepository by lazy {
+        (applicationContext as App).transactionRepository
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +97,27 @@ class AddTransactionActivity : AppCompatActivity() {
                 }
             }
         }
+
+        lifecycleScope.launch {
+            cardDao.getAllCards().collect { cards ->
+                cardsMap = cards.associate { "${it.name} (${it.maskedNumber})" to it.id }
+                val cardsList = cardsMap.keys.toList()
+
+                val cardsAdapter = object : ArrayAdapter<String>(
+                    this@AddTransactionActivity,
+                    android.R.layout.simple_spinner_item,
+                    cardsList
+                ) {
+                    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                        val view = super.getView(position, convertView, parent) as TextView
+                        view.setTextColor(Color.parseColor("#D0B8F5"))
+                        return view
+                    }
+                }
+                cardSpinner.adapter = cardsAdapter
+            }
+        }
+
 
         val cards = listOf("T-bank 0567", "Sber 8989", "Alfa 6666")
         val cardsAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, cards) {
@@ -189,6 +217,11 @@ class AddTransactionActivity : AppCompatActivity() {
             return false
         }
 
+        if (cardsMap.isEmpty()) {
+            Toast.makeText(this, "No cards available", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
         return true
     }
 
@@ -198,6 +231,14 @@ class AddTransactionActivity : AppCompatActivity() {
         val category = categorySpinner.selectedItem.toString()
         val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
         val dateInMillis = selectedDate.timeInMillis
+        val selectedCardName = cardSpinner.selectedItem.toString()
+
+        val cardId = cardsMap[selectedCardName]
+
+        if (cardId == null) {
+            Toast.makeText(this, "Selected card not found in database", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         val iconResId = if (isIncomeSelected) {
             when (category) {
@@ -218,21 +259,31 @@ class AddTransactionActivity : AppCompatActivity() {
             }
         }
 
-        val transaction = UserTransaction(
-            isIncome = isIncomeSelected,
-            amount = amount,
-            currency = currency,
-            category = category,
-            description = description,
-            date = dateInMillis,
-            iconResId = iconResId
-        )
-
         lifecycleScope.launch {
-            transactionDao.insert(transaction)
-        }
+            val transaction = UserTransaction(
+                isIncome = isIncomeSelected,
+                amount = amount,
+                currency = currency,
+                category = category,
+                description = description,
+                date = dateInMillis,
+                iconResId = iconResId,
+                cardId = cardId
+            )
 
-        finish()
+            transactionDao.insert(transaction)
+            val card = cardDao.getCardById(cardId)
+            if (card != null) {
+                val newBalance = if (isIncomeSelected) {
+                    card.balance + amount
+                } else {
+                    card.balance - amount
+                }
+                cardDao.update(card.copy(balance = newBalance))
+            }
+
+            finish()
+        }
     }
 
     private fun showDatePicker() {
