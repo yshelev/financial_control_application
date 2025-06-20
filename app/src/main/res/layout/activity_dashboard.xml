@@ -24,8 +24,8 @@
             android:clipChildren="false"
             android:paddingStart="48dp"
             android:paddingEnd="48dp"
-            android:layout_marginTop="40dp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/summaryLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -34,9 +34,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="40dp"
             android:gravity="center"
-            app:layout_constraintTop_toBottomOf="@id/cardsViewPager"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/summaryLayout"
+            app:layout_constraintTop_toBottomOf="@id/cardsViewPager"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:gravity="center_vertical">
