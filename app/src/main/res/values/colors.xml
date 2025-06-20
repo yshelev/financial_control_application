@@ -9,4 +9,22 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green">#50FF9D</color>
     <color name="red">#FF6E6E</color>
+    <color name="colorPrimary">#B480FF</color>
+    <color name="colorPrimaryDark">#76A258EE</color>
+    <color name="primaryColor">#B480FF</color>
+    <color name="secondaryColor">#9F45E7</color>
+    <color name="thirdColor">#76A258ED</color>
+    <color name="forthColor">#5A2A9E</color>
+    <color name="backgroundColor">#FEFEFE</color>
+    <color name="backgroundColor2">#FFF2F2</color>
+    <color name="bottomColor">#D9D9D9</color>
+    <color name="cardColor">#D0B8F5</color>
+    <color name="buttonTextColor">#090707</color>
+    <color name="textColor">#090707</color>
+    <color name="secondaryTextColor">#141414</color>
+    <color name="glass1">#40FF0000</color>
+    <color name="glass2">#10A42B2B</color>
+    <color name="glass3">#26FFFFFF</color>
+    <color name="glass4">#66FFFFFF</color>
+    <color name="spinnerColor">#AAAAAA</color>
 </resources>

@@ -34,7 +34,7 @@
                 android:ellipsize="none"
                 android:padding="12dp"
                 android:text="NEW CATEGORY"
-                android:textColor="#D6B4F2"
+                android:textColor="@color/forthColor"
                 android:textSize="22sp"
                 android:textStyle="bold" />
         </RelativeLayout>
@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Category Name"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/buttonTextColor"
             android:textSize="16sp"
             android:layout_marginLeft="8dp"/>
         <EditText
@@ -60,7 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Type"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/buttonTextColor"
             android:textSize="16sp"
             android:layout_marginTop="24dp"
             android:layout_marginLeft="8dp"/>
@@ -77,14 +77,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Expense"
-                android:textColor="#FFFFFF" />
+                android:textColor="@color/buttonTextColor" />
 
             <RadioButton
                 android:id="@+id/incomeRadioButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Income"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/buttonTextColor"
                 android:layout_marginStart="24dp"/>
         </RadioGroup>
 
@@ -92,7 +92,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Choose Icon"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/buttonTextColor"
             android:textSize="16sp"
             android:layout_marginTop="24dp"
             android:layout_marginLeft="8dp"/>

@@ -1,7 +1,9 @@
 package com.example.myapplication
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.myapplication.database.MainDatabase
+import android.content.Context
 
 class App : Application() {
 
@@ -13,5 +15,15 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         database = MainDatabase.getDatabase(this)
+
+        // Устанавливаем темную тему по умолчанию
+        val sharedPref = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        // Если тема еще не сохранена в настройках, устанавливаем темную
+        if (!sharedPref.contains("NightMode")) {
+            sharedPref.edit().putInt("NightMode", AppCompatDelegate.MODE_NIGHT_YES).apply()
+        }
+        // Применяем сохраненную тему
+        val mode = sharedPref.getInt("NightMode", AppCompatDelegate.MODE_NIGHT_YES) // Изменено значение по умолчанию
+        AppCompatDelegate.setDefaultNightMode(mode)
     }
 }

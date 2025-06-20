@@ -52,7 +52,8 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.MyApplication"/>
+            android:theme="@style/Theme.MyApplication"
+            />
 
         <activity
             android:name=".CreateCategoryActivity"

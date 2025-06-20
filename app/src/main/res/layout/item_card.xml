@@ -19,7 +19,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Card Name"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/buttonTextColor"
             android:textSize="14sp" />
 
         <ImageButton
@@ -38,14 +38,14 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="Balance"
-        android:textColor="#FFFFFF" />
+        android:textColor="@color/buttonTextColor" />
 
     <TextView
         android:id="@+id/cardBalance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="120,000₽"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/buttonTextColor"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -60,14 +60,14 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/buttonTextColor"
             android:text="**** ***** **** 1234" />
 
         <TextView
             android:id="@+id/cardDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/buttonTextColor"
             android:text="12/25" />
     </LinearLayout>
 </LinearLayout>

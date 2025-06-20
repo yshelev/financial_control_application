@@ -51,7 +51,7 @@
                 <TextView
                     android:id="@+id/selectDateText"
                     android:text="Choose date"
-                    android:textColor="#D0B8F5"
+                    android:textColor="@color/forthColor"
                     android:textSize="16sp"
                     android:layout_marginStart="12dp"
                     android:layout_width="wrap_content"
@@ -63,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Card Name"
-            android:textColor="#D0B8F5"
+            android:textColor="@color/forthColor"
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
@@ -71,8 +71,8 @@
             android:id="@+id/cardSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="#D0B8F5"
-            android:popupBackground="#D0B8F5"
+            android:backgroundTint="@color/forthColor"
+            android:popupBackground="@color/forthColor"
             android:layout_marginBottom="20dp" />
 
         <com.google.android.material.button.MaterialButtonToggleGroup
@@ -108,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Category"
-            android:textColor="#D0B8F5"
+            android:textColor="@color/forthColor"
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
@@ -116,8 +116,8 @@
             android:id="@+id/categorySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="#D0B8F5"
-            android:popupBackground="#D0B8F5"
+            android:backgroundTint="@color/forthColor"
+            android:popupBackground="@color/forthColor"
             android:layout_marginBottom="20dp" />
 
         <EditText
@@ -125,7 +125,7 @@
             style="@style/GlassInput"
             android:hint="Description"
             android:layout_marginBottom="20dp"
-            android:textColor="#FFFFFF" />
+            android:textColor="@color/buttonTextColor" />
 
         <EditText
             android:id="@+id/amountEditText"
@@ -133,13 +133,13 @@
             android:hint="Amount"
             android:inputType="numberDecimal"
             android:layout_marginBottom="20dp"
-            android:textColor="#FFFFFF" />
+            android:textColor="@color/buttonTextColor" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Currency"
-            android:textColor="#D0B8F5"
+            android:textColor="@color/forthColor"
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
@@ -147,8 +147,8 @@
             android:id="@+id/currencySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="#D0B8F5"
-            android:popupBackground="#D0B8F5"
+            android:backgroundTint="@color/forthColor"
+            android:popupBackground="@color/forthColor"
             android:layout_marginBottom="20dp" />
 
         <Button

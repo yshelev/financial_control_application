@@ -3,25 +3,23 @@
 
     <style name="CandyButton" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/glass_button_ripple</item>
-        <item name="android:textColor">#000000</item>
+        <item name="android:textColor">@color/buttonTextColor</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">18sp</item>
         <item name="android:padding">12dp</item>
         <item name="android:elevation">6dp</item>
     </style>
 
-
-
     <style name="LogoIcon">
         <item name="android:textSize">48sp</item>
         <item name="android:gravity">center</item>
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColor">@color/buttonTextColor</item>
     </style>
 
     <style name="TitleText">
         <item name="android:textSize">24sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColor">@color/buttonTextColor</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
 
@@ -37,8 +35,8 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/glass_input_bg</item>
         <item name="android:padding">14dp</item>
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textColorHint">#D0B8F5</item>
+        <item name="android:textColor">@color/buttonTextColor</item>
+        <item name="android:textColorHint">@color/forthColor</item>
         <item name="android:textSize">16sp</item>
         <item name="android:hint">Enter text</item>
     </style>

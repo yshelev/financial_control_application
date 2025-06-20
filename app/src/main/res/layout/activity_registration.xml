@@ -111,7 +111,7 @@
             android:clickable="true"
             android:focusable="true"
             android:text="Already have an account? Sign in"
-            android:textColor="#C58CFF"
+            android:textColor="@color/forthColor"
             android:textSize="14sp"
             android:textStyle="bold" />
 

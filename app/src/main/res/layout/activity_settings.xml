@@ -4,19 +4,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient">
+    android:background="@drawable/background_gradient"
+    >
 
     <ScrollView
         android:id="@+id/settingsScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottomNavigation"
-        android:padding="24dp">
+        android:padding="24dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="0dp">
 
             <TextView
                 android:layout_marginTop="40dp"
@@ -24,13 +29,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Email"
-                android:textColor="#AAAAAA"/>
+                android:textColor="@color/secondaryTextColor"/>
             <TextView
                 android:layout_marginLeft="8dp"
                 android:id="@+id/emailTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/textColor"
                 android:textSize="16sp"
                 android:paddingBottom="8dp"/>
 
@@ -38,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Name"
-                android:textColor="#AAAAAA"
+                android:textColor="@color/secondaryTextColor"
                 android:layout_marginTop="8dp"
                 android:layout_marginLeft="8dp"/>
 
@@ -71,7 +76,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Password"
-                android:textColor="#AAAAAA"
+                android:textColor="@color/secondaryTextColor"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp" />
 
@@ -121,15 +126,15 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Dark theme"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/textColor"
                     android:textSize="16sp" />
 
                 <Switch
                     android:id="@+id/themeSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:thumbTint="@color/white"
-                    android:trackTint="#808080" />
+                    android:thumbTint="@color/textColor"
+                    android:trackTint="@color/secondaryTextColor" />
             </LinearLayout>
 
             <Button
@@ -171,9 +176,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#222222"
+        android:background="@color/bottomColor"
         app:menu="@menu/bottom_nav_menu"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
+        app:itemIconTint="@color/textColor"
+        app:itemTextColor="@color/secondaryTextColor"
         app:labelVisibilityMode="labeled" />
 </RelativeLayout>

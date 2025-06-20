@@ -4,7 +4,7 @@
 
     <style name="Theme.MyApplication" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Основные цвета -->
-        <item name="colorPrimary">#D0B8F5</item>
+        <item name="colorPrimary">#782AAB</item>
 
 
         <!-- Цвет фона по умолчанию -->
