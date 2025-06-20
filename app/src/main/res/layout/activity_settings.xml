@@ -7,6 +7,10 @@
     android:background="@drawable/background_gradient"
     >
 
+    <com.example.myapplication.GradientBackgroundView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <ScrollView
         android:id="@+id/settingsScroll"
         android:layout_width="match_parent"
@@ -180,5 +184,9 @@
         app:menu="@menu/bottom_nav_menu"
         app:itemIconTint="@color/textColor"
         app:itemTextColor="@color/secondaryTextColor"
-        app:labelVisibilityMode="labeled" />
+        app:labelVisibilityMode="labeled"
+        app:elevation="0dp"
+        app:layout_insetEdge="bottom"
+        app:paddingBottomSystemWindowInsets="false"
+        android:fitsSystemWindows="false"/>
 </RelativeLayout>

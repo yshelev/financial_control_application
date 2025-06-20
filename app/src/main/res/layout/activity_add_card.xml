@@ -3,14 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/background_gradient"
-    android:padding="24dp">
+    android:padding="0dp">
+
+    <com.example.myapplication.GradientBackgroundView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="24dp"
+        android:layout_marginTop="16dp">
 
     <ImageButton
         android:id="@+id/backButton"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="40dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
         android:layout_marginBottom="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Back"
@@ -25,7 +34,8 @@
         android:padding="24dp"
         app:cardCornerRadius="20dp"
         app:cardBackgroundColor="@color/cardColor"
-        app:cardElevation="12dp">
+        app:cardElevation="0dp"
+        app:cardUseCompatPadding="true">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -116,6 +126,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save Card"
+        android:layout_marginBottom="24dp"
         android:layout_alignParentBottom="true"
         style="@style/CandyButton" />
+
+    </RelativeLayout>
 </RelativeLayout>

@@ -7,8 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="green">#50FF9D</color>
-    <color name="red">#FF6E6E</color>
+    <color name="green">#6FB821</color>
+    <color name="red">#DB3C0A</color>
     <color name="colorPrimary">#8A3CFE</color>
     <color name="colorPrimaryDark">#769F45E8</color>
     <color name="primaryColor">#6F2AAB</color>
@@ -17,14 +17,15 @@
     <color name="forthColor">#D0B8F5</color>
     <color name="backgroundColor">#070708</color>
     <color name="backgroundColor2">#212121</color>
-    <color name="bottomColor">#222222</color>
-    <color name="cardColor">#2E2E2E</color>
+    <color name="bottomColor">#7F1A003C</color>
+    <color name="cardColor">#942E2E2E</color>
     <color name="buttonTextColor">#FEFEFE</color>
     <color name="textColor">#FEFEFE</color>
-    <color name="secondaryTextColor">#AAAAAA</color>
+    <color name="secondaryTextColor">#E0E0E0</color>
     <color name="glass1">#40FFFFFF</color>
     <color name="glass2">#10FFFFFF</color>
     <color name="glass3">#26FFFFFF</color>
     <color name="glass4">#66FFFFFF</color>
     <color name="spinnerColor">#AAAAAA</color>
+    <color name="transparent">#831A003C</color>
 </resources>

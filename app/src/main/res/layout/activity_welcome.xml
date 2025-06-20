@@ -6,7 +6,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_gradient"
-    android:padding="24dp">
+    android:padding="0dp">
+
+    <com.example.myapplication.GradientBackgroundView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <LinearLayout
         android:id="@+id/glassPanel"
@@ -15,6 +19,7 @@
         android:background="@drawable/glass_background"
         android:elevation="8dp"
         android:orientation="vertical"
+        android:layout_margin="24dp"
         android:padding="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="START"
-            android:layout_marginTop="32dp"/>
+            android:layout_marginTop="24dp"/>
 
         <TextView
             android:id="@+id/registerLink"
