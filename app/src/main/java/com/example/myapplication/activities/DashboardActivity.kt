@@ -109,6 +109,7 @@ class DashboardActivity : AuthBaseActivity() {
 
         cardsViewPager.adapter = CardsAdapter(
             db.cardDao().getAllCards(),
+            db.transactionDao().getAllTransactions(), // Add transactions flow
             lifecycleScope,
             onAddCardClicked = {
                 val intent = Intent(this@DashboardActivity, AddCardActivity::class.java)
@@ -325,8 +326,10 @@ class DashboardActivity : AuthBaseActivity() {
 
         lifecycleScope.launch {
             val cards = App.database.cardDao().getAllCards()
+            val db = App.database
             cardsViewPager.adapter = CardsAdapter(
-                cards,
+                db.cardDao().getAllCards(),
+                db.transactionDao().getAllTransactions(), // Add transactions flow
                 lifecycleScope,
                 onAddCardClicked = {
                     val intent = Intent(this@DashboardActivity, AddCardActivity::class.java)
@@ -335,7 +338,7 @@ class DashboardActivity : AuthBaseActivity() {
                 onDeleteCardClicked = { card ->
                     lifecycleScope.launch {
                         // Удаляем карту из базы данных
-                        App.database.cardDao().delete(card)
+                        db.cardDao().delete(card)
 
                         // Обновляем статистику баланса после удаления карты
                         updateBalanceStats(emptyList())
