@@ -37,7 +37,9 @@ class CreateCategoryActivity : AppCompatActivity() {
         R.drawable.ic_bar, R.drawable.ic_cafe, R.drawable.ic_car_wash, R.drawable.ic_clothes,
         R.drawable.ic_dining, R.drawable.ic_education, R.drawable.ic_entertainment,
         R.drawable.ic_flower, R.drawable.ic_game, R.drawable.ic_gas_station, R.drawable.ic_hospital,
-        R.drawable.ic_investment, R.drawable.ic_phone, R.drawable.ic_store
+        R.drawable.ic_investment, R.drawable.ic_phone, R.drawable.ic_store, R.drawable.ic_attractions,
+        R.drawable.ic_cake, R.drawable.ic_child, R.drawable.ic_church, R.drawable.ic_roller,
+        R.drawable.ic_selebration, R.drawable.ic_sports
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
