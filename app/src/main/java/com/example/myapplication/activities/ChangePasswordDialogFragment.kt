@@ -1,16 +1,15 @@
-package com.example.myapplication
+package com.example.myapplication.activities
 
 import android.app.Dialog
 import android.os.Bundle
-import android.text.InputType
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.example.myapplication.AuthController
+import com.example.myapplication.R
 
 class ChangePasswordDialogFragment(
     private val authController: AuthController
