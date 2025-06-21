@@ -8,27 +8,32 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.database.entities.Card
+import com.example.myapplication.database.entities.UserTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 class CardsAdapter(
     private val cardsFlow: Flow<List<Card>>,
+    private val transactionsFlow: Flow<List<UserTransaction>>,
     private val coroutineScope: CoroutineScope,
     private val onAddCardClicked: () -> Unit,
-    private val onDeleteCardClicked: (Card) -> Unit // Добавляем callback для удаления
+    private val onDeleteCardClicked: (Card) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var cards: List<Card> = emptyList()
+    private var transactions: List<UserTransaction> = emptyList()
 
     private val VIEW_TYPE_CARD = 0
     private val VIEW_TYPE_ADD_BUTTON = 1
 
     init {
         observeCards()
+        observeTransactions()
     }
-
     private fun observeCards() {
         coroutineScope.launch(Dispatchers.Main) {
             cardsFlow.collectLatest { newCards ->
@@ -38,22 +43,42 @@ class CardsAdapter(
         }
     }
 
+    private fun observeTransactions() {
+        coroutineScope.launch(Dispatchers.Main) {
+            transactionsFlow.collectLatest { newTransactions ->
+                transactions = newTransactions
+                notifyDataSetChanged()
+            }
+        }
+    }
+
     class CardViewHolder(
         view: View,
-        private val onDeleteCardClicked: (Card) -> Unit // Добавляем параметр в конструктор
+        private val onDeleteCardClicked: (Card) -> Unit
     ) : RecyclerView.ViewHolder(view) {
         val balanceText: TextView = view.findViewById(R.id.cardBalance)
         val cardName: TextView = view.findViewById(R.id.cardName)
         val cardNumber: TextView = view.findViewById(R.id.cardNumber)
         val cardDate: TextView = view.findViewById(R.id.cardDate)
         val deleteButton: ImageButton = view.findViewById(R.id.deleteButton)
+        val incomeText: TextView = view.findViewById(R.id.cardIncome)
+        val expenseText: TextView = view.findViewById(R.id.cardExpenses)
 
-        fun bind(card: Card) {
-            balanceText.text = "${card.balance}" // balanceText.text = "${card.balance}${card.currency}"
+        fun bind(card: Card, transactions: List<UserTransaction>) {
+            balanceText.text = "${card.balance}"
             cardName.text = card.name
             cardNumber.text = card.maskedNumber
             cardDate.text = card.date
             deleteButton.setOnClickListener { onDeleteCardClicked(card) }
+
+            // Calculate income and expenses for this card
+            val cardTransactions = transactions.filter { it.cardId == card.id }
+            val income = cardTransactions.filter { it.isIncome }.sumOf { it.amount }
+            val expenses = cardTransactions.filter { !it.isIncome }.sumOf { it.amount }
+
+            val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
+            incomeText.text = "+${numberFormat.format(income)}₽"
+            expenseText.text = "-${numberFormat.format(expenses)}₽"
         }
     }
 
@@ -83,7 +108,7 @@ class CardsAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is CardViewHolder && position < cards.size) {
-            holder.bind(cards[position]) // Используем метод bind
+            holder.bind(cards[position], transactions) // Pass transactions to bind
         }
     }
 
