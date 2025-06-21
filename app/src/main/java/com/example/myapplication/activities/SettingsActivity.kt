@@ -3,8 +3,11 @@ package com.example.myapplication
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.text.method.PasswordTransformationMethod
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -24,6 +27,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var clearDataButton: Button
     private lateinit var exportDataButton: Button
     private lateinit var themeIcon: ImageView
+    private lateinit var currencySpinner: Spinner
 
     // Инициализатор для синхронизации темы
     init {
@@ -51,6 +55,7 @@ class SettingsActivity : AppCompatActivity() {
         clearDataButton = findViewById(R.id.clearDataButton)
         exportDataButton = findViewById(R.id.exportDataButton)
         themeIcon = findViewById(R.id.themeIcon)
+        currencySpinner = findViewById(R.id.currencySpinner)
 
         // Установка начального состояния UI
         emailTextView.text = "user@example.com"
@@ -87,6 +92,16 @@ class SettingsActivity : AppCompatActivity() {
                 updateThemeIcon(isChecked)
             }
         }
+
+        val currencies = listOf("RUB", "USD", "EUR")
+        val currencyAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencies) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.setTextColor(Color.parseColor("#D0B8F5"))
+                return view
+            }
+        }
+        currencySpinner.adapter = currencyAdapter
 
         // Кнопки
         exportDataButton.setOnClickListener {

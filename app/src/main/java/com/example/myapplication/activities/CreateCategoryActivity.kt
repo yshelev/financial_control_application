@@ -1,28 +1,43 @@
 package com.example.myapplication
 
+import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.GridView
 import android.widget.ImageButton
-import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.myapplication.repositories.TransactionRepository
+import com.google.android.material.button.MaterialButtonToggleGroup
 
 class CreateCategoryActivity : AppCompatActivity() {
 
     private lateinit var nameEditText: EditText
-    private lateinit var typeRadioGroup: RadioGroup
     private lateinit var iconGridView: GridView
     private lateinit var saveButton: Button
+    private lateinit var incomeToggle: Button
+    private lateinit var expenseToggle: Button
+    private lateinit var typeGroup: MaterialButtonToggleGroup
 
-    private var selectedIconResId: Int = R.drawable.ic_default // по умолчанию
+    private val activeIncomeBg = Color.parseColor("#50FF9D")
+    private val activeIncomeText = Color.BLACK
+    private val activeExpenseBg = Color.parseColor("#FF6E6E")
+    private val activeExpenseText = Color.BLACK
+    private val inactiveBg = Color.TRANSPARENT
+    private val inactiveIncomeText = Color.parseColor("#50FF9D")
+    private val inactiveExpenseText = Color.parseColor("#FF6E6E")
+
+    private var selectedIconResId: Int = R.drawable.ic_default
+    private var isIncomeSelected: Boolean = true
 
     private val iconList = listOf(
         R.drawable.ic_food, R.drawable.ic_transport,
-        R.drawable.ic_salary,
-        R.drawable.ic_gift, R.drawable.ic_health
+        R.drawable.ic_salary, R.drawable.ic_gift, R.drawable.ic_health, R.drawable.ic_airport,
+        R.drawable.ic_bar, R.drawable.ic_cafe, R.drawable.ic_car_wash, R.drawable.ic_clothes,
+        R.drawable.ic_dining, R.drawable.ic_education, R.drawable.ic_entertainment,
+        R.drawable.ic_flower, R.drawable.ic_game, R.drawable.ic_gas_station, R.drawable.ic_hospital,
+        R.drawable.ic_investment, R.drawable.ic_phone, R.drawable.ic_store
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,10 +45,15 @@ class CreateCategoryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_create_category)
 
         nameEditText = findViewById(R.id.categoryNameEditText)
-        typeRadioGroup = findViewById(R.id.typeRadioGroup)
         iconGridView = findViewById(R.id.iconGridView)
         saveButton = findViewById(R.id.saveCategoryButton)
+        incomeToggle = findViewById(R.id.incomeToggle)
+        expenseToggle = findViewById(R.id.expenseToggle)
+        typeGroup = findViewById(R.id.typeGroup)
         val backButton = findViewById<ImageButton>(R.id.backButton)
+
+        isIncomeSelected = intent.getBooleanExtra("isIncome", true)
+        updateToggleButtons(if (isIncomeSelected) "income" else "expense")
 
         iconGridView.adapter = IconAdapter(this, iconList)
 
@@ -46,23 +66,48 @@ class CreateCategoryActivity : AppCompatActivity() {
             finish()
         }
 
-        saveButton.setOnClickListener {
-            val name = nameEditText.text.toString()
-            val type = when (typeRadioGroup.checkedRadioButtonId) {
-                R.id.expenseRadioButton -> "expense"
-                R.id.incomeRadioButton -> "income"
-                else -> null
-            }
+        incomeToggle.setOnClickListener {
+            isIncomeSelected = true
+            updateToggleButtons("income")
+        }
 
-            if (name.isBlank() || type == null) {
-                Toast.makeText(this, "Fill in all fields", Toast.LENGTH_SHORT).show()
+        expenseToggle.setOnClickListener {
+            isIncomeSelected = false
+            updateToggleButtons("expense")
+        }
+
+        saveButton.setOnClickListener {
+            val name = nameEditText.text.toString().trim()
+
+            if (name.isEmpty()) {
+                nameEditText.error = "Please enter category name"
                 return@setOnClickListener
             }
 
+            // Возвращаем результат в AddTransactionActivity
+            val resultIntent = Intent()
+            resultIntent.putExtra("newCategory", name)
+            resultIntent.putExtra("isIncome", isIncomeSelected)
+            resultIntent.putExtra("iconResId", selectedIconResId)
 
-            // TODO: Сохранить категорию в БД
-            Toast.makeText(this, "Category \"$name\" saved", Toast.LENGTH_SHORT).show()
+            setResult(RESULT_OK, resultIntent)
             finish()
+        }
+    }
+
+    private fun updateToggleButtons(selected: String) {
+        if (selected == "income") {
+            incomeToggle.setBackgroundColor(activeIncomeBg)
+            incomeToggle.setTextColor(activeIncomeText)
+
+            expenseToggle.setBackgroundColor(inactiveBg)
+            expenseToggle.setTextColor(inactiveExpenseText)
+        } else if (selected == "expense") {
+            expenseToggle.setBackgroundColor(activeExpenseBg)
+            expenseToggle.setTextColor(activeExpenseText)
+
+            incomeToggle.setBackgroundColor(inactiveBg)
+            incomeToggle.setTextColor(inactiveIncomeText)
         }
     }
 }

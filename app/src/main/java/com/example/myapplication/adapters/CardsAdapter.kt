@@ -49,7 +49,7 @@ class CardsAdapter(
         val deleteButton: ImageButton = view.findViewById(R.id.deleteButton)
 
         fun bind(card: Card) {
-            balanceText.text = "${card.balance}${card.currency}"
+            balanceText.text = "${card.balance}" // balanceText.text = "${card.balance}${card.currency}"
             cardName.text = card.name
             cardNumber.text = card.maskedNumber
             cardDate.text = card.date

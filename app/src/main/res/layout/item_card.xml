@@ -40,14 +40,43 @@
         android:text="Balance"
         android:textColor="@color/buttonTextColor" />
 
-    <TextView
-        android:id="@+id/cardBalance"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="120,000₽"
-        android:textColor="@color/buttonTextColor"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/cardBalance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="120,000₽"
+            android:textColor="@color/buttonTextColor"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/income"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="+45,000₽"
+            android:textColor="@color/green"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/expenses"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="−32,000₽"
+            android:textColor="@color/red"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_weight="1" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

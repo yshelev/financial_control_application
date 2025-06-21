@@ -58,14 +58,14 @@ class TransactionsAdapter(
         holder.title.text = tx.category
         holder.date.text = dateFormatter.format(Date(tx.date))
 
-        val currencySymbol = when (tx.currency.uppercase()) {
-            "RUB" -> "₽"
-            "EUR" -> "€"
-            "USD" -> "$"
-            else -> tx.currency
-        }
+//        val currencySymbol = when (tx.currency.uppercase()) {
+//            "RUB" -> "₽"
+//            "EUR" -> "€"
+//            "USD" -> "$"
+//            else -> tx.currency
+//        }
 
-        holder.amount.text = if (tx.isIncome) "+${tx.amount}${currencySymbol}" else "-${tx.amount}${tx.currency}"
+//        holder.amount.text = if (tx.isIncome) "+${tx.amount}${currencySymbol}" else "-${tx.amount}${tx.currency}"
         holder.amount.setTextColor(
             holder.itemView.context.getColor(
                 if (tx.isIncome) R.color.green else R.color.red

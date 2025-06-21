@@ -20,7 +20,7 @@ class AddCardActivity : AppCompatActivity() {
     private lateinit var balanceEditText: EditText
     private lateinit var saveCardButton: Button
     private lateinit var backButton: ImageButton
-    private lateinit var currencySpinner: Spinner
+//    private lateinit var currencySpinner: Spinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,29 +32,29 @@ class AddCardActivity : AppCompatActivity() {
         balanceEditText = findViewById(R.id.balanceEditText)
         saveCardButton = findViewById(R.id.saveCardButton)
         backButton = findViewById(R.id.backButton)
-        currencySpinner = findViewById(R.id.currencySpinner)
+//        currencySpinner = findViewById(R.id.currencySpinner)
 
-        val currencies = listOf("₽", "$", "€")
-        val spinnerAdapter = object : ArrayAdapter<String>(
-            this,
-            android.R.layout.simple_spinner_item,
-            currencies
-        ) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(Color.WHITE)
-                return view
-            }
-
-            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getDropDownView(position, convertView, parent) as TextView
-                view.setTextColor(Color.WHITE)
-                return view
-            }
-        }
-
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        currencySpinner.adapter = spinnerAdapter
+//        val currencies = listOf("₽", "$", "€")
+//        val spinnerAdapter = object : ArrayAdapter<String>(
+//            this,
+//            android.R.layout.simple_spinner_item,
+//            currencies
+//        ) {
+//            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+//                val view = super.getView(position, convertView, parent) as TextView
+//                view.setTextColor(Color.WHITE)
+//                return view
+//            }
+//
+//            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+//                val view = super.getDropDownView(position, convertView, parent) as TextView
+//                view.setTextColor(Color.WHITE)
+//                return view
+//            }
+//        }
+//
+//        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        currencySpinner.adapter = spinnerAdapter
 
         expiryDateEditText.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
@@ -98,7 +98,7 @@ class AddCardActivity : AppCompatActivity() {
             val last4 = last4DigitsEditText.text.toString().trim()
             val date = expiryDateEditText.text.toString().trim()
             val balanceStr = balanceEditText.text.toString().trim()
-            val currency = currencySpinner.selectedItem.toString()
+//            val currency = currencySpinner.selectedItem.toString()
 
             if (!validateInputs(name, last4, date, balanceStr)) {
                 return@setOnClickListener
@@ -111,7 +111,7 @@ class AddCardActivity : AppCompatActivity() {
                     name = name,
                     maskedNumber = last4,
                     date = date,
-                    currency = currency,
+//                    currency = currency,
                     balance = balance
                 )
 

@@ -77,28 +77,34 @@
             android:layout_marginTop="24dp"
             android:layout_marginLeft="8dp"/>
 
-        <RadioGroup
-            android:id="@+id/typeRadioGroup"
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/typeGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:layout_marginBottom="20dp"
+            app:checkedButton="@+id/incomeToggle"
+            app:singleSelection="true">
 
-            <RadioButton
-                android:id="@+id/expenseRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Expense"
-                android:textColor="@color/buttonTextColor" />
-
-            <RadioButton
-                android:id="@+id/incomeRadioButton"
-                android:layout_width="wrap_content"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/incomeToggle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Income"
-                android:textColor="@color/buttonTextColor"
-                android:layout_marginStart="24dp"/>
-        </RadioGroup>
+                android:textColor="@color/green"
+                app:backgroundTint="@color/transparent"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/expenseToggle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Expense"
+                android:textColor="@color/red"
+                app:backgroundTint="@color/transparent"
+                app:cornerRadius="12dp" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <TextView
             android:layout_width="wrap_content"

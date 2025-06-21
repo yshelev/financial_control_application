@@ -30,7 +30,7 @@ class AddTransactionActivity : AppCompatActivity() {
     private lateinit var descriptionEditText: EditText
     private lateinit var amountEditText: EditText
     private lateinit var saveButton: Button
-    private lateinit var currencySpinner: Spinner
+//    private lateinit var currencySpinner: Spinner
     private lateinit var backButton: ImageButton
 
     private lateinit var createCategoryLauncher: ActivityResultLauncher<Intent>
@@ -73,7 +73,7 @@ class AddTransactionActivity : AppCompatActivity() {
         categorySpinner = findViewById(R.id.categorySpinner)
         descriptionEditText = findViewById(R.id.descriptionEditText)
         amountEditText = findViewById(R.id.amountEditText)
-        currencySpinner = findViewById(R.id.currencySpinner)
+//        currencySpinner = findViewById(R.id.currencySpinner)
         backButton = findViewById(R.id.backButton)
         saveButton = findViewById(R.id.saveButton)
 
@@ -129,15 +129,15 @@ class AddTransactionActivity : AppCompatActivity() {
         }
         cardSpinner.adapter = cardsAdapter
 
-        val currencies = listOf("RUB", "USD", "EUR")
-        val currencyAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencies) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(Color.parseColor("#D0B8F5"))
-                return view
-            }
-        }
-        currencySpinner.adapter = currencyAdapter
+//        val currencies = listOf("RUB", "USD", "EUR")
+//        val currencyAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencies) {
+//            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+//                val view = super.getView(position, convertView, parent) as TextView
+//                view.setTextColor(Color.parseColor("#D0B8F5"))
+//                return view
+//            }
+//        }
+//        currencySpinner.adapter = currencyAdapter
 
         updateDateLabel()
 
@@ -227,7 +227,7 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private fun saveTransaction() {
         val amount = amountEditText.text.toString().toDouble()
-        val currency = currencySpinner.selectedItem.toString()
+//        val currency = currencySpinner.selectedItem.toString()
         val category = categorySpinner.selectedItem.toString()
         val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
         val dateInMillis = selectedDate.timeInMillis
@@ -263,7 +263,7 @@ class AddTransactionActivity : AppCompatActivity() {
             val transaction = UserTransaction(
                 isIncome = isIncomeSelected,
                 amount = amount,
-                currency = currency,
+//                currency = currency,
                 category = category,
                 description = description,
                 date = dateInMillis,
