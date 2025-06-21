@@ -1,11 +1,13 @@
 package com.example.myapplication
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -29,26 +31,6 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var exportDataButton: Button
     private lateinit var themeIcon: ImageView
     private lateinit var currencySpinner: Spinner
-
-    // Новые поля для смены пароля
-    private lateinit var oldPasswordLayout: View
-    private lateinit var oldPasswordEditText: EditText
-    private lateinit var oldPasswordToggle: ImageButton
-    private lateinit var verifyOldPasswordButton: Button
-
-    private lateinit var newPasswordLayout: View
-    private lateinit var newPasswordEditText: EditText
-    private lateinit var newPasswordToggle: ImageButton
-
-    private lateinit var repeatPasswordLayout: View
-    private lateinit var repeatPasswordEditText: EditText
-    private lateinit var repeatPasswordToggle: ImageButton
-
-    private lateinit var confirmPasswordChangeButton: Button
-
-    private var oldPasswordVisible = false
-    private var newPasswordVisible = false
-    private var repeatPasswordVisible = false
 
     private var currentEmail: String? = null
 
@@ -81,30 +63,6 @@ class SettingsActivity : AppCompatActivity() {
         themeIcon = findViewById(R.id.themeIcon)
         currencySpinner = findViewById(R.id.currencySpinner)
 
-        // Инициализация новых элементов для смены пароля
-        oldPasswordLayout = findViewById(R.id.oldPasswordLayout)
-        oldPasswordEditText = findViewById(R.id.oldPasswordEditText)
-        oldPasswordToggle = findViewById(R.id.oldPasswordToggle)
-        verifyOldPasswordButton = findViewById(R.id.verifyOldPasswordButton)
-
-        newPasswordLayout = findViewById(R.id.newPasswordLayout)
-        newPasswordEditText = findViewById(R.id.newPasswordEditText)
-        newPasswordToggle = findViewById(R.id.newPasswordToggle)
-
-        repeatPasswordLayout = findViewById(R.id.repeatPasswordLayout)
-        repeatPasswordEditText = findViewById(R.id.repeatPasswordEditText)
-        repeatPasswordToggle = findViewById(R.id.repeatPasswordToggle)
-
-        confirmPasswordChangeButton = findViewById(R.id.confirmPasswordChangeButton)
-
-        // Скрываем поля смены пароля по умолчанию
-        oldPasswordLayout.visibility = View.GONE
-        verifyOldPasswordButton.visibility = View.GONE
-        newPasswordLayout.visibility = View.GONE
-        repeatPasswordLayout.visibility = View.GONE
-        confirmPasswordChangeButton.visibility = View.GONE
-
-        // Установка начального состояния UI
         nameEditText.isEnabled = false
 
         authController.getCurrentUser { user ->
@@ -198,44 +156,62 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        // Логика кнопок смены пароля и глазиков
-
         changePass.setOnClickListener {
-            oldPasswordLayout.visibility = View.VISIBLE
-            verifyOldPasswordButton.visibility = View.VISIBLE
-
-            newPasswordLayout.visibility = View.GONE
-            repeatPasswordLayout.visibility = View.GONE
-            confirmPasswordChangeButton.visibility = View.GONE
+            showChangePasswordDialog()
         }
+    }
 
-        verifyOldPasswordButton.setOnClickListener {
-            // Здесь можно добавить проверку старого пароля перед открытием новых полей
+    private fun showChangePasswordDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_password, null)
+        val oldPasswordEditText = dialogView.findViewById<EditText>(R.id.oldPasswordEditText)
+        val oldPasswordToggle = dialogView.findViewById<ImageButton>(R.id.oldPasswordToggle)
+        val newPasswordEditText = dialogView.findViewById<EditText>(R.id.newPasswordEditText)
+        val newPasswordToggle = dialogView.findViewById<ImageButton>(R.id.newPasswordToggle)
+        val repeatPasswordEditText = dialogView.findViewById<EditText>(R.id.repeatPasswordEditText)
+        val repeatPasswordToggle = dialogView.findViewById<ImageButton>(R.id.repeatPasswordToggle)
+        val confirmPasswordChangeButton = dialogView.findViewById<Button>(R.id.confirmPasswordChangeButton)
 
-            newPasswordLayout.visibility = View.VISIBLE
-            repeatPasswordLayout.visibility = View.VISIBLE
-            confirmPasswordChangeButton.visibility = View.VISIBLE
+        var oldPasswordVisible = false
+        var newPasswordVisible = false
+        var repeatPasswordVisible = false
+
+        fun togglePasswordVisibility(editText: EditText, visible: Boolean, toggleButton: ImageButton) {
+            if (visible) {
+                editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                toggleButton.setImageResource(R.drawable.ic_eye)
+            } else {
+                editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                toggleButton.setImageResource(R.drawable.ic_eye_closed)
+            }
+            editText.setSelection(editText.text.length)
         }
 
         oldPasswordToggle.setOnClickListener {
             oldPasswordVisible = !oldPasswordVisible
             togglePasswordVisibility(oldPasswordEditText, oldPasswordVisible, oldPasswordToggle)
         }
-
         newPasswordToggle.setOnClickListener {
             newPasswordVisible = !newPasswordVisible
             togglePasswordVisibility(newPasswordEditText, newPasswordVisible, newPasswordToggle)
         }
-
         repeatPasswordToggle.setOnClickListener {
             repeatPasswordVisible = !repeatPasswordVisible
             togglePasswordVisibility(repeatPasswordEditText, repeatPasswordVisible, repeatPasswordToggle)
         }
 
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
         confirmPasswordChangeButton.setOnClickListener {
-            // Здесь добавьте логику смены пароля с валидацией
+            val oldPass = oldPasswordEditText.text.toString()
             val newPass = newPasswordEditText.text.toString()
             val repeatPass = repeatPasswordEditText.text.toString()
+
+            if (oldPass.isEmpty()) {
+                Toast.makeText(this, "Введите старый пароль", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             if (newPass.isEmpty() || repeatPass.isEmpty()) {
                 Toast.makeText(this, "Введите новый пароль и повторите его", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -246,17 +222,9 @@ class SettingsActivity : AppCompatActivity() {
             }
 
         }
-    }
 
-    private fun togglePasswordVisibility(editText: EditText, visible: Boolean, toggleButton: ImageButton) {
-        if (visible) {
-            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-            toggleButton.setImageResource(R.drawable.ic_eye)
-        } else {
-            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-            toggleButton.setImageResource(R.drawable.ic_eye_closed)
-        }
-        editText.setSelection(editText.text.length)
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
 
     override fun onResume() {
