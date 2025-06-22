@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">SmartSave</string>
     <string name="currency_rub">₽</string>
     <string name="currency_usd">$</string>
     <string name="currency_eur">€</string>

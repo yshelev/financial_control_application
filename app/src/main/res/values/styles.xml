@@ -41,4 +41,11 @@
         <item name="android:hint">Enter text</item>
     </style>
 
+    <style name="spinnerTheme">
+        <item name="colorAccent">@color/buttonTextColor</item>
+        <item name="android:textColor">@color/buttonTextColor</item>
+        <item name="colorControlNormal">@color/buttonTextColor</item>
+        <item name="android:backgroundTint">@null</item>
+    </style>
+
 </resources>

@@ -3,6 +3,8 @@ package com.example.myapplication
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.TransitionDrawable
 import android.util.AttributeSet
 import android.view.View
 
@@ -75,6 +77,9 @@ class GradientBackgroundView @JvmOverloads constructor(
     private var lightGradients: List<GradientData> = emptyList()
     private var darkGradients: List<GradientData> = emptyList()
 
+    private var currentDrawable: BitmapDrawable? = null
+    private var lastDarkTheme: Boolean? = null
+
     init {
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
@@ -89,27 +94,62 @@ class GradientBackgroundView @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
         lightGradients = buildGradients(w, h, lightTheme, smooth = false)
         darkGradients = buildGradients(w, h, darkTheme, smooth = true)
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        invalidate()
+        regenerateCurrentDrawable(w, h)
     }
 
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
+        val isDark = isDarkTheme()
 
+        if (lastDarkTheme == null) {
+            regenerateCurrentDrawable(width, height)
+            currentDrawable?.draw(canvas)
+            lastDarkTheme = isDark
+            return
+        }
+
+        if (lastDarkTheme != isDark) {
+            val oldDrawable = currentDrawable
+            val newBitmap = generateBitmap(width, height, if (isDark) darkTheme else lightTheme)
+            val newDrawable = BitmapDrawable(resources, newBitmap).apply {
+                setBounds(0, 0, width, height)
+            }
+
+            val transition = TransitionDrawable(arrayOf(oldDrawable, newDrawable)).apply {
+                isCrossFadeEnabled = true
+                setBounds(0, 0, width, height)
+            }
+
+            currentDrawable = newDrawable
+            transition.startTransition(600)
+            transition.draw(canvas)
+            lastDarkTheme = isDark
+        } else {
+            currentDrawable?.draw(canvas)
+        }
+    }
+
+    private fun regenerateCurrentDrawable(w: Int, h: Int) {
         val theme = if (isDarkTheme()) darkTheme else lightTheme
-        val gradients = if (isDarkTheme()) darkGradients else lightGradients
+        val bitmap = generateBitmap(w, h, theme)
+        currentDrawable = BitmapDrawable(resources, bitmap).apply {
+            setBounds(0, 0, w, h)
+        }
+        lastDarkTheme = isDarkTheme()
+    }
 
+    private fun generateBitmap(w: Int, h: Int, theme: ThemePalette): Bitmap {
+        val gradients = if (theme == darkTheme) darkGradients else lightGradients
+        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
         canvas.drawColor(theme.background)
 
         gradients.forEach { data ->
             paint.shader = data.shader
             canvas.drawCircle(data.cx, data.cy, data.radius, paint)
         }
-
         paint.shader = null
+
+        return bitmap
     }
 
     private fun buildGradients(
@@ -126,25 +166,18 @@ class GradientBackgroundView @JvmOverloads constructor(
             val cy = height * pos.yRatio
             val radius = width * pos.sizeRatio * if (smooth) 1.5f else 1.2f
 
-            val centerColor = Color.argb(baseAlpha,
+            val centerColor = Color.argb(
+                baseAlpha,
                 Color.red(config.color),
                 Color.green(config.color),
-                Color.blue(config.color))
+                Color.blue(config.color)
+            )
 
-            val shader = if (smooth && palette == darkTheme) {
-                RadialGradient(
-                    cx, cy, radius,
-                    intArrayOf(centerColor, Color.TRANSPARENT),
-                    floatArrayOf(0f, 1f),
-                    Shader.TileMode.CLAMP
-                )
-            } else {
-                RadialGradient(
-                    cx, cy, radius,
-                    centerColor, Color.TRANSPARENT,
-                    Shader.TileMode.CLAMP
-                )
-            }
+            val shader = RadialGradient(
+                cx, cy, radius,
+                centerColor, Color.TRANSPARENT,
+                Shader.TileMode.CLAMP
+            )
 
             GradientData(shader, cx, cy, radius)
         }

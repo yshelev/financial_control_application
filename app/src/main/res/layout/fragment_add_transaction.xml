@@ -78,9 +78,10 @@
             android:id="@+id/cardSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/forthColor"
-            android:popupBackground="@color/forthColor"
-            android:layout_marginBottom="20dp" />
+            android:popupBackground="@color/transparent"
+            android:dropDownHorizontalOffset="80dp"
+            android:theme="@style/spinnerTheme"
+            android:layout_marginBottom="20dp"/>
 
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/typeGroup"
@@ -123,8 +124,9 @@
             android:id="@+id/categorySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/forthColor"
-            android:popupBackground="@color/forthColor"
+            android:popupBackground="@color/transparent"
+            android:dropDownHorizontalOffset="80dp"
+            android:theme="@style/spinnerTheme"
             android:layout_marginBottom="20dp" />
 
         <EditText
@@ -154,8 +156,9 @@
             android:id="@+id/currencySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/forthColor"
-            android:popupBackground="@color/forthColor"
+            android:popupBackground="@color/transparent"
+            android:dropDownHorizontalOffset="80dp"
+            android:theme="@style/spinnerTheme"
             android:layout_marginBottom="20dp" />
 
         <Button

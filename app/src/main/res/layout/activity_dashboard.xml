@@ -99,10 +99,11 @@
                 android:id="@+id/timeFilterSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/buttonTextColor"
-                android:popupBackground="@color/transparent"
                 android:padding="8dp"
                 android:textAlignment="center"
+                android:popupBackground="@color/transparent"
+                android:dropDownHorizontalOffset="80dp"
+                android:theme="@style/spinnerTheme"
                 />
         </LinearLayout>
 
