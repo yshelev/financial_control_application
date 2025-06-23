@@ -79,35 +79,20 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Password"
+                android:text="Currency"
+                android:textSize="14sp"
                 android:textColor="@color/secondaryTextColor"
                 android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"  />
 
-            <RelativeLayout
+            <Spinner
+                android:id="@+id/currencySpinner"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    style="@style/GlassInput"
-                    android:id="@+id/passwordEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Enter new password"
-                    android:inputType="textPassword"
-                    android:enabled="false"
-                    android:paddingEnd="40dp" />
-
-                <ImageButton
-                    android:layout_marginRight="8dp"
-                    android:id="@+id/editPasswordButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_edit"
-                    android:background="@android:color/transparent"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"/>
-            </RelativeLayout>
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/forthColor"
+                android:popupBackground="@color/forthColor"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="8dp"/>
 
             <LinearLayout
                 android:id="@+id/themeSwitcherLayout"
@@ -141,6 +126,112 @@
                     android:trackTint="@color/secondaryTextColor" />
             </LinearLayout>
 
+            <Button
+                android:id="@+id/changePass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Change password"
+                style="@style/CandyButton"
+                android:layout_marginTop="16dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                android:id="@+id/oldPasswordLayout">
+
+                <EditText
+                    android:id="@+id/oldPasswordEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter current password"
+                    android:inputType="textPassword"
+                    style="@style/GlassInput"
+                    android:paddingEnd="40dp"/>
+
+                <ImageButton
+                    android:id="@+id/oldPasswordToggle"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_eye"
+                    android:contentDescription="Toggle password visibility"/>
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/verifyOldPasswordButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Verify"
+                android:visibility="gone"
+                style="@style/CandyButton"
+                android:layout_marginTop="8dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                android:id="@+id/newPasswordLayout">
+
+                <EditText
+                    android:id="@+id/newPasswordEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter new password"
+                    android:inputType="textPassword"
+                    style="@style/GlassInput"
+                    android:paddingEnd="40dp"/>
+
+                <ImageButton
+                    android:id="@+id/newPasswordToggle"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_eye"
+                    android:contentDescription="Toggle password visibility"/>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                android:id="@+id/repeatPasswordLayout">
+
+                <EditText
+                    android:id="@+id/repeatPasswordEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Repeat new password"
+                    android:inputType="textPassword"
+                    style="@style/GlassInput"
+                    android:paddingEnd="40dp"/>
+
+                <ImageButton
+                    android:id="@+id/repeatPasswordToggle"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_eye"
+                    android:contentDescription="Toggle password visibility"/>
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/confirmPasswordChangeButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Confirm password change"
+                android:visibility="gone"
+                style="@style/CandyButton"
+                android:layout_marginTop="8dp"/>
             <Button
                 android:id="@+id/exportDataButton"
                 android:layout_width="match_parent"

@@ -144,22 +144,24 @@
             android:layout_marginBottom="20dp"
             android:textColor="@color/buttonTextColor" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Currency"
-            android:textColor="@color/forthColor"
-            android:textSize="14sp"
-            android:layout_marginBottom="8dp" />
 
-        <Spinner
-            android:id="@+id/currencySpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:popupBackground="@color/transparent"
-            android:dropDownHorizontalOffset="80dp"
-            android:theme="@style/spinnerTheme"
-            android:layout_marginBottom="20dp" />
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Currency"-->
+<!--            android:textSize="14sp"-->
+<!--            android:textColor="@color/secondaryTextColor"-->
+<!--            android:layout_marginLeft="8dp"-->
+<!--            android:layout_marginTop="8dp"  />-->
+
+<!--        <Spinner-->
+<!--            android:id="@+id/currencySpinner"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:popupBackground="@color/transparent"-->
+<!--            android:dropDownHorizontalOffset="80dp"-->
+<!--            android:theme="@style/spinnerTheme"-->
+<!--            android:layout_marginBottom="20dp" />-->
 
         <Button
             style="@style/CandyButton"

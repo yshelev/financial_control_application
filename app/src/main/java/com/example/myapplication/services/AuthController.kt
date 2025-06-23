@@ -13,6 +13,7 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import androidx.core.content.edit
+import kotlinx.coroutines.CoroutineScope
 
 class AuthController(private val context: Context, private val database: MainDatabase) {
 
@@ -117,6 +118,48 @@ class AuthController(private val context: Context, private val database: MainDat
         prefs.edit() {
             putBoolean(KEY_IS_LOGGED_IN, true)
                 .putString(KEY_USER_EMAIL, email)
+        }
+    }
+
+    fun getCurrentUser(callback: (User?) -> Unit) {
+        val email = prefs.getString(KEY_USER_EMAIL, null)
+        if (email == null) {
+            callback(null)
+            return
+        }
+
+        (context as? AppCompatActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
+            val user = database.userDao().getUserByEmail(email)
+            (context as? AppCompatActivity)?.runOnUiThread {
+                callback(user)
+            }
+        }
+    }
+
+    fun updateUser(
+        updatedName: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val email = prefs.getString(KEY_USER_EMAIL, null)
+        if (email == null) {
+            onFailure("No logged-in user")
+            return
+        }
+
+        (context as? AppCompatActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
+            val user = database.userDao().getUserByEmail(email)
+            if (user == null) {
+                context.runOnUiThread { onFailure("User not found") }
+                return@launch
+            }
+
+            val updatedUser = user.copy(
+                username = updatedName,
+            )
+
+            database.userDao().update(updatedUser)
+            context.runOnUiThread { onSuccess() }
         }
     }
 

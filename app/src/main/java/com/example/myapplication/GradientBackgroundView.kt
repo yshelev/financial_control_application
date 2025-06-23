@@ -164,7 +164,7 @@ class GradientBackgroundView @JvmOverloads constructor(
 
             val cx = width * pos.xRatio
             val cy = height * pos.yRatio
-            val radius = width * pos.sizeRatio * if (smooth) 1.5f else 1.2f
+            val radius = width * pos.sizeRatio * if (smooth) 1.6f else 1.6f
 
             val centerColor = Color.argb(
                 baseAlpha,
