@@ -26,7 +26,7 @@ class WelcomeActivity : AuthBaseActivity() {
     override fun onStart() {
         super.onStart()
         if (authController.isUserLoggedIn()) {
-            startActivity(Intent(this, DashboardActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
     }

@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.example.myapplication.MainActivity
 import java.util.Locale
 
 class RegisterActivity : AuthBaseActivity() {
@@ -67,7 +68,7 @@ class RegisterActivity : AuthBaseActivity() {
                 repeatPassword = repeatPassword,
                 onSuccess = {
                     Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, DashboardActivity::class.java))
+                    startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 },
                 onFailure = { errorMessage ->

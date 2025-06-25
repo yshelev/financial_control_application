@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.example.myapplication.MainActivity
 
 class LoginActivity : AuthBaseActivity() {
 
@@ -37,7 +38,7 @@ class LoginActivity : AuthBaseActivity() {
                 password = password,
                 onSuccess = {
                     Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, DashboardActivity::class.java))
+                    startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 },
                 onFailure = { errorMessage ->
