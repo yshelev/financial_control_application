@@ -24,6 +24,7 @@ class AddCardActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         setContentView(R.layout.activity_add_card)
 
         cardNameEditText = findViewById(R.id.cardNameEditText)
@@ -36,9 +37,7 @@ class AddCardActivity : AppCompatActivity() {
 
         val currencies = listOf("₽", "$", "€")
         val spinnerAdapter = object : ArrayAdapter<String>(
-            this,
-            android.R.layout.simple_spinner_item,
-            currencies
+            this, android.R.layout.simple_spinner_item, currencies
         ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
@@ -78,8 +77,9 @@ class AddCardActivity : AppCompatActivity() {
             }
         })
 
-        // Очистка ошибок при вводе
         listOf(cardNameEditText, last4DigitsEditText, expiryDateEditText, balanceEditText).forEach { editText ->
+            editText.alpha = 0f
+            editText.animate().alpha(1f).setDuration(500).start()
             editText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -91,6 +91,7 @@ class AddCardActivity : AppCompatActivity() {
 
         backButton.setOnClickListener {
             finish()
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         saveCardButton.setOnClickListener {
@@ -98,20 +99,18 @@ class AddCardActivity : AppCompatActivity() {
             val last4 = last4DigitsEditText.text.toString().trim()
             val date = expiryDateEditText.text.toString().trim()
             val balanceStr = balanceEditText.text.toString().trim()
-//            val currency = currencySpinner.selectedItem.toString()
 
             if (!validateInputs(name, last4, date, balanceStr)) {
+                shakeInvalidFields(name, last4, date, balanceStr)
                 return@setOnClickListener
             }
 
             try {
                 val balance = if (balanceStr.isNotEmpty()) balanceStr.toDouble() else 0.0
-
                 val card = Card(
                     name = name,
                     maskedNumber = last4,
                     date = date,
-//                    currency = currency,
                     balance = balance
                 )
 
@@ -121,7 +120,7 @@ class AddCardActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-                balanceEditText.error = "Ошибка при сохранении: ${e.message}"
+                balanceEditText.error = "Error saving: ${e.message}"
             }
         }
     }
@@ -130,17 +129,17 @@ class AddCardActivity : AppCompatActivity() {
         var isValid = true
 
         if (name.isEmpty()) {
-            cardNameEditText.error = "Введите название карты"
+            cardNameEditText.error = "Please enter the card name"
             isValid = false
         }
 
         if (last4.length != 4 || !last4.all { it.isDigit() }) {
-            last4DigitsEditText.error = "Введите 4 цифры"
+            last4DigitsEditText.error = "Enter 4 digits"
             isValid = false
         }
 
         if (!date.matches(Regex("""^(0[1-9]|1[0-2])\/\d{2}$"""))) {
-            expiryDateEditText.error = "Формат MM/YY"
+            expiryDateEditText.error = "Date format: MM/YY"
             isValid = false
         }
 
@@ -148,11 +147,32 @@ class AddCardActivity : AppCompatActivity() {
             try {
                 balanceStr.toDouble()
             } catch (e: NumberFormatException) {
-                balanceEditText.error = "Баланс должен быть числом"
+                balanceEditText.error = "Balance must be a number"
                 isValid = false
             }
         }
 
         return isValid
+    }
+
+    private fun shakeInvalidFields(name: String, last4: String, date: String, balanceStr: String) {
+        if (name.isEmpty()) animateShake(cardNameEditText)
+        if (last4.length != 4 || !last4.all { it.isDigit() }) animateShake(last4DigitsEditText)
+        if (!date.matches(Regex("""^(0[1-9]|1[0-2])\/\d{2}$"""))) animateShake(expiryDateEditText)
+        if (balanceStr.isNotEmpty()) {
+            try {
+                balanceStr.toDouble()
+            } catch (e: NumberFormatException) {
+                animateShake(balanceEditText)
+            }
+        }
+    }
+
+    private fun animateShake(view: View) {
+        view.animate().translationX(10f).setDuration(50).withEndAction {
+            view.animate().translationX(-10f).setDuration(50).withEndAction {
+                view.animate().translationX(0f).setDuration(50).start()
+            }.start()
+        }.start()
     }
 }

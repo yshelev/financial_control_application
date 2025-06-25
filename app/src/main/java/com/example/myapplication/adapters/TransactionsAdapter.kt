@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,13 +17,16 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class TransactionsAdapter(
-    private val lifecycleOwner: LifecycleOwner,
-    private val transactionsFlow: Flow<List<UserTransaction>>,
+    lifecycleOwner: LifecycleOwner,
+    transactionsFlow: Flow<List<UserTransaction>>,
     private val onDeleteClicked: (UserTransaction) -> Unit
 ) : RecyclerView.Adapter<TransactionsAdapter.TransactionViewHolder>() {
 
     private val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    private var transactions: List<UserTransaction> = emptyList()
+
+    // Сделаем transactions публичным, чтобы можно было получить транзакцию для свайпа
+    var transactions: List<UserTransaction> = emptyList()
+        private set
 
     init {
         lifecycleOwner.lifecycleScope.launch {
@@ -49,23 +51,11 @@ class TransactionsAdapter(
         return TransactionViewHolder(view)
     }
 
-    fun updateTransactions(newTransactions: List<UserTransaction>) {
-        this.transactions = newTransactions
-        notifyDataSetChanged()
-    }
-
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val tx = transactions[position]
         holder.title.text = tx.category
         holder.date.text = dateFormatter.format(Date(tx.date))
 
-//        val currencySymbol = when (tx.currency.uppercase()) {
-//            "RUB" -> "₽"
-//            "EUR" -> "€"
-//            "USD" -> "$"
-//            else -> tx.currency
-//        }
-//        holder.amount.text = if (tx.isIncome) "+${tx.amount}${currencySymbol}" else "-${tx.amount}${tx.currency}"
         holder.amount.text = if (tx.isIncome) "+${tx.amount}₽" else "-${tx.amount}₽"
         holder.amount.setTextColor(
             holder.itemView.context.getColor(
@@ -80,4 +70,9 @@ class TransactionsAdapter(
     }
 
     override fun getItemCount(): Int = transactions.size
+
+    fun updateTransactions(newTransactions: List<UserTransaction>) {
+        transactions = newTransactions
+        notifyDataSetChanged()
+    }
 }

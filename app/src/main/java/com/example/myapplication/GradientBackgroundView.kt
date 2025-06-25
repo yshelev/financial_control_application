@@ -32,7 +32,7 @@ class GradientBackgroundView @JvmOverloads constructor(
         background = Color.parseColor("#FAFAFA"),
         spots = listOf(
             SpotConfig(Color.parseColor("#FF9E80")),
-            SpotConfig(Color.parseColor("#80DEEA")),
+            SpotConfig(Color.parseColor("#47d9ed")),
             SpotConfig(Color.parseColor("#C5E1A5")),
             SpotConfig(Color.parseColor("#FFD54F")),
             SpotConfig(Color.parseColor("#B39DDB")),

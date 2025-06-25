@@ -63,6 +63,7 @@ class AddTransactionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         setContentView(R.layout.fragment_add_transaction)
 
         dateCard = findViewById(R.id.dateCard)
@@ -74,13 +75,23 @@ class AddTransactionActivity : AppCompatActivity() {
         categorySpinner = findViewById(R.id.categorySpinner)
         descriptionEditText = findViewById(R.id.descriptionEditText)
         amountEditText = findViewById(R.id.amountEditText)
-//        currencySpinner = findViewById(R.id.currencySpinner)
         backButton = findViewById(R.id.backButton)
         saveButton = findViewById(R.id.saveButton)
 
-        backButton.setOnClickListener { finish() }
+        // Плавное появление элементов
+        listOf(
+            dateCard, cardSpinner, incomeToggle, expenseToggle,
+            categorySpinner, descriptionEditText, amountEditText, saveButton
+        ).forEach {
+            it.alpha = 0f
+            it.animate().alpha(1f).setDuration(500).start()
+        }
 
-        // Initialize ActivityResultLauncher
+        backButton.setOnClickListener {
+            finish()
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        }
+
         createCategoryLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -103,17 +114,12 @@ class AddTransactionActivity : AppCompatActivity() {
             cardDao.getAllCards().collect { cards ->
                 cardsMap = cards.associate { "${it.name} (${it.maskedNumber})" to it.id }
                 val cardsList = cardsMap.keys.toList()
-
                 val cardsAdapter = object : ArrayAdapter<String>(
-                    this@AddTransactionActivity,
-                    android.R.layout.simple_spinner_item,
-                    cardsList
+                    this@AddTransactionActivity, android.R.layout.simple_spinner_item, cardsList
                 ) {
                     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                         val view = super.getView(position, convertView, parent) as TextView
-                        view.setTextColor(
-                            ContextCompat.getColor(context, R.color.buttonTextColor)
-                        )
+                        view.setTextColor(ContextCompat.getColor(context, R.color.buttonTextColor))
                         return view
                     }
                 }
@@ -121,55 +127,39 @@ class AddTransactionActivity : AppCompatActivity() {
             }
         }
 
-
-        val cards = listOf("T-bank 0567", "Sber 8989", "Alfa 6666")
-        val cardsAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, cards) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(
-                    ContextCompat.getColor(context, R.color.buttonTextColor)
-                )
-                return view
-            }
-        }
-        cardSpinner.adapter = cardsAdapter
-
-//        val currencies = listOf("RUB", "USD", "EUR")
-//        val currencyAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencies) {
-//            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-//                val view = super.getView(position, convertView, parent) as TextView
-//                view.setTextColor(Color.parseColor("#D0B8F5"))
-//                return view
-//            }
-//        }
-//        currencySpinner.adapter = currencyAdapter
-
         updateDateLabel()
-
-        dateCard.setOnClickListener { showDatePicker() }
+        dateCard.setOnClickListener {
+            it.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction {
+                it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+                showDatePicker()
+            }.start()
+        }
 
         incomeToggle.setOnClickListener {
+            it.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction {
+                it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+            }.start()
             isIncomeSelected = true
             updateToggleButtons("income")
             updateCategorySpinner()
         }
 
         expenseToggle.setOnClickListener {
+            it.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction {
+                it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+            }.start()
             isIncomeSelected = false
             updateToggleButtons("expense")
             updateCategorySpinner()
         }
 
         categorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?, view: View?, position: Int, id: Long
-            ) {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selected = categorySpinner.selectedItem.toString()
                 if (selected == "Add new category") {
                     openCreateCategoryScreen()
                 }
             }
-
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
@@ -179,6 +169,12 @@ class AddTransactionActivity : AppCompatActivity() {
         saveButton.setOnClickListener {
             if (validateInputs()) {
                 saveTransaction()
+            } else {
+                amountEditText.animate().translationX(10f).setDuration(50).withEndAction {
+                    amountEditText.animate().translationX(-10f).setDuration(50).withEndAction {
+                        amountEditText.animate().translationX(0f).setDuration(50).start()
+                    }.start()
+                }.start()
             }
         }
     }

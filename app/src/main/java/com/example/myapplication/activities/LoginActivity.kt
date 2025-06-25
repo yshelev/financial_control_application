@@ -8,7 +8,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import com.example.myapplication.MainActivity
+import androidx.appcompat.app.AppCompatActivity
 
 class LoginActivity : AuthBaseActivity() {
 
@@ -30,8 +30,20 @@ class LoginActivity : AuthBaseActivity() {
         }
 
         loginButton.setOnClickListener {
+
             val email = emailInput.text.toString().trim()
             val password = passwordInput.text.toString()
+
+            if (email.isEmpty()) {
+                shakeView(emailInput)
+                emailInput.error = "Enter your email address"
+                return@setOnClickListener
+            }
+            if (password.isEmpty()) {
+                shakeView(passwordInput)
+                passwordInput.error = "Enter your password"
+                return@setOnClickListener
+            }
 
             authController.loginAccount(
                 email = email,
@@ -39,6 +51,7 @@ class LoginActivity : AuthBaseActivity() {
                 onSuccess = {
                     Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
                 },
                 onFailure = { errorMessage ->
@@ -49,6 +62,7 @@ class LoginActivity : AuthBaseActivity() {
 
         goToRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             finish()
         }
     }
@@ -64,4 +78,24 @@ class LoginActivity : AuthBaseActivity() {
         }
         editText.setSelection(editText.text.length)
     }
+
+    private fun shakeView(view: EditText) {
+        view.animate()
+            .translationX(10f)
+            .setDuration(50)
+            .withEndAction {
+                view.animate()
+                    .translationX(-10f)
+                    .setDuration(50)
+                    .withEndAction {
+                        view.animate()
+                            .translationX(0f)
+                            .setDuration(50)
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
+    }
 }
+

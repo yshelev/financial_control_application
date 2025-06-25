@@ -2,35 +2,36 @@ package com.example.myapplication
 
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.*
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
-import com.example.myapplication.AddCardActivity
-import com.example.myapplication.AddTransactionActivity
-import com.example.myapplication.App
-import com.example.myapplication.CardsAdapter
-import com.example.myapplication.R
-import com.example.myapplication.TransactionsAdapter
 import com.example.myapplication.database.entities.UserTransaction
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 
 class DashboardFragment : Fragment() {
 
     private var currentFilter = "All"
     private lateinit var cardsViewPager: ViewPager2
-    private lateinit var transactionsRecycler: androidx.recyclerview.widget.RecyclerView
+    private lateinit var transactionsRecycler: RecyclerView
     private lateinit var timeFilterSpinner: Spinner
     private lateinit var addTransactionButton: FloatingActionButton
     private lateinit var transactionsAdapter: TransactionsAdapter
@@ -60,26 +61,13 @@ class DashboardFragment : Fragment() {
         addTransactionButton = view.findViewById(R.id.addTransactionButton)
 
         val timeOptions = listOf("All", "Today", "Week", "Month", "Year", "Custom period")
-        val selectedPosition = timeOptions.indexOf(currentFilter)
-        if (selectedPosition >= 0) {
-            timeFilterSpinner.setSelection(selectedPosition)
+        timeFilterSpinner.adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            timeOptions
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
-
-        val timeAdapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, timeOptions) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(ContextCompat.getColor(context, R.color.buttonTextColor))
-                return view
-            }
-
-            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getDropDownView(position, convertView, parent) as TextView
-                view.setTextColor(ContextCompat.getColor(context, R.color.buttonTextColor))
-                return view
-            }
-        }
-
-        timeFilterSpinner.adapter = timeAdapter
 
         transactionsAdapter = TransactionsAdapter(
             viewLifecycleOwner,
@@ -103,13 +91,97 @@ class DashboardFragment : Fragment() {
         transactionsRecycler.layoutManager = LinearLayoutManager(requireContext())
         transactionsRecycler.adapter = transactionsAdapter
 
+        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+
+            private val backgroundPaint = Paint().apply { color = Color.RED }
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val transaction = transactionsAdapter.transactions[position]
+
+                lifecycleScope.launch {
+                    val card = db.cardDao().getCardById(transaction.cardId)
+                    if (card != null) {
+                        val newBalance = if (transaction.isIncome) {
+                            card.balance - transaction.amount
+                        } else {
+                            card.balance + transaction.amount
+                        }
+                        db.cardDao().update(card.copy(balance = newBalance))
+                    }
+                    db.transactionDao().delete(transaction)
+                }
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: androidx.recyclerview.widget.RecyclerView,
+                viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
+                dX: Float, dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                val itemView = viewHolder.itemView
+                val cornerRadius = 30f  // радиус скругления
+
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    val backgroundLeft = itemView.right + dX
+                    val backgroundRight = itemView.right.toFloat()
+                    val backgroundTop = itemView.top.toFloat()
+                    val backgroundBottom = itemView.bottom.toFloat()
+
+                    val alpha = (255 * (kotlin.math.abs(dX) / itemView.width)).toInt().coerceIn(0, 255)
+                    val smoothPaint = Paint().apply {
+                        color = Color.argb(alpha, 255, 69, 58)
+                        isAntiAlias = true
+                    }
+
+                    val rectF = android.graphics.RectF(
+                        backgroundLeft,
+                        backgroundTop,
+                        backgroundRight,
+                        backgroundBottom
+                    )
+
+                    c.drawRoundRect(rectF, cornerRadius, cornerRadius, smoothPaint)
+                }
+
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            }
+        }
+
+        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(transactionsRecycler)
+
         timeFilterSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 updateTransactionsByPeriod(timeOptions[position])
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+
+        setupCardsViewPager()
+
+        addTransactionButton.setOnClickListener {
+            startActivity(Intent(requireContext(), AddTransactionActivity::class.java))
+        }
+
+        updateTransactionsByPeriod("All")
+    }
+
+    private fun setupCardsViewPager() {
+        val db = App.database
 
         cardsViewPager.adapter = CardsAdapter(
             db.cardDao().getAllCards(),
@@ -126,19 +198,19 @@ class DashboardFragment : Fragment() {
             }
         )
 
-        cardsViewPager.setPageTransformer(CompositePageTransformer().apply {
+        val transformer = CompositePageTransformer().apply {
             addTransformer(MarginPageTransformer(dpToPx(16f)))
-        })
+            addTransformer { page, position ->
+                val r = 1 - abs(position)
+                page.scaleY = 0.85f + r * 0.15f
+                page.alpha = 0.5f + r * 0.5f
+            }
+        }
+
+        cardsViewPager.setPageTransformer(transformer)
         cardsViewPager.clipToPadding = false
         cardsViewPager.clipChildren = false
         cardsViewPager.offscreenPageLimit = 3
-
-        addTransactionButton.setOnClickListener {
-            val intent = Intent(requireContext(), AddTransactionActivity::class.java)
-            startActivity(intent)
-        }
-
-        updateTransactionsByPeriod("All")
     }
 
     private fun updateTransactionsByPeriod(period: String) {
@@ -156,8 +228,7 @@ class DashboardFragment : Fragment() {
                             calendar.set(Calendar.MINUTE, 0)
                             calendar.set(Calendar.SECOND, 0)
                             calendar.set(Calendar.MILLISECOND, 0)
-                            val startOfDay = calendar.timeInMillis
-                            App.database.transactionDao().getTransactionsByDateRange(startOfDay, now)
+                            App.database.transactionDao().getTransactionsByDateRange(calendar.timeInMillis, now)
                         }
                         "Week" -> {
                             calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
@@ -165,8 +236,7 @@ class DashboardFragment : Fragment() {
                             calendar.set(Calendar.MINUTE, 0)
                             calendar.set(Calendar.SECOND, 0)
                             calendar.set(Calendar.MILLISECOND, 0)
-                            val startOfWeek = calendar.timeInMillis
-                            App.database.transactionDao().getTransactionsByDateRange(startOfWeek, now)
+                            App.database.transactionDao().getTransactionsByDateRange(calendar.timeInMillis, now)
                         }
                         "Month" -> {
                             calendar.set(Calendar.DAY_OF_MONTH, 1)
@@ -174,8 +244,7 @@ class DashboardFragment : Fragment() {
                             calendar.set(Calendar.MINUTE, 0)
                             calendar.set(Calendar.SECOND, 0)
                             calendar.set(Calendar.MILLISECOND, 0)
-                            val startOfMonth = calendar.timeInMillis
-                            App.database.transactionDao().getTransactionsByDateRange(startOfMonth, now)
+                            App.database.transactionDao().getTransactionsByDateRange(calendar.timeInMillis, now)
                         }
                         "Year" -> {
                             calendar.set(Calendar.DAY_OF_YEAR, 1)
@@ -183,20 +252,19 @@ class DashboardFragment : Fragment() {
                             calendar.set(Calendar.MINUTE, 0)
                             calendar.set(Calendar.SECOND, 0)
                             calendar.set(Calendar.MILLISECOND, 0)
-                            val startOfYear = calendar.timeInMillis
-                            App.database.transactionDao().getTransactionsByDateRange(startOfYear, now)
+                            App.database.transactionDao().getTransactionsByDateRange(calendar.timeInMillis, now)
                         }
                         else -> {
-                            App.database.transactionDao().getAllTransactions().collect { transactions ->
-                                transactionsAdapter.updateTransactions(transactions)
-                                updateBalanceStats(transactions)
+                            App.database.transactionDao().getAllTransactions().collect {
+                                transactionsAdapter.updateTransactions(it)
+                                updateBalanceStats(it)
                             }
                             return@launch
                         }
                     }
 
-                    updateBalanceStats(transactions)
                     transactionsAdapter.updateTransactions(transactions)
+                    updateBalanceStats(transactions)
                 }
             }
         }
@@ -205,50 +273,35 @@ class DashboardFragment : Fragment() {
     private fun showDateRangeDialog() {
         val calendar = Calendar.getInstance()
 
-        val startDatePicker = DatePickerDialog(
-            requireContext(),
-            { _, year, month, day ->
-                val startCalendar = Calendar.getInstance().apply {
-                    set(year, month, day, 0, 0, 0)
-                    set(Calendar.MILLISECOND, 0)
+        DatePickerDialog(requireContext(), { _, year, month, day ->
+            val startCalendar = Calendar.getInstance().apply {
+                set(year, month, day, 0, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            DatePickerDialog(requireContext(), { _, endYear, endMonth, endDay ->
+                val endCalendar = Calendar.getInstance().apply {
+                    set(endYear, endMonth, endDay, 23, 59, 59)
+                    set(Calendar.MILLISECOND, 999)
                 }
 
-                val endDatePicker = DatePickerDialog(
-                    requireContext(),
-                    { _, year, month, day ->
-                        val endCalendar = Calendar.getInstance().apply {
-                            set(year, month, day, 23, 59, 59)
-                            set(Calendar.MILLISECOND, 999)
-                        }
+                if (endCalendar.before(startCalendar)) {
+                    Toast.makeText(requireContext(), "End date cannot be before start date", Toast.LENGTH_LONG).show()
+                    showDateRangeDialog()
+                } else {
+                    loadCustomPeriodTransactions(startCalendar.timeInMillis, endCalendar.timeInMillis)
+                }
 
-                        if (endCalendar.before(startCalendar)) {
-                            Toast.makeText(requireContext(), "End date cannot be before start date", Toast.LENGTH_LONG).show()
-                            showDateRangeDialog()
-                        } else {
-                            loadCustomPeriodTransactions(startCalendar.timeInMillis, endCalendar.timeInMillis)
-                        }
-                    },
-                    startCalendar.get(Calendar.YEAR),
-                    startCalendar.get(Calendar.MONTH),
-                    startCalendar.get(Calendar.DAY_OF_MONTH)
-                )
+            }, startCalendar.get(Calendar.YEAR), startCalendar.get(Calendar.MONTH), startCalendar.get(Calendar.DAY_OF_MONTH)).apply {
+                datePicker.minDate = startCalendar.timeInMillis
+            }.show()
 
-                endDatePicker.datePicker.minDate = startCalendar.timeInMillis
-                endDatePicker.show()
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-
-        startDatePicker.setTitle("Select start date")
-        startDatePicker.show()
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
 
     private fun loadCustomPeriodTransactions(startDate: Long, endDate: Long) {
         lifecycleScope.launch {
-            val transactions = App.database.transactionDao()
-                .getTransactionsByDateRange(startDate, endDate)
+            val transactions = App.database.transactionDao().getTransactionsByDateRange(startDate, endDate)
             transactionsAdapter.updateTransactions(transactions)
             updateBalanceStats(transactions)
         }
@@ -259,17 +312,12 @@ class DashboardFragment : Fragment() {
         var totalExpenses = 0.0
         var totalBalance = 0.0
 
-        val cards = App.database.cardDao().getAllCardsOnce()
-        cards.forEach { card ->
+        App.database.cardDao().getAllCardsOnce().forEach { card ->
             totalBalance += card.balance
         }
 
-        transactions.forEach { transaction ->
-            if (transaction.isIncome) {
-                totalIncome += transaction.amount
-            } else {
-                totalExpenses += transaction.amount
-            }
+        transactions.forEach {
+            if (it.isIncome) totalIncome += it.amount else totalExpenses += it.amount
         }
 
         val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
@@ -282,37 +330,14 @@ class DashboardFragment : Fragment() {
     }
 
     private fun dpToPx(dp: Float): Int {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics
-        ).toInt()
-    }
-
-    private fun Date.toShortDateString(): String {
-        return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(this)
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics).toInt()
     }
 
     override fun onResume() {
         super.onResume()
-        lifecycleScope.launch {
-            val db = App.database
-            cardsViewPager.adapter = CardsAdapter(
-                db.cardDao().getAllCards(),
-                db.transactionDao().getAllTransactions(),
-                lifecycleScope,
-                onAddCardClicked = {
-                    startActivity(Intent(requireContext(), AddCardActivity::class.java))
-                },
-                onDeleteCardClicked = { card ->
-                    lifecycleScope.launch {
-                        db.cardDao().delete(card)
-                        updateBalanceStats(emptyList())
-                    }
-                }
-            )
-            updateBalanceStats(emptyList())
-        }
-
+        setupCardsViewPager()
         updateTransactionsByPeriod(currentFilter)
     }
 }
+
 

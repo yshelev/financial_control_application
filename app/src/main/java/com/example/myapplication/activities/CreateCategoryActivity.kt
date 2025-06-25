@@ -1,23 +1,24 @@
 package com.example.myapplication
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
-import android.widget.Button
 import android.widget.EditText
 import android.widget.GridView
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 
 class CreateCategoryActivity : AppCompatActivity() {
 
     private lateinit var nameEditText: EditText
     private lateinit var iconGridView: GridView
-    private lateinit var saveButton: Button
-    private lateinit var incomeToggle: Button
-    private lateinit var expenseToggle: Button
+    private lateinit var saveButton: MaterialButton
+    private lateinit var incomeToggle: MaterialButton
+    private lateinit var expenseToggle: MaterialButton
     private lateinit var typeGroup: MaterialButtonToggleGroup
 
     private val activeIncomeBg = Color.parseColor("#50FF9D")
@@ -44,6 +45,7 @@ class CreateCategoryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         setContentView(R.layout.activity_create_category)
 
         nameEditText = findViewById(R.id.categoryNameEditText)
@@ -59,21 +61,35 @@ class CreateCategoryActivity : AppCompatActivity() {
 
         iconGridView.adapter = IconAdapter(this, iconList)
 
-        iconGridView.setOnItemClickListener { _, _, position, _ ->
+        // Анимации появления
+        listOf(iconGridView, nameEditText, saveButton, incomeToggle, expenseToggle).forEach {
+            it.alpha = 0f
+            it.animate().alpha(1f).setDuration(500).start()
+        }
+
+        iconGridView.setOnItemClickListener { _, view, position, _ ->
             selectedIconResId = iconList[position]
+
+            view.animate().scaleX(1.2f).scaleY(1.2f).setDuration(150).withEndAction {
+                view.animate().scaleX(1f).scaleY(1f).setDuration(150).start()
+            }.start()
+
             Toast.makeText(this, "Icon selected", Toast.LENGTH_SHORT).show()
         }
 
         backButton.setOnClickListener {
             finish()
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         incomeToggle.setOnClickListener {
+            animateButton(it)
             isIncomeSelected = true
             updateToggleButtons("income")
         }
 
         expenseToggle.setOnClickListener {
+            animateButton(it)
             isIncomeSelected = false
             updateToggleButtons("expense")
         }
@@ -83,33 +99,49 @@ class CreateCategoryActivity : AppCompatActivity() {
 
             if (name.isEmpty()) {
                 nameEditText.error = "Please enter category name"
+                shakeView(nameEditText)
                 return@setOnClickListener
             }
 
-            // Возвращаем результат в AddTransactionActivity
-            val resultIntent = Intent()
-            resultIntent.putExtra("newCategory", name)
-            resultIntent.putExtra("isIncome", isIncomeSelected)
-            resultIntent.putExtra("iconResId", selectedIconResId)
+            val resultIntent = Intent().apply {
+                putExtra("newCategory", name)
+                putExtra("isIncome", isIncomeSelected)
+                putExtra("iconResId", selectedIconResId)
+            }
 
             setResult(RESULT_OK, resultIntent)
             finish()
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
     }
 
     private fun updateToggleButtons(selected: String) {
         if (selected == "income") {
-            incomeToggle.setBackgroundColor(activeIncomeBg)
+            incomeToggle.backgroundTintList = ColorStateList.valueOf(activeIncomeBg)
             incomeToggle.setTextColor(activeIncomeText)
 
-            expenseToggle.setBackgroundColor(inactiveBg)
+            expenseToggle.backgroundTintList = ColorStateList.valueOf(inactiveBg)
             expenseToggle.setTextColor(inactiveExpenseText)
-        } else if (selected == "expense") {
-            expenseToggle.setBackgroundColor(activeExpenseBg)
+        } else {
+            expenseToggle.backgroundTintList = ColorStateList.valueOf(activeExpenseBg)
             expenseToggle.setTextColor(activeExpenseText)
 
-            incomeToggle.setBackgroundColor(inactiveBg)
+            incomeToggle.backgroundTintList = ColorStateList.valueOf(inactiveBg)
             incomeToggle.setTextColor(inactiveIncomeText)
         }
+    }
+
+    private fun animateButton(button: android.view.View) {
+        button.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction {
+            button.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+        }.start()
+    }
+
+    private fun shakeView(view: android.view.View) {
+        view.animate().translationX(10f).setDuration(50).withEndAction {
+            view.animate().translationX(-10f).setDuration(50).withEndAction {
+                view.animate().translationX(0f).setDuration(50).start()
+            }.start()
+        }.start()
     }
 }

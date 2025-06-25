@@ -7,10 +7,10 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
@@ -32,8 +32,8 @@ class SettingsFragment : Fragment() {
     private lateinit var exportDataButton: Button
     private lateinit var themeIcon: ImageView
     private lateinit var currencySpinner: Spinner
+    private lateinit var themeNameTextView: TextView
 
-//    // Применяем тему перед созданием вьюхи
     private fun applyThemeFromPreferences() {
         val prefs = requireActivity()
             .getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
@@ -54,11 +54,9 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Инициализация контроллера
         val db = MainDatabase.getDatabase(requireContext())
         authController = AuthController(requireActivity(), db)
 
-        // Привязка UI
         nameEditText       = view.findViewById(R.id.nameEditText)
         emailTextView      = view.findViewById(R.id.emailTextView)
         themeSwitch        = view.findViewById(R.id.themeSwitch)
@@ -70,12 +68,11 @@ class SettingsFragment : Fragment() {
         exportDataButton   = view.findViewById(R.id.exportDataButton)
         themeIcon          = view.findViewById(R.id.themeIcon)
         currencySpinner    = view.findViewById(R.id.currencySpinner)
+        themeNameTextView  = view.findViewById(R.id.themeText)
 
-        // Начальное состояние
         nameEditText.isEnabled = false
         view.findViewById<ScrollView>(R.id.settingsScroll).scrollTo(0, 0)
 
-        // Загрузка текущего пользователя
         authController.getCurrentUser { user ->
             requireActivity().runOnUiThread {
                 emailTextView.text = user?.email.orEmpty()
@@ -83,11 +80,14 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        // Редактирование имени
+        // Редактирование имени с автокурсором и клавиатурой
         editNameButton.setOnClickListener {
             nameEditText.isEnabled = true
             nameEditText.requestFocus()
             nameEditText.setSelection(nameEditText.text.length)
+
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(nameEditText, InputMethodManager.SHOW_IMPLICIT)
         }
 
         // Сохранение имени
@@ -112,23 +112,29 @@ class SettingsFragment : Fragment() {
             )
         }
 
-        // Переключение темы
+        // Плавная анимация переключения темы с затемнением
         themeSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (themeSwitch.isPressed) {
-                val newMode = if (isChecked)
-                    AppCompatDelegate.MODE_NIGHT_YES
-                else
-                    AppCompatDelegate.MODE_NIGHT_NO
+                val rootView = requireView()
 
-                // Сохраняем и применяем
-                requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
-                    .edit { putInt("NightMode", newMode) }
-                AppCompatDelegate.setDefaultNightMode(newMode)
+                rootView.animate().alpha(0f).setDuration(200).withEndAction {
+                    val newMode = if (isChecked)
+                        AppCompatDelegate.MODE_NIGHT_YES
+                    else
+                        AppCompatDelegate.MODE_NIGHT_NO
+
+                    requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+                        .edit { putInt("NightMode", newMode) }
+                    AppCompatDelegate.setDefaultNightMode(newMode)
+
+                    rootView.animate().alpha(1f).setDuration(200).start()
+                }.start()
+
                 updateThemeIcon(isChecked)
+                updateThemeName(isChecked)
             }
         }
 
-        // Устанавливаем спиннер валют
         val currencies = listOf("RUB", "USD", "EUR")
         val currencyAdapter = object : ArrayAdapter<String>(
             requireContext(),
@@ -143,7 +149,6 @@ class SettingsFragment : Fragment() {
         }
         currencySpinner.adapter = currencyAdapter
 
-        // Экспорт/очистка данных
         exportDataButton.setOnClickListener {
             Toast.makeText(requireContext(), "Экспорт данных выполнен", Toast.LENGTH_SHORT).show()
         }
@@ -151,7 +156,6 @@ class SettingsFragment : Fragment() {
             Toast.makeText(requireContext(), "Все данные очищены", Toast.LENGTH_SHORT).show()
         }
 
-        // Выход из аккаунта
         logoutButton.setOnClickListener {
             authController.logout()
             startActivity(
@@ -163,11 +167,10 @@ class SettingsFragment : Fragment() {
             requireActivity().finish()
         }
 
-        // Смена пароля
         changePass.setOnClickListener { showChangePasswordDialog() }
 
-        // Иконка темы по текущей системе
         updateThemeFromSystem()
+        updateThemeName(themeSwitch.isChecked)  // Обновляем текст при загрузке
     }
 
     private fun updateThemeFromSystem() {
@@ -178,9 +181,15 @@ class SettingsFragment : Fragment() {
     }
 
     private fun updateThemeIcon(isNightMode: Boolean) {
+        themeIcon.animate().rotationBy(360f).setDuration(600).start()
         themeIcon.setImageResource(
             if (isNightMode) R.drawable.ic_sun else R.drawable.ic_moon
         )
+    }
+
+
+    private fun updateThemeName(isNightMode: Boolean) {
+        themeNameTextView.text = if (isNightMode) "Light theme" else "Dark theme"
     }
 
     private fun showChangePasswordDialog() {
@@ -243,6 +252,22 @@ class SettingsFragment : Fragment() {
                 }
             )
         }
+
+        dialog.setOnShowListener {
+            val dialogView = dialog.window?.decorView
+            dialogView?.apply {
+                alpha = 0f
+                scaleX = 0.8f
+                scaleY = 0.8f
+                animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(300)
+                    .start()
+            }
+        }
+
 
         dialog.show()
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)

@@ -30,21 +30,59 @@ class ChangePasswordDialogFragment(
             val repeatPass = repeatPasswordEditText.text.toString()
 
             if (oldPass.isEmpty() || newPass.isEmpty() || repeatPass.isEmpty()) {
-                Toast.makeText(context, "Заполните все поля", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Fill in all fields", Toast.LENGTH_SHORT).show()
+                shakeView(oldPasswordEditText)
+                shakeView(newPasswordEditText)
+                shakeView(repeatPasswordEditText)
                 return@setOnClickListener
             }
 
             if (newPass != repeatPass) {
-                Toast.makeText(context, "Пароли не совпадают", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "The passwords do not match", Toast.LENGTH_SHORT).show()
+                shakeView(newPasswordEditText)
+                shakeView(repeatPasswordEditText)
                 return@setOnClickListener
             }
-
         }
 
-        return AlertDialog.Builder(requireContext())
-            .setTitle("Смена пароля")
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Change password")
             .setView(view)
-            .setNegativeButton("Отмена") { _, _ -> dismiss() }
+            .setNegativeButton("Cancel") { _, _ -> dismiss() }
             .create()
+
+        dialog.setOnShowListener {
+            val rootView = dialog.window?.decorView
+            rootView?.alpha = 0f
+            rootView?.animate()?.alpha(1f)?.setDuration(300)?.start()
+        }
+
+        return dialog
+    }
+
+    private fun shakeView(view: EditText) {
+        view.animate()
+            .translationX(10f)
+            .setDuration(50)
+            .withEndAction {
+                view.animate()
+                    .translationX(-10f)
+                    .setDuration(50)
+                    .withEndAction {
+                        view.animate()
+                            .translationX(0f)
+                            .setDuration(50)
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
+    }
+
+    override fun dismiss() {
+        val rootView = dialog?.window?.decorView
+        rootView?.animate()?.alpha(0f)?.setDuration(200)?.withEndAction {
+            super.dismiss()
+        }?.start() ?: super.dismiss()
     }
 }
