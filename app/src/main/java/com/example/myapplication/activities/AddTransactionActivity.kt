@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -48,9 +49,9 @@ class AddTransactionActivity : AppCompatActivity() {
     private val inactiveIncomeText = Color.parseColor("#50FF9D")
     private val inactiveExpenseText = Color.parseColor("#FF6E6E")
 
-    private val incomeCategories = mutableListOf("Salary", "Gift", "Investment", "Create category")
+    private val incomeCategories = mutableListOf("Salary", "Gift", "Investment", "Add new category")
     private val expenseCategories = mutableListOf(
-        "Food", "Transport", "Clothes", "Education", "Health", "Entertainment", "Create category")
+        "Food", "Transport", "Clothes", "Education", "Health", "Entertainment", "Add new category")
 
     val db = App.database
     val transactionDao = db.transactionDao()
@@ -110,7 +111,9 @@ class AddTransactionActivity : AppCompatActivity() {
                 ) {
                     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                         val view = super.getView(position, convertView, parent) as TextView
-                        view.setTextColor(Color.parseColor("#D0B8F5"))
+                        view.setTextColor(
+                            ContextCompat.getColor(context, R.color.buttonTextColor)
+                        )
                         return view
                     }
                 }
@@ -123,7 +126,9 @@ class AddTransactionActivity : AppCompatActivity() {
         val cardsAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, cards) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(Color.parseColor("#D0B8F5"))
+                view.setTextColor(
+                    ContextCompat.getColor(context, R.color.buttonTextColor)
+                )
                 return view
             }
         }
@@ -160,7 +165,7 @@ class AddTransactionActivity : AppCompatActivity() {
                 parent: AdapterView<*>?, view: View?, position: Int, id: Long
             ) {
                 val selected = categorySpinner.selectedItem.toString()
-                if (selected == "Create category") {
+                if (selected == "Add new category") {
                     openCreateCategoryScreen()
                 }
             }
@@ -184,7 +189,9 @@ class AddTransactionActivity : AppCompatActivity() {
         val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(Color.parseColor("#D0B8F5"))
+                view.setTextColor(
+                    ContextCompat.getColor(context, R.color.buttonTextColor)
+                )
                 return view
             }
         }

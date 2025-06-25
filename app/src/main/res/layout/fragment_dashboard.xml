@@ -6,13 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
+    android:padding="16dp"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
-        android:layout_marginBottom="56dp"
         >
 
         <androidx.viewpager2.widget.ViewPager2
@@ -100,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:textAlignment="center"
-                android:popupBackground="@color/transparent"
+                android:popupBackground="@color/glass1"
                 android:dropDownHorizontalOffset="80dp"
                 android:theme="@style/spinnerTheme"
                 />

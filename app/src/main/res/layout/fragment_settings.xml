@@ -32,7 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Email"
-                android:textColor="@color/secondaryTextColor"/>
+                android:textColor="@color/buttonTextColor"/>
             <TextView
                 android:layout_marginLeft="8dp"
                 android:id="@+id/emailTextView"
@@ -46,9 +46,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Name"
-                android:textColor="@color/secondaryTextColor"
+                android:textColor="@color/buttonTextColor"
                 android:layout_marginTop="8dp"
-                android:layout_marginLeft="8dp"/>
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="4dp"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -80,16 +81,18 @@
                 android:layout_height="wrap_content"
                 android:text="Currency"
                 android:textSize="14sp"
-                android:textColor="@color/secondaryTextColor"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"  />
+                android:textColor="@color/buttonTextColor"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp"/>
 
             <Spinner
                 android:id="@+id/currencySpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/forthColor"
-                android:popupBackground="@color/forthColor"
+                android:popupBackground="@color/glass1"
+                android:dropDownHorizontalOffset="80dp"
+                android:theme="@style/spinnerTheme"
                 android:layout_marginBottom="20dp"
                 android:layout_marginLeft="8dp"/>
 
@@ -122,7 +125,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:thumbTint="@color/textColor"
-                    android:trackTint="@color/secondaryTextColor" />
+                    android:trackTint="@color/buttonTextColor" />
             </LinearLayout>
 
             <Button

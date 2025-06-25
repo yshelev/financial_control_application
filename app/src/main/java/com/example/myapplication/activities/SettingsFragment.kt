@@ -13,6 +13,7 @@ import android.text.InputType
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import com.example.myapplication.database.MainDatabase
@@ -136,7 +137,7 @@ class SettingsFragment : Fragment() {
         ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val tv = super.getView(position, convertView, parent) as TextView
-                tv.setTextColor(Color.parseColor("#D0B8F5"))
+                tv.setTextColor(ContextCompat.getColor(context, R.color.buttonTextColor))
                 return tv
             }
         }
