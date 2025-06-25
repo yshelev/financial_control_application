@@ -36,10 +36,10 @@
             android:exported="false"
             android:theme="@style/Theme.MyApplication" />
 
-        <activity
-            android:name=".DashboardActivity"
-            android:exported="false"
-            android:theme="@style/Theme.MyApplication" />
+<!--        <activity-->
+<!--            android:name=".DashboardActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.MyApplication" />-->
 
         <activity
             android:name=".MainActivity"
@@ -56,11 +56,11 @@
             android:exported="false"
             android:theme="@style/Theme.MyApplication"/>
 
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:theme="@style/Theme.MyApplication"
-            />
+<!--        <activity-->
+<!--            android:name=".SettingsActivity"-->
+<!--            android:exported="false"-->
+<!--            android:theme="@style/Theme.MyApplication"-->
+<!--            />-->
 
         <activity
             android:name=".CreateCategoryActivity"
