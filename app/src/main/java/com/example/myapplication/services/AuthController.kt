@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import java.math.BigInteger
 import java.security.MessageDigest
 import android.content.SharedPreferences
+import android.widget.Toast
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import androidx.core.content.edit
@@ -160,6 +161,49 @@ class AuthController(private val context: Context, private val database: MainDat
 
             database.userDao().update(updatedUser)
             context.runOnUiThread { onSuccess() }
+        }
+    }
+
+    fun changePassword(
+        oldPassword: String,
+        newPassword: String,
+        repeatedPassword: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        if (newPassword != repeatedPassword) {
+            onFailure("New passwords do not match")
+            return
+        }
+
+        if (newPassword.isEmpty()) {
+            onFailure("Password cannot be empty")
+            return
+        }
+
+        val email = prefs.getString(KEY_USER_EMAIL, null) ?: run {
+            onFailure("User is not authorized")
+            return
+        }
+
+        (context as? AppCompatActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
+            val user = database.userDao().getUserByEmail(email) ?: run {
+                context.runOnUiThread { onFailure("User not found") }
+                return@launch
+            }
+
+            if (!verify(user.password, oldPassword)) {
+                context.runOnUiThread { onFailure("Wrong password") }
+                return@launch
+            }
+
+            val updatedUser = user.copy(password = hash(newPassword))
+            database.userDao().update(updatedUser)
+
+            context.runOnUiThread {
+                Toast.makeText(context, "Password successfully changed", Toast.LENGTH_SHORT).show()
+                onSuccess()
+            }
         }
     }
 

@@ -187,13 +187,13 @@ class SettingsFragment : Fragment() {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_change_password, null)
 
-        val oldPasswordEditText   = dialogView.findViewById<EditText>(R.id.oldPasswordEditText)
-        val oldPasswordToggle     = dialogView.findViewById<ImageButton>(R.id.oldPasswordToggle)
-        val newPasswordEditText   = dialogView.findViewById<EditText>(R.id.newPasswordEditText)
-        val newPasswordToggle     = dialogView.findViewById<ImageButton>(R.id.newPasswordToggle)
-        val repeatPasswordEditText= dialogView.findViewById<EditText>(R.id.repeatPasswordEditText)
-        val repeatPasswordToggle  = dialogView.findViewById<ImageButton>(R.id.repeatPasswordToggle)
-        val confirmButton         = dialogView.findViewById<Button>(R.id.confirmPasswordChangeButton)
+        val oldPasswordEditText    = dialogView.findViewById<EditText>(R.id.oldPasswordEditText)
+        val oldPasswordToggle      = dialogView.findViewById<ImageButton>(R.id.oldPasswordToggle)
+        val newPasswordEditText    = dialogView.findViewById<EditText>(R.id.newPasswordEditText)
+        val newPasswordToggle      = dialogView.findViewById<ImageButton>(R.id.newPasswordToggle)
+        val repeatPasswordEditText = dialogView.findViewById<EditText>(R.id.repeatPasswordEditText)
+        val repeatPasswordToggle   = dialogView.findViewById<ImageButton>(R.id.repeatPasswordToggle)
+        val confirmButton          = dialogView.findViewById<Button>(R.id.confirmPasswordChangeButton)
 
         fun toggle(editText: EditText, visible: Boolean, btn: ImageButton) {
             editText.inputType = if (visible)
@@ -209,11 +209,13 @@ class SettingsFragment : Fragment() {
             oldVisible = !oldVisible
             toggle(oldPasswordEditText, oldVisible, oldPasswordToggle)
         }
+
         var newVisible = false
         newPasswordToggle.setOnClickListener {
             newVisible = !newVisible
             toggle(newPasswordEditText, newVisible, newPasswordToggle)
         }
+
         var repeatVisible = false
         repeatPasswordToggle.setOnClickListener {
             repeatVisible = !repeatVisible
@@ -223,9 +225,25 @@ class SettingsFragment : Fragment() {
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .create()
+
         confirmButton.setOnClickListener {
-            // Ваша логика проверки и отправки нового пароля
+            val oldPass = oldPasswordEditText.text.toString()
+            val newPass = newPasswordEditText.text.toString()
+            val repeatPass = repeatPasswordEditText.text.toString()
+
+            authController.changePassword(
+                oldPassword = oldPass,
+                newPassword = newPass,
+                repeatedPassword = repeatPass,
+                onSuccess = {
+                    dialog.dismiss()
+                },
+                onFailure = { error ->
+                    Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+                }
+            )
         }
+
         dialog.show()
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
