@@ -18,5 +18,5 @@ data class ErApiResponse(
 
 interface ExchangeRateApi {
     @GET("v6/latest/{base}")
-    fun getRates(@Path("base") base: String = "RUB"): Call<ErApiResponse>
+    suspend fun getRates(@Path("base") base: String): ErApiResponse
 }
