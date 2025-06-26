@@ -18,6 +18,7 @@ import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.currency.ExchangeRateClient
+import com.example.myapplication.database.entities.ExchangeRateEntity
 import com.example.myapplication.database.entities.UserTransaction
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
@@ -307,21 +308,32 @@ class DashboardFragment : Fragment() {
     }
 
     private suspend fun convertCurrency(amount: Double, fromCurrency: String, toCurrency: String): Double {
-        return try {
+        val db = App.database
+
+        try {
             val response = ExchangeRateClient.api.getRates(fromCurrency)
 
             if (response.result == "success" && response.rates != null) {
-                val rates = response.rates
-                val rate = rates[toCurrency] as? Double
+                val now = System.currentTimeMillis()
+                val rates = response.rates.mapNotNull { (currency, rateAny) ->
+                    val rate = rateAny as? Double ?: return@mapNotNull null
+                    ExchangeRateEntity(currencyCode = currency, rate = rate, baseCurrency = fromCurrency, lastUpdated = now)
+                }
+                db.exchangeRateDao().insertAll(rates)
+
+                val rate = response.rates[toCurrency] as? Double
                     ?: throw IllegalArgumentException("Currency not found: $toCurrency")
-                amount * rate
-            } else {
-                throw IllegalStateException("Invalid response from currency API")
+
+                return amount * rate
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            throw RuntimeException("Currency conversion failed: ${e.message}")
         }
+
+        val cachedRate = db.exchangeRateDao().getRate(fromCurrency, toCurrency)
+            ?: throw RuntimeException("Нет доступа к курсу $fromCurrency → $toCurrency")
+
+        return amount * cachedRate.rate
     }
 
     private fun updateBalanceStats(transactions: List<UserTransaction>) {

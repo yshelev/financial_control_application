@@ -5,21 +5,24 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.myapplication.database.dao.CardDao
+import com.example.myapplication.database.dao.ExchangeRateDao
 import com.example.myapplication.database.dao.TransactionDao
 import com.example.myapplication.database.dao.UserDao
 import com.example.myapplication.database.entities.UserTransaction
 import com.example.myapplication.database.entities.User
 import com.example.myapplication.database.entities.Card
+import com.example.myapplication.database.entities.ExchangeRateEntity
 
 @Database(
-    entities = [User::class, UserTransaction::class, Card::class],
-    version = 8,
+    entities = [User::class, UserTransaction::class, Card::class, ExchangeRateEntity::class],
+    version = 9,
     exportSchema = false
 )
 abstract class MainDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun transactionDao(): TransactionDao
     abstract fun cardDao(): CardDao
+    abstract fun exchangeRateDao(): ExchangeRateDao
 
     companion object {
         @Volatile
