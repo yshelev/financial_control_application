@@ -36,12 +36,12 @@ class LoginActivity : AuthBaseActivity() {
 
             if (email.isEmpty()) {
                 shakeView(emailInput)
-                emailInput.error = "Enter your email address"
+                emailInput.error = getString(R.string.error_enter_email)
                 return@setOnClickListener
             }
             if (password.isEmpty()) {
                 shakeView(passwordInput)
-                passwordInput.error = "Enter your password"
+                passwordInput.error = getString(R.string.error_enter_password)
                 return@setOnClickListener
             }
 
@@ -49,7 +49,7 @@ class LoginActivity : AuthBaseActivity() {
                 email = email,
                 password = password,
                 onSuccess = {
-                    Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()

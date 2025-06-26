@@ -60,27 +60,27 @@ class RegisterActivity : AuthBaseActivity() {
             var hasError = false
             if (name.isEmpty()) {
                 shakeView(nameInput)
-                nameInput.error = "Enter your name"
+                nameInput.error = getString(R.string.error_enter_name)
                 hasError = true
             }
             if (email.isEmpty()) {
                 shakeView(emailInput)
-                emailInput.error = "Enter your email"
+                emailInput.error = getString(R.string.error_enter_email)
                 hasError = true
             }
             if (password.isEmpty()) {
                 shakeView(passwordInput)
-                passwordInput.error = "Enter your password"
+                passwordInput.error = getString(R.string.error_enter_password)
                 hasError = true
             }
             if (repeatPassword.isEmpty()) {
                 shakeView(repeatPasswordInput)
-                repeatPasswordInput.error = "Repeat password"
+                repeatPasswordInput.error = getString(R.string.error_repeat_password)
                 hasError = true
             }
             if (password != repeatPassword) {
                 shakeView(repeatPasswordInput)
-                repeatPasswordInput.error = "The passwords do not match"
+                repeatPasswordInput.error = getString(R.string.error_passwords_no_match)
                 hasError = true
             }
             if (hasError) return@setOnClickListener
@@ -91,7 +91,7 @@ class RegisterActivity : AuthBaseActivity() {
                 password = password,
                 repeatPassword = repeatPassword,
                 onSuccess = {
-                    Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.registration_successful), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
@@ -101,6 +101,7 @@ class RegisterActivity : AuthBaseActivity() {
                 }
             )
         }
+
     }
 
     private fun togglePasswordVisibility(editText: EditText, toggle: ImageView, visible: Boolean) {

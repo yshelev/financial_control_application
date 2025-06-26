@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="24dp"
-            android:text="Financial tracker" />
+            android:text="@string/financial_tracker" />
 
         <TextView
             android:id="@+id/subtitle"
@@ -45,14 +45,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp"
-            android:text="Track your spending effortlessly" />
+            android:text="@string/track_your_spending_effortlessly" />
 
         <Button
             android:id="@+id/startButton"
             style="@style/CandyButton"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="START"
+            android:text="@string/start"
             android:layout_marginTop="24dp"/>
 
         <TextView
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
-            android:text="Don't have an account? Sign up"
+            android:text="@string/don_t_have_an_account_sign_up"
             android:textColor="@color/forthColor"
             android:textSize="14sp"
             android:textStyle="bold"

@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.example.myapplication.AuthController
@@ -25,30 +24,54 @@ class ChangePasswordDialogFragment(
         val confirmButton = view.findViewById<Button>(R.id.confirmPasswordChangeButton)
 
         confirmButton.setOnClickListener {
-            val oldPass = oldPasswordEditText.text.toString()
-            val newPass = newPasswordEditText.text.toString()
-            val repeatPass = repeatPasswordEditText.text.toString()
+            val oldPass = oldPasswordEditText.text.toString().trim()
+            val newPass = newPasswordEditText.text.toString().trim()
+            val repeatPass = repeatPasswordEditText.text.toString().trim()
 
-            if (oldPass.isEmpty() || newPass.isEmpty() || repeatPass.isEmpty()) {
-                Toast.makeText(context, "Fill in all fields", Toast.LENGTH_SHORT).show()
+            var hasError = false
+
+            if (oldPass.isEmpty()) {
                 shakeView(oldPasswordEditText)
+                oldPasswordEditText.error = getString(R.string.error_enter_old_password)
+                hasError = true
+            }
+            if (newPass.isEmpty()) {
                 shakeView(newPasswordEditText)
+                newPasswordEditText.error = getString(R.string.error_enter_password)
+                hasError = true
+            }
+            if (repeatPass.isEmpty()) {
                 shakeView(repeatPasswordEditText)
-                return@setOnClickListener
+                repeatPasswordEditText.error = getString(R.string.error_repeat_password)
+                hasError = true
+            }
+            if (newPass.isNotEmpty() && repeatPass.isNotEmpty() && newPass != repeatPass) {
+                shakeView(repeatPasswordEditText)
+                repeatPasswordEditText.error = getString(R.string.error_passwords_no_match)
+                hasError = true
             }
 
-            if (newPass != repeatPass) {
-                Toast.makeText(context, "The passwords do not match", Toast.LENGTH_SHORT).show()
-                shakeView(newPasswordEditText)
-                shakeView(repeatPasswordEditText)
-                return@setOnClickListener
-            }
-        }
+            if (hasError) return@setOnClickListener
+
+            authController.changePassword(
+                oldPassword = oldPass,
+                newPassword = newPass,
+                repeatedPassword = repeatPass,
+                onSuccess = {
+                    dismiss()
+                },
+                onFailure = { errorMessage ->
+                    oldPasswordEditText.text.clear()
+                    shakeView(oldPasswordEditText)
+                    oldPasswordEditText.error = errorMessage
+                }
+            )
+    }
 
         val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Change password")
+            .setTitle(getString(R.string.change_password))
             .setView(view)
-            .setNegativeButton("Cancel") { _, _ -> dismiss() }
+            .setNegativeButton(getString(R.string.cancel)) { _, _ -> dismiss() }
             .create()
 
         dialog.setOnShowListener {

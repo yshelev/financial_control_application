@@ -29,13 +29,13 @@
         <TextView
             android:id="@+id/loginTitle"
             style="@style/TitleText"
-            android:text="Welcome back!"
+            android:text="@string/welcome_back"
             android:layout_gravity="center_horizontal" />
 
         <EditText
             android:id="@+id/emailInput"
             style="@style/GlassInput"
-            android:hint="Email"
+            android:hint="@string/email"
             android:inputType="textEmailAddress"
             android:layout_marginTop="24dp" />
 
@@ -47,7 +47,7 @@
             <EditText
                 android:id="@+id/passwordInput"
                 style="@style/GlassInput"
-                android:hint="Password"
+                android:hint="@string/password"
                 android:inputType="textPassword"
                 android:paddingEnd="48dp"
                 android:layout_width="match_parent"
@@ -72,14 +72,14 @@
             style="@style/CandyButton"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="LOGIN"
+            android:text="@string/login"
             android:layout_marginTop="32dp" />
 
         <TextView
             android:id="@+id/goToRegister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Don't have an account? Sign up"
+            android:text="@string/don_t_have_an_account_sign_up"
             android:textColor="@color/forthColor"
             android:textSize="14sp"
             android:textStyle="bold"

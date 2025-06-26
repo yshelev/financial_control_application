@@ -120,7 +120,7 @@ class AddCardActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-                balanceEditText.error = "Error saving: ${e.message}"
+                balanceEditText.error = getString(R.string.error_saving, e.message ?: "")
             }
         }
     }
@@ -129,17 +129,17 @@ class AddCardActivity : AppCompatActivity() {
         var isValid = true
 
         if (name.isEmpty()) {
-            cardNameEditText.error = "Please enter the card name"
+            cardNameEditText.error = getString(R.string.enter_card_name)
             isValid = false
         }
 
         if (last4.length != 4 || !last4.all { it.isDigit() }) {
-            last4DigitsEditText.error = "Enter 4 digits"
+            last4DigitsEditText.error = getString(R.string.enter_4_digits)
             isValid = false
         }
 
         if (!date.matches(Regex("""^(0[1-9]|1[0-2])\/\d{2}$"""))) {
-            expiryDateEditText.error = "Date format: MM/YY"
+            expiryDateEditText.error = getString(R.string.date_format)
             isValid = false
         }
 
@@ -147,7 +147,7 @@ class AddCardActivity : AppCompatActivity() {
             try {
                 balanceStr.toDouble()
             } catch (e: NumberFormatException) {
-                balanceEditText.error = "Balance must be a number"
+                balanceEditText.error = getString(R.string.balance_must_be_number)
                 isValid = false
             }
         }
@@ -176,3 +176,4 @@ class AddCardActivity : AppCompatActivity() {
         }.start()
     }
 }
+

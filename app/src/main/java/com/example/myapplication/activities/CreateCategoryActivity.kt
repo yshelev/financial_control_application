@@ -74,7 +74,7 @@ class CreateCategoryActivity : AppCompatActivity() {
                 view.animate().scaleX(1f).scaleY(1f).setDuration(150).start()
             }.start()
 
-            Toast.makeText(this, "Icon selected", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.icon_selected), Toast.LENGTH_SHORT).show()
         }
 
         backButton.setOnClickListener {
@@ -98,7 +98,7 @@ class CreateCategoryActivity : AppCompatActivity() {
             val name = nameEditText.text.toString().trim()
 
             if (name.isEmpty()) {
-                nameEditText.error = "Please enter category name"
+                nameEditText.error = getString(R.string.enter_category_name)
                 shakeView(nameEditText)
                 return@setOnClickListener
             }

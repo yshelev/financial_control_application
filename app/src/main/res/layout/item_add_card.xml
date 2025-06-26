@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center|bottom"
         android:layout_marginBottom="16dp"
-        android:text="Add Card"
+        android:text="@string/add_card"
         android:textColor="@color/buttonTextColor"
         android:textSize="25sp" />
 </FrameLayout>

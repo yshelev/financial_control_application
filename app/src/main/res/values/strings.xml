@@ -1,8 +1,137 @@
 <resources>
+    <string name="language">Language</string>
+    <string-array name="language_options">
+        <item>English</item>
+        <item>Русский</item>
+    </string-array>
     <string name="app_name">SmartSave</string>
     <string name="currency_rub">₽</string>
     <string name="currency_usd">$</string>
     <string name="currency_eur">€</string>
+    <string name="new_card">NEW CARD</string>
+    <string name="card_name">Card Name</string>
+    <string name="balance">Balance</string>
+    <string name="mm_yy">MM/YY</string>
+    <string name="save_card">Save Card</string>
+    <string name="new_category">NEW CATEGORY</string>
+    <string name="category_name">Category Name</string>
+    <string name="enter_name">Enter name</string>
+    <string name="type">Type</string>
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
+    <string name="choose_icon">Choose Icon</string>
+    <string name="save_category">Save Category</string>
+    <string name="time_period">Time period:</string>
+    <string name="welcome_back">Welcome back!</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">LOGIN</string>
+    <string name="don_t_have_an_account_sign_up">Don\'t have an account? Sign up</string>
+    <string name="create_an_account">Create an account</string>
+    <string name="full_name">Full Name</string>
+    <string name="repeat_password">Repeat Password</string>
+    <string name="register">REGISTER</string>
+    <string name="already_have_an_account_sign_in">Already have an account? Sign in</string>
+    <string name="name">Name</string>
+    <string name="enter_new_name">Enter new name</string>
+    <string name="currency">Currency</string>
+    <string name="dark_theme">Dark theme</string>
+    <string name="change_password">Change password</string>
+    <string name="export_data">Export data</string>
+    <string name="clear_all_data">Clear all data</string>
+    <string name="logout">Logout</string>
+    <string name="save_changes">Save changes</string>
+    <string name="financial_tracker">Financial tracker</string>
+    <string name="track_your_spending_effortlessly">Track your spending effortlessly</string>
+    <string name="start">START</string>
+    <string name="current_password">Current password</string>
+    <string name="new_password">New password</string>
+    <string name="repeat_new_password">Repeat new password</string>
+    <string name="save">save</string>
+    <string name="add_transaction">ADD TRANSACTION</string>
+    <string name="choose_date">Choose date</string>
+    <string name="category">Category</string>
+    <string name="description">Description</string>
+    <string name="amount">Amount</string>
+    <string name="add_card">Add Card</string>
+    <string name="error_empty_name">Name cannot be empty</string>
+    <string name="settings_saved">Settings saved</string>
+    <string name="export_complete">Data export completed</string>
+    <string name="data_cleared">All data cleared</string>
+    <string name="error_generic">Error: %1$s</string>
+    <string name="light_theme">Light theme</string>
+    <string name="error_enter_name">Enter your name</string>
+    <string name="error_enter_email">Enter your email</string>
+    <string name="error_enter_password">Enter your password</string>
+    <string name="error_repeat_password">Repeat password</string>
+    <string name="error_passwords_no_match">The passwords do not match</string>
+    <string name="registration_successful">Registration successful!</string>
+    <string name="login_successful">Login successful!</string>
+
+    <string name="filter_all">All</string>
+    <string name="filter_today">Today</string>
+    <string name="filter_week">Week</string>
+    <string name="filter_month">Month</string>
+    <string name="filter_year">Year</string>
+    <string name="filter_custom_period">Custom period</string>
+
+    <string name="error_end_date_before_start">End date cannot be before start date</string>
+
+    <string name="label_balance">Balance: %1$s₽</string>
+    <string name="label_income">Income:\n+%1$s₽</string>
+    <string name="label_expenses">Expenses:\n-%1$s₽</string>
+    <string name="enter_category_name">Enter category name</string>
+    <string name="icon_selected">Icon sekected</string>
+
+    <string name="fill_all_fields">Fill all fields</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="category_salary">Salary</string>
+    <string name="category_gift">Gift</string>
+    <string name="category_investment">Investment</string>
+
+    <string name="category_food">Food</string>
+    <string name="category_transport">Transport</string>
+    <string name="category_clothes">Clothes</string>
+    <string name="category_education">Education</string>
+    <string name="category_health">Health</string>
+    <string name="category_entertainment">Entertainment</string>
+
+    <string name="category_add_new">Add new category</string>
+
+    <string name="error_enter_amount">Please enter an amount</string>
+    <string name="error_amount_positive">Amount must be greater than 0</string>
+    <string name="error_enter_valid_number">Please enter a valid number</string>
+    <string name="error_no_cards">No cards available</string>
+    <string name="error_card_not_found">Selected card not found in database</string>
+
+    <string name="enter_card_name">Please enter the card name</string>
+    <string name="enter_4_digits">Enter 4 digits</string>
+    <string name="date_format">Date format: MM/YY</string>
+    <string name="balance_must_be_number">Balance must be a number</string>
+    <string name="error_saving">Error saving: %1$s</string>
+    <string name="wallet">Wallet</string>
+    <string name="settings">Settings</string>
+    <string name="error_enter_old_password">Enter old password</string>
+
+    <string name="error_email_registered">Email already registered</string>
+    <string name="error_email_required">Email is required</string>
+    <string name="error_password_required">Password is required</string>
+    <string name="error_invalid_email">Invalid email</string>
+    <string name="error_invalid_password">Invalid password</string>
+    <string name="error_no_logged_user">No logged-in user</string>
+    <string name="error_user_not_found">User not found</string>
+    <string name="error_passwords_not_match">Passwords do not match</string>
+    <string name="error_password_empty">Password cannot be empty</string>
+    <string name="error_wrong_password">Wrong password</string>
+    <string name="error_user_not_authorized">User is not authorized</string>
+    <string name="password_changed_successfully">Password successfully changed</string>
+    <string name="error_name_required">Name is required</string>
+    <string name="error_repeat_password_required">Repeated password is required</string>
+    <string name="error_invalid_email_format">Invalid email format</string>
+
+
     <string-array name="currencies">
         <item>₽</item>
         <item>$</item>

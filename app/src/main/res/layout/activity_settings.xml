@@ -32,7 +32,7 @@
                 android:layout_marginLeft="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Email"
+                android:text="@string/email"
                 android:textColor="@color/secondaryTextColor"/>
             <TextView
                 android:layout_marginLeft="8dp"
@@ -46,7 +46,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Name"
+                android:text="@string/name"
                 android:textColor="@color/secondaryTextColor"
                 android:layout_marginTop="8dp"
                 android:layout_marginLeft="8dp"/>
@@ -60,7 +60,7 @@
                     android:id="@+id/nameEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter new name"
+                    android:hint="@string/enter_new_name"
                     android:inputType="textPersonName"
                     android:enabled="false"
                     android:paddingEnd="40dp" />
@@ -79,7 +79,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Currency"
+                android:text="@string/currency"
                 android:textSize="14sp"
                 android:textColor="@color/secondaryTextColor"
                 android:layout_marginLeft="8dp"
@@ -115,7 +115,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Dark theme"
+                    android:text="@string/dark_theme"
                     android:textColor="@color/textColor"
                     android:textSize="16sp" />
 
@@ -131,7 +131,7 @@
                 android:id="@+id/changePass"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Change password"
+                android:text="@string/change_password"
                 style="@style/CandyButton"
                 android:layout_marginTop="16dp"/>
 
@@ -237,7 +237,7 @@
                 android:id="@+id/exportDataButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Export data"
+                android:text="@string/export_data"
                 style="@style/CandyButton"
                 android:layout_marginTop="16dp"/>
 
@@ -245,7 +245,7 @@
                 android:id="@+id/clearDataButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Clear all data"
+                android:text="@string/clear_all_data"
                 style="@style/CandyButton"
                 android:layout_marginTop="8dp"/>
 
@@ -253,7 +253,7 @@
                 android:id="@+id/logoutButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Logout"
+                android:text="@string/logout"
                 style="@style/CandyButton"
                 android:layout_marginTop="8dp"/>
 
@@ -261,7 +261,7 @@
                 android:id="@+id/saveSettingsButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Save changes"
+                android:text="@string/save_changes"
                 style="@style/CandyButton"
                 android:layout_marginTop="16dp"/>
         </LinearLayout>
