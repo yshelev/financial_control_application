@@ -45,7 +45,7 @@
         <item name="colorAccent">@color/buttonTextColor</item>
         <item name="android:textColor">@color/buttonTextColor</item>
         <item name="colorControlNormal">@color/buttonTextColor</item>
-        <item name="android:backgroundTint">@null</item>
+        <item name="android:backgroundTint">@color/spinnerBackColor</item>
     </style>
 
 </resources>

@@ -3,7 +3,6 @@ package com.example.myapplication
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.*
 
@@ -12,7 +11,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         applySavedLocale()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dashboard_settings)
+        setContentView(R.layout.activity_main)
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -24,6 +23,7 @@ class MainActivity : AppCompatActivity() {
             val frag = when (item.itemId) {
                 R.id.nav_wallet -> DashboardFragment()
                 R.id.nav_settings -> SettingsFragment()
+                R.id.nav_stats -> StatsFragment()
                 else -> null
             }
             frag?.let {

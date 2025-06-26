@@ -62,7 +62,7 @@ class AddTransactionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-        setContentView(R.layout.fragment_add_transaction)
+        setContentView(R.layout.activity_add_transaction)
 
         dateCard = findViewById(R.id.dateCard)
         selectDateText = findViewById(R.id.selectDateText)

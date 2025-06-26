@@ -18,7 +18,7 @@
     <string name="expense">Расход</string>
     <string name="choose_icon">Выберите иконку</string>
     <string name="save_category">Сохранить категорию</string>
-    <string name="time_period">Период времени:</string>
+    <string name="time_period">Период:</string>
     <string name="welcome_back">С возвращением!</string>
     <string name="email">Электронная почта</string>
     <string name="password">Пароль</string>
@@ -108,6 +108,7 @@
     <string name="balance_must_be_number">Баланс должен быть числом</string>
     <string name="error_saving">Ошибка при сохранении: %1$s</string>
     <string name="wallet">Кошелек</string>
+    <string name="stats">Статистика</string>
     <string name="settings">Настройки</string>
 
     <string name="error_enter_old_password">Введите старый пароль</string>
@@ -127,5 +128,14 @@
     <string name="error_repeat_password_required">Поле повтора пароля обязательно для заполнения</string>
     <string name="error_invalid_email_format">Неверный формат почты</string>
     <string name="error_wrong_password">Неверный пароль</string>
+    <string name="confirm_password_change">Подтвердите изменение пароля</string>
+    <string name="toggle_password_visibility">Показать/скрыть пароль</string>
+    <string name="enter_new_password">Введите новый пароль</string>
+    <string name="verify">Подтвердить</string>
+    <string name="enter_current_password">Введите текущий пароль</string>
 
+    <string-array name="stats_tab_titles">
+        <item>Доходы</item>
+        <item>Расходы</item>
+    </string-array>
 </resources>

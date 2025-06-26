@@ -132,6 +132,7 @@
                     android:layout_marginStart="12dp"
                     android:popupBackground="@color/cardColor"
                     android:padding="8dp"
+                    android:theme="@style/spinnerTheme"
                     android:entries="@array/currencies"
                     android:background="@drawable/spinner_background"/>
             </LinearLayout>

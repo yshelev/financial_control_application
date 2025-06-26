@@ -112,6 +112,7 @@
     <string name="balance_must_be_number">Balance must be a number</string>
     <string name="error_saving">Error saving: %1$s</string>
     <string name="wallet">Wallet</string>
+    <string name="stats">Stats</string>
     <string name="settings">Settings</string>
     <string name="error_enter_old_password">Enter old password</string>
 
@@ -130,12 +131,22 @@
     <string name="error_name_required">Name is required</string>
     <string name="error_repeat_password_required">Repeated password is required</string>
     <string name="error_invalid_email_format">Invalid email format</string>
+    <string name="confirm_password_change">Confirm password change</string>
+    <string name="toggle_password_visibility">Toggle password visibility</string>
+    <string name="enter_new_password">Enter new password</string>
+    <string name="verify">Verify</string>
+    <string name="enter_current_password">Enter current password</string>
 
 
     <string-array name="currencies">
         <item>₽</item>
         <item>$</item>
         <item>€</item>
+    </string-array>
+
+    <string-array name="stats_tab_titles">
+        <item>Income</item>
+        <item>Expenses</item>
     </string-array>
 
 </resources>

@@ -15,17 +15,18 @@
     <color name="secondaryColor">#9F45E7</color>
     <color name="thirdColor">#5FA258ED</color>
     <color name="forthColor">#5A2A9E</color>
-    <color name="backgroundColor">#FEFEFE</color>
+    <color name="backgroundColor">#FAFAFA</color>
     <color name="backgroundColor2">#FFF2F2</color>
-    <color name="bottomColor">#7FFAFAFA</color>
+    <color name="bottomColor">#63FAFAFA</color>
     <color name="cardColor">#AAD0B8F5</color>
     <color name="buttonTextColor">#090707</color>
     <color name="textColor">#090707</color>
-    <color name="secondaryTextColor">#141414</color>
+    <color name="secondaryTextColor">#262626</color>
     <color name="glass1">#69A681DE</color>
     <color name="glass2">#4DAA9FCC</color>
     <color name="glass3">#26FFFFFF</color>
     <color name="glass4">#66FFFFFF</color>
     <color name="spinnerColor">#83FEFEFE</color>
     <color name="transparent">#83FEFEFE</color>
+    <color name="spinnerBackColor">#FAFAFA</color>
 </resources>
