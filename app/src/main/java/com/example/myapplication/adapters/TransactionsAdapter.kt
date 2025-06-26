@@ -23,8 +23,12 @@ class TransactionsAdapter(
 ) : RecyclerView.Adapter<TransactionsAdapter.TransactionViewHolder>() {
 
     private val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    private val currencySymbols = mapOf(
+        "RUB" to "₽",
+        "USD" to "$",
+        "EUR" to "€"
+    )
 
-    // Сделаем transactions публичным, чтобы можно было получить транзакцию для свайпа
     var transactions: List<UserTransaction> = emptyList()
         private set
 
@@ -55,8 +59,8 @@ class TransactionsAdapter(
         val tx = transactions[position]
         holder.title.text = tx.category
         holder.date.text = dateFormatter.format(Date(tx.date))
-
-        holder.amount.text = if (tx.isIncome) "+${tx.amount}₽" else "-${tx.amount}₽"
+        val symbol = currencySymbols[tx.currency] ?: "₽"
+        holder.amount.text = if (tx.isIncome) "+${tx.amount}${symbol}" else "-${tx.amount}${symbol}"
         holder.amount.setTextColor(
             holder.itemView.context.getColor(
                 if (tx.isIncome) R.color.green else R.color.red
