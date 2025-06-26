@@ -3,15 +3,28 @@ package com.example.myapplication.database.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.example.myapplication.database.entities.Card
-import com.example.myapplication.database.entities.UserTransaction
 import kotlinx.coroutines.flow.Flow
 
 
 @Dao
 interface CardDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(transactions: List<Card>)
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAll()
+
+    @Transaction
+    suspend fun refreshCards(cards: List<Card>) {
+        deleteAll()
+        insertAll(cards)
+    }
+
     @Insert
     suspend fun insert(card: Card): Long
 

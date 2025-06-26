@@ -7,6 +7,18 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(transactions: List<UserTransaction>)
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAll()
+
+    @Transaction
+    suspend fun refreshTransactions(transactions: List<UserTransaction>) {
+        deleteAll()
+        insertAll(transactions)
+    }
+
     @Insert
     suspend fun insert(transaction: UserTransaction)
 
