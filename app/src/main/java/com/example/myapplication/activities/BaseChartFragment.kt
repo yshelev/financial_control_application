@@ -15,9 +15,16 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.renderer.PieChartRenderer
 import com.google.android.flexbox.FlexboxLayout
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
+import androidx.core.content.ContentProviderCompat.requireContext
+import com.github.mikephil.charting.utils.Utils
 
 
 abstract class BaseChartFragment : Fragment() {
@@ -70,12 +77,13 @@ abstract class BaseChartFragment : Fragment() {
         val colors = List(data.size) { i -> shuffledColors[i % shuffledColors.size] }
 
         val dataSet = PieDataSet(entries, title)
+        dataSet.valueFormatter = BorderedValueFormatter()
         dataSet.colors = colors
         dataSet.valueTextSize = 14f
         dataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
 
         pieChart.data = PieData(dataSet)
-        pieChart.setUsePercentValues(true)
+//        pieChart.setUsePercentValues(true)
         pieChart.isRotationEnabled = false
         pieChart.description.isEnabled = false
         pieChart.legend.isEnabled = false
@@ -83,6 +91,13 @@ abstract class BaseChartFragment : Fragment() {
         pieChart.setEntryLabelColor(ContextCompat.getColor(requireContext(), R.color.buttonTextColor))
         pieChart.setDrawHoleEnabled(false)
         pieChart.animateY(500)
+
+        pieChart.renderer = FramedPieChartRenderer(
+            pieChart,
+            pieChart.animator,
+            pieChart.viewPortHandler
+        )
+
         pieChart.invalidate()
 
         renderCustomLegend(data, colors)
@@ -200,4 +215,92 @@ abstract class BaseChartFragment : Fragment() {
 
     data class SpotConfig(val color: Int)
     data class ThemePalette(val background: Int, val spots: List<SpotConfig>)
+
+    inner class BorderedValueFormatter : ValueFormatter() {
+        override fun getPieLabel(value: Float, pieEntry: PieEntry?): String {
+            return "${value.toInt()}%"
+        }
+    }
+
+    inner class FramedPieChartRenderer(
+        chart: PieChart,
+        animator: com.github.mikephil.charting.animation.ChartAnimator,
+        viewPortHandler: com.github.mikephil.charting.utils.ViewPortHandler
+    ) : PieChartRenderer(chart, animator, viewPortHandler) {
+
+        private val boxPaint = Paint().apply {
+            style = Paint.Style.FILL
+            color = ContextCompat.getColor(requireContext(), R.color.transparent) // Полупрозрачный чёрный фон
+            isAntiAlias = true
+        }
+
+        private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
+            textSize = Utils.convertDpToPixel(12f)
+        }
+
+        override fun drawValues(c: Canvas) {
+            val center = mChart.centerCircleBox
+            val radius = mChart.radius
+
+            val rotationAngle = mChart.rotationAngle
+            val drawAngles = mChart.drawAngles
+            val absoluteAngles = mChart.absoluteAngles
+
+            val data = mChart.data
+            val dataSets = data.dataSets
+
+            var angle = 0f
+
+            for (i in dataSets.indices) {
+                val dataSet = dataSets[i]
+
+                for (j in 0 until dataSet.entryCount) {
+                    val entry = dataSet.getEntryForIndex(j) as PieEntry
+                    val value = dataSet.getEntryForIndex(j).y
+
+                    val offset = drawAngles[j] / 2f
+                    val sliceAngle = drawAngles[j]
+                    val transformedAngle = rotationAngle + angle + offset
+
+                    val sliceXBase = Math.cos(Math.toRadians(transformedAngle.toDouble())).toFloat()
+                    val sliceYBase = Math.sin(Math.toRadians(transformedAngle.toDouble())).toFloat()
+
+                    val label = "${entry.label}\n${"%.1f".format(value)}%"
+
+                    val x = center.x + radius / 1.8f * sliceXBase
+                    val y = center.y + radius / 1.8f * sliceYBase
+
+                    // Рамка
+                    val padding = Utils.convertDpToPixel(6f)
+                    val textBounds = RectF()
+                    val lines = label.split("\n")
+                    val width = lines.maxOf { textPaint.measureText(it) }
+                    val height = textPaint.textSize * lines.size + padding
+
+                    textBounds.set(
+                        x - width / 2 - padding,
+                        y - height / 2 - padding / 2,
+                        x + width / 2 + padding,
+                        y + height / 2 + padding / 2
+                    )
+
+                    c.drawRoundRect(textBounds, 16f, 16f, boxPaint)
+
+                    // Текст
+                    lines.forEachIndexed { idx, line ->
+                        c.drawText(
+                            line,
+                            x,
+                            y + textPaint.textSize * (idx - 0.5f),
+                            textPaint.apply { textAlign = Paint.Align.CENTER }
+                        )
+                    }
+
+                    angle += sliceAngle
+                }
+            }
+        }
+    }
+
 }
