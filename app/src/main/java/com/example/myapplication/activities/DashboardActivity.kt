@@ -344,6 +344,7 @@ class DashboardActivity : AuthBaseActivity() {
                     val email = user.email
                     val transactionDtos = transactionRepository.getTransactions(email)
                     val transactionEntities = transactionDtos.toEntityList()
+                    Log.d("dashboardAct", transactionEntities.toString())
                     db.transactionDao().refreshTransactions(transactionEntities)
                     Log.d("DashboardActivity", "Transactions successfully refreshed from API.")
                 }
@@ -366,7 +367,6 @@ class DashboardActivity : AuthBaseActivity() {
                     Log.d("DashboardActivity", "CardDtos count: ${cardDtos.size}")
                     val cardEntities = cardDtos.toEntityList()
                     db.cardDao().refreshCards(cardEntities)
-
                     Log.d("CardRefresh", "Cards updated. Count: ${cardEntities.size}")
                 }
             }
