@@ -10,14 +10,19 @@ import kotlinx.coroutines.launch
 import java.math.BigInteger
 import java.security.MessageDigest
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import androidx.core.content.edit
-import kotlinx.coroutines.CoroutineScope
+import com.example.myapplication.schemas.UserSchema
 
 class AuthController(private val context: Context, private val database: MainDatabase) {
 
     private val prefsFile = "auth_prefs"
+
+    private val userRepository by lazy {
+        (context.applicationContext as App).userRepository
+    }
 
     private val prefs: SharedPreferences by lazy {
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
@@ -46,16 +51,33 @@ class AuthController(private val context: Context, private val database: MainDat
         }
 
         (context as? AppCompatActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
-            val existingUser = database.userDao().getUserByEmail(email)
-            if (existingUser != null) {
+//            val existingUser = database.userDao().getUserByEmail(email)
+            val existingUser_ = userRepository.getUserByEmail(email).body()
+            if (existingUser_ != null) {
+                Log.d("AuthController", "user not null")
                 context.runOnUiThread {
                     onFailure("Email already registered")
                 }
                 return@launch
             }
 
+//            if (existingUser != null) {
+//                context.runOnUiThread {
+//                    onFailure("Email already registered")
+//                }
+//                return@launch
+//            }
+
             val hashedPassword = hash(password)
             val newUser = User(username = name, email = email, password = hashedPassword)
+            val newUserS = UserSchema(
+                username = name,
+                email = email,
+                password = hashedPassword
+            )
+            context.lifecycleScope.launch {
+                userRepository.registerUser(newUserS)
+            }
 
             database.userDao().insert(newUser)
             loginAccount(email, password, onSuccess, onFailure)
