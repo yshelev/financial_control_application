@@ -1,18 +1,15 @@
 package com.example.myapplication
 
-import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.myapplication.database.entities.Card
+import com.example.myapplication.schemas.CardSchema
 import kotlinx.coroutines.launch
 
-class AddCardActivity : AppCompatActivity() {
+class AddCardActivity : AuthBaseActivity() {
 
     private lateinit var cardNameEditText: EditText
     private lateinit var last4DigitsEditText: EditText
@@ -21,6 +18,11 @@ class AddCardActivity : AppCompatActivity() {
     private lateinit var saveCardButton: Button
     private lateinit var backButton: ImageButton
 //    private lateinit var currencySpinner: Spinner
+
+    private val cardRepository by lazy {
+        (applicationContext as App).cardRepository
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +80,6 @@ class AddCardActivity : AppCompatActivity() {
             }
         })
 
-        // Очистка ошибок при вводе
         listOf(cardNameEditText, last4DigitsEditText, expiryDateEditText, balanceEditText).forEach { editText ->
             editText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -107,17 +108,24 @@ class AddCardActivity : AppCompatActivity() {
             try {
                 val balance = if (balanceStr.isNotEmpty()) balanceStr.toDouble() else 0.0
 
-                val card = Card(
-                    name = name,
-                    maskedNumber = last4,
-                    date = date,
+                authController.getCurrentUser {
+                    user ->
+                    if (user?.email == null) {
+                        return@getCurrentUser
+                    }
+                    val card = CardSchema(
+                        name = name,
+                        balance = balance,
+                        masked_number = last4,
+                        date = date,
 //                    currency = currency,
-                    balance = balance
-                )
+                        owner_email = user.email
+                    )
+                    lifecycleScope.launch{
+                        cardRepository.addCard(card)
+                        finish()
+                    }
 
-                lifecycleScope.launch {
-                    App.database.cardDao().insert(card)
-                    finish()
                 }
 
             } catch (e: Exception) {

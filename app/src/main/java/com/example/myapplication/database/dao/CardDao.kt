@@ -1,5 +1,6 @@
 package com.example.myapplication.database.dao
 
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -22,6 +23,8 @@ interface CardDao {
     @Transaction
     suspend fun refreshCards(cards: List<Card>) {
         deleteAll()
+        Log.d("Transaction", "deleted all cards")
+        Log.d("Transaction", "entities size: ${cards.size}")
         insertAll(cards)
     }
 

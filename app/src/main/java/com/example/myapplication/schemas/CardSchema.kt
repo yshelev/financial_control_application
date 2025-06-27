@@ -6,5 +6,5 @@ data class CardSchema (
     val masked_number: String,
     val date: String,
 //    val currency: String,
-    val owner_id: Int
+    val owner_email: String
 )

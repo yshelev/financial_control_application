@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -17,10 +18,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
+import com.example.myapplication.database.MainDatabase
 import com.example.myapplication.database.entities.UserTransaction
+import com.example.myapplication.mappers.toEntityList
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,6 +41,14 @@ class DashboardActivity : AuthBaseActivity() {
     private lateinit var totalBalanceTextView: TextView
     private lateinit var incomeTextView: TextView
     private lateinit var expensesTextView: TextView
+    private lateinit var db: MainDatabase
+
+    private val transactionRepository by lazy {
+        (applicationContext as App).transactionRepository
+    }
+    private val cardRepository by lazy {
+        (applicationContext as App).cardRepository
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +56,7 @@ class DashboardActivity : AuthBaseActivity() {
 
         currentFilter = savedInstanceState?.getString("CURRENT_FILTER", "All") ?: "All"
 
-        val db = App.database
-
+        db = App.database
 
         totalBalanceTextView = findViewById(R.id.totalBalance)
         incomeTextView = findViewById(R.id.income)
@@ -79,7 +91,7 @@ class DashboardActivity : AuthBaseActivity() {
         // Инициализация адаптера с пустым списком
         transactionsAdapter = TransactionsAdapter(
             this,
-            App.database.transactionDao().getAllTransactions(),
+            db.transactionDao().getAllTransactions(),
             onDeleteClicked = { transaction ->
                 lifecycleScope.launch {
                     val card = db.cardDao().getCardById(transaction.cardId)
@@ -109,7 +121,7 @@ class DashboardActivity : AuthBaseActivity() {
 
         cardsViewPager.adapter = CardsAdapter(
             db.cardDao().getAllCards(),
-            db.transactionDao().getAllTransactions(), // Add transactions flow
+            db.transactionDao().getAllTransactions(),
             lifecycleScope,
             onAddCardClicked = {
                 val intent = Intent(this@DashboardActivity, AddCardActivity::class.java)
@@ -117,10 +129,8 @@ class DashboardActivity : AuthBaseActivity() {
             },
             onDeleteCardClicked = { card ->
                 lifecycleScope.launch {
-                    // Удаляем карту из базы данных
                     db.cardDao().delete(card)
 
-                    // Обновляем статистику баланса после удаления карты
                     updateBalanceStats(emptyList())
                 }
             }
@@ -323,9 +333,45 @@ class DashboardActivity : AuthBaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        lifecycleScope.launch(Dispatchers.IO) {
+            authController.getCurrentUser {
+                user ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    if (user?.email == null) {
+                        Log.e("CardRefresh", "User or email not found from callback")
+                        return@launch
+                    }
+                    val email = user.email
+                    val transactionDtos = transactionRepository.getTransactions(email)
+                    val transactionEntities = transactionDtos.toEntityList()
+                    db.transactionDao().refreshTransactions(transactionEntities)
+                    Log.d("DashboardActivity", "Transactions successfully refreshed from API.")
+                }
+            }
+        }
 
+        lifecycleScope.launch(Dispatchers.IO) {
+            authController.getCurrentUser {
+                user ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    if (user?.email == null) {
+                        Log.e("CardRefresh", "User or email not found from callback")
+                        return@launch
+                    }
+                    Log.d("DashboardActivity", "User email: ${user.email}")
+                    val email = user.email
+
+                    val cardDtos = cardRepository.getCards(email)
+
+                    Log.d("DashboardActivity", "CardDtos count: ${cardDtos.size}")
+                    val cardEntities = cardDtos.toEntityList()
+                    db.cardDao().refreshCards(cardEntities)
+
+                    Log.d("CardRefresh", "Cards updated. Count: ${cardEntities.size}")
+                }
+            }
+        }
         lifecycleScope.launch {
-            val cards = App.database.cardDao().getAllCards()
             val db = App.database
             cardsViewPager.adapter = CardsAdapter(
                 db.cardDao().getAllCards(),
@@ -337,20 +383,16 @@ class DashboardActivity : AuthBaseActivity() {
                 },
                 onDeleteCardClicked = { card ->
                     lifecycleScope.launch {
-                        // Удаляем карту из базы данных
                         db.cardDao().delete(card)
 
-                        // Обновляем статистику баланса после удаления карты
                         updateBalanceStats(emptyList())
                     }
                 }
             )
 
-            // Обновляем статистику баланса
-            updateBalanceStats(emptyList()) // Передаем пустой список, так как нам нужен только баланс карт
+            updateBalanceStats(emptyList())
         }
 
-        // Обновляем транзакции с текущим фильтром
         updateTransactionsByPeriod(currentFilter)
     }
 
