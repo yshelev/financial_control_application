@@ -17,12 +17,17 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
+import com.example.myapplication.currency.ExchangeRateClient
+import com.example.myapplication.database.entities.ExchangeRateEntity
 import com.example.myapplication.database.entities.UserTransaction
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
 import kotlin.math.abs
+import retrofit2.Response
+import retrofit2.Call
+import retrofit2.Callback
 
 class DashboardFragment : Fragment() {
 
@@ -302,20 +307,76 @@ class DashboardFragment : Fragment() {
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
 
-    private fun updateBalanceStats(transactions: List<UserTransaction>) {
-        var totalBalance = 0.0
-        var totalIncome = 0.0
-        var totalExpenses = 0.0
+    private suspend fun convertCurrency(amount: Double, fromCurrency: String, toCurrency: String): Double {
+        val db = App.database
 
-        transactions.forEach { transaction ->
-            if (transaction.isIncome) totalIncome += transaction.amount else totalExpenses += transaction.amount
+        try {
+            val response = ExchangeRateClient.api.getRates(fromCurrency)
+
+            if (response.result == "success" && response.rates != null) {
+                val now = System.currentTimeMillis()
+                val rates = response.rates.mapNotNull { (currency, rateAny) ->
+                    val rate = rateAny as? Double ?: return@mapNotNull null
+                    ExchangeRateEntity(currencyCode = currency, rate = rate, baseCurrency = fromCurrency, lastUpdated = now)
+                }
+                db.exchangeRateDao().insertAll(rates)
+
+                val rate = response.rates[toCurrency] as? Double
+                    ?: throw IllegalArgumentException("Currency not found: $toCurrency")
+
+                return amount * rate
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        totalBalance = totalIncome - totalExpenses
 
-        val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
-        totalBalanceTextView.text = getString(R.string.label_balance, numberFormat.format(totalBalance))
-        incomeTextView.text = getString(R.string.label_income, numberFormat.format(totalIncome))
-        expensesTextView.text = getString(R.string.label_expenses, numberFormat.format(totalExpenses))
+        val cachedRate = db.exchangeRateDao().getRate(fromCurrency, toCurrency)
+            ?: throw RuntimeException("Нет доступа к курсу $fromCurrency → $toCurrency")
+
+        return amount * cachedRate.rate
+    }
+
+    private fun updateBalanceStats(transactions: List<UserTransaction>) {
+        lifecycleScope.launch {
+            val db = App.database
+            var totalBalance = 0.0
+            var totalIncome = 0.0
+            var totalExpenses = 0.0
+
+            val cards = db.cardDao().getAllCards()
+            val userPrefCurrency = "RUB"
+            transactions.forEach { transaction ->
+
+                // Convert transaction amount to card's currency
+                val convertedAmount = if (transaction.currency != userPrefCurrency) {
+                    convertCurrency(transaction.amount, transaction.currency, userPrefCurrency)
+                } else {
+                    transaction.amount
+                }
+
+                if (transaction.isIncome) {
+                    totalIncome += convertedAmount
+                } else {
+                    totalExpenses += convertedAmount
+                }
+            }
+
+            totalBalance = totalIncome - totalExpenses
+
+
+            val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
+            totalBalanceTextView.text = getString(R.string.label_balance,
+                numberFormat.format(totalBalance), userPrefCurrency)
+            incomeTextView.text = getString(R.string.label_income,
+                numberFormat.format(totalIncome), userPrefCurrency)
+            expensesTextView.text = getString(R.string.label_expenses,
+                numberFormat.format(totalExpenses), userPrefCurrency)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("CURRENT_FILTER", currentFilter)
+        super.onSaveInstanceState(outState)
     }
 
     private fun dpToPx(dp: Float): Int {
@@ -324,11 +385,6 @@ class DashboardFragment : Fragment() {
             dp,
             resources.displayMetrics
         ).toInt()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString("CURRENT_FILTER", currentFilter)
-        super.onSaveInstanceState(outState)
     }
 }
 

@@ -30,10 +30,17 @@ class CardsAdapter(
     private val VIEW_TYPE_CARD = 0
     private val VIEW_TYPE_ADD_BUTTON = 1
 
+    private val currencySymbols = mapOf(
+        "RUB" to "₽",
+        "USD" to "$",
+        "EUR" to "€"
+    )
+
     init {
         observeCards()
         observeTransactions()
     }
+
     private fun observeCards() {
         coroutineScope.launch(Dispatchers.Main) {
             cardsFlow.collectLatest { newCards ->
@@ -64,8 +71,9 @@ class CardsAdapter(
         val incomeText: TextView = view.findViewById(R.id.cardIncome)
         val expenseText: TextView = view.findViewById(R.id.cardExpenses)
 
-        fun bind(card: Card, transactions: List<UserTransaction>) {
-            balanceText.text = "${card.balance}"
+        fun bind(card: Card, transactions: List<UserTransaction>, currencySymbol: String) {
+            balanceText.text = "${card.balance}${currencySymbol}"
+
             cardName.text = card.name
             cardNumber.text = card.maskedNumber
             cardDate.text = card.date
@@ -77,8 +85,9 @@ class CardsAdapter(
             val expenses = cardTransactions.filter { !it.isIncome }.sumOf { it.amount }
 
             val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
-            incomeText.text = "+${numberFormat.format(income)}₽"
-            expenseText.text = "-${numberFormat.format(expenses)}₽"
+
+            incomeText.text = "+${numberFormat.format(income)}$currencySymbol"
+            expenseText.text = "-${numberFormat.format(expenses)}$currencySymbol"
         }
     }
 
@@ -98,7 +107,7 @@ class CardsAdapter(
         return if (viewType == VIEW_TYPE_CARD) {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_card, parent, false)
-            CardViewHolder(view, onDeleteCardClicked) // Передаем callback в ViewHolder
+            CardViewHolder(view, onDeleteCardClicked)
         } else {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_add_card, parent, false)
@@ -108,7 +117,9 @@ class CardsAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is CardViewHolder && position < cards.size) {
-            holder.bind(cards[position], transactions) // Pass transactions to bind
+            val card = cards[position]
+            val symbol = currencySymbols[card.currency] ?: "₽" // Получаем символ валюты или используем рубль по умолчанию
+            holder.bind(card, transactions, symbol)
         }
     }
 

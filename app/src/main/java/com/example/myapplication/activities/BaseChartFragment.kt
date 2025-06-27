@@ -77,13 +77,12 @@ abstract class BaseChartFragment : Fragment() {
         val colors = List(data.size) { i -> shuffledColors[i % shuffledColors.size] }
 
         val dataSet = PieDataSet(entries, title)
-        dataSet.valueFormatter = BorderedValueFormatter()
         dataSet.colors = colors
         dataSet.valueTextSize = 14f
         dataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
 
         pieChart.data = PieData(dataSet)
-//        pieChart.setUsePercentValues(true)
+        pieChart.setUsePercentValues(true)
         pieChart.isRotationEnabled = false
         pieChart.description.isEnabled = false
         pieChart.legend.isEnabled = false
@@ -218,7 +217,7 @@ abstract class BaseChartFragment : Fragment() {
 
     inner class BorderedValueFormatter : ValueFormatter() {
         override fun getPieLabel(value: Float, pieEntry: PieEntry?): String {
-            return "${value.toInt()}%"
+            return "${value.toInt()}"
         }
     }
 

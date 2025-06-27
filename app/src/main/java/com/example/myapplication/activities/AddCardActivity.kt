@@ -21,6 +21,14 @@ class AddCardActivity : AppCompatActivity() {
     private lateinit var saveCardButton: Button
     private lateinit var backButton: ImageButton
     private lateinit var currencySpinner: Spinner
+    private var selectedCurrency: String = "RUB" // Значение по умолчанию
+
+    // Маппинг символов валют на их коды
+    private val currencyMap = mapOf(
+        "₽" to "RUB",
+        "$" to "USD",
+        "€" to "EUR"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,9 +43,9 @@ class AddCardActivity : AppCompatActivity() {
         backButton = findViewById(R.id.backButton)
         currencySpinner = findViewById(R.id.currencySpinner)
 
-        val currencies = listOf("₽", "$", "€")
+        val currencySymbols = listOf("₽", "$", "€")
         val spinnerAdapter = object : ArrayAdapter<String>(
-            this, android.R.layout.simple_spinner_item, currencies
+            this, android.R.layout.simple_spinner_item, currencySymbols
         ) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
@@ -54,6 +62,21 @@ class AddCardActivity : AppCompatActivity() {
 
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         currencySpinner.adapter = spinnerAdapter
+
+        currencySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedCurrency = when (position) {
+                    0 -> "RUB"
+                    1 -> "USD"
+                    2 -> "EUR"
+                    else -> "RUB"
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedCurrency = "RUB"
+            }
+        }
 
         expiryDateEditText.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
@@ -111,7 +134,8 @@ class AddCardActivity : AppCompatActivity() {
                     name = name,
                     maskedNumber = last4,
                     date = date,
-                    balance = balance
+                    balance = balance,
+                    currency = selectedCurrency
                 )
 
                 lifecycleScope.launch {
@@ -176,4 +200,3 @@ class AddCardActivity : AppCompatActivity() {
         }.start()
     }
 }
-
