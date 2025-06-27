@@ -1,15 +1,20 @@
 package com.example.myapplication.repositories
 
-import com.example.myapplication.database.entities.UserTransaction
+import com.example.myapplication.dto.TransactionDto
 import com.example.myapplication.network.ApiService
-import retrofit2.Response
+import com.example.myapplication.schemas.TransactionSchema
+import retrofit2.Call
 
 class TransactionRepository(private val apiService: ApiService) {
-    suspend fun getTransactions(userId: Int): Response<List<UserTransaction>> {
-        return apiService.getUserTransactions(userId)
+    suspend fun getTransactions(email: String): List<TransactionDto> {
+        return apiService.getUserTransactions(email)
     }
 
-    suspend fun addTransaction(transaction: UserTransaction): Response<UserTransaction> {
+    suspend fun addTransaction(transaction: TransactionSchema): TransactionDto {
         return apiService.addTransaction(transaction)
+    }
+
+    suspend fun getTransaction(transactionId: Int): TransactionDto {
+        return apiService.getTransaction(transactionId)
     }
 }

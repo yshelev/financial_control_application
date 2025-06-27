@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -12,9 +13,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.entities.UserTransaction
+import com.example.myapplication.mappers.toEntityList
+import com.example.myapplication.schemas.TransactionSchema
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -270,6 +275,16 @@ class AddTransactionActivity : AppCompatActivity() {
                 iconResId = iconResId,
                 cardId = cardId
             )
+            val transactionS = TransactionSchema(
+                is_income = isIncomeSelected,
+                amount = amount,
+                category = category,
+                description = description,
+                card_id = cardId,
+                icon_res_id = iconResId
+            )
+
+            transactionRepository.addTransaction(transactionS)
 
             transactionDao.insert(transaction)
             val card = cardDao.getCardById(cardId)
