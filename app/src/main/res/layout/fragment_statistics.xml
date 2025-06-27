@@ -21,10 +21,10 @@ android:layout_height="match_parent"
         app:tabGravity="fill"
         app:tabMode="fixed"
         android:background="@android:color/transparent"
-        app:tabIndicatorColor="@color/colorPrimary"
-        app:tabSelectedTextColor="@color/colorPrimary"
+        app:tabIndicatorColor="@color/primaryColor"
+        app:tabSelectedTextColor="@color/primaryColor"
         app:tabTextColor="@color/secondaryTextColor"
-        android:paddingTop="24dp"/>
+        android:paddingTop="36dp"/>
 
 </com.google.android.material.appbar.AppBarLayout>
 

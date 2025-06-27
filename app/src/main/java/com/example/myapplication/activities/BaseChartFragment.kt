@@ -1,10 +1,12 @@
 package com.example.myapplication
 
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +15,7 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.google.android.flexbox.FlexboxLayout
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -28,15 +31,23 @@ abstract class BaseChartFragment : Fragment() {
     ): View = inflater.inflate(R.layout.fragment_chart, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val pieChart = view.findViewById<PieChart>(R.id.pieChart)
-
         val db = MainDatabase.getDatabase(requireContext().applicationContext)
         val dao = db.transactionDao()
         val start = getStartOfMonth()
         val end = getEndOfMonth()
 
+        val loader = view.findViewById<View>(R.id.chartLoader) // или R.id.chartLoadingText
+        val pieChart = view.findViewById<PieChart>(R.id.pieChart)
+
         lifecycleScope.launch {
+            loader.visibility = View.VISIBLE
+            pieChart.visibility = View.INVISIBLE
+
             val data = loadData(start, end)
+
+            loader.visibility = View.GONE
+            pieChart.visibility = View.VISIBLE
+
             setupChart(pieChart, data, chartTitle)
         }
     }
@@ -46,6 +57,8 @@ abstract class BaseChartFragment : Fragment() {
         data: List<CategorySum>,
         title: String
     ) {
+        pieChart.setNoDataText("")
+
         val entries = data.map { PieEntry(it.category_sum.toFloat(), it.category) }
 
         // Тема
@@ -53,7 +66,8 @@ abstract class BaseChartFragment : Fragment() {
                 android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
                 android.content.res.Configuration.UI_MODE_NIGHT_YES
         val palette = getCurrentThemePalette(isDark)
-        val colors = List(data.size) { i -> palette.spots[i % palette.spots.size].color }
+        val shuffledColors = palette.spots.map { it.color }.shuffled()
+        val colors = List(data.size) { i -> shuffledColors[i % shuffledColors.size] }
 
         val dataSet = PieDataSet(entries, title)
         dataSet.colors = colors
@@ -61,12 +75,17 @@ abstract class BaseChartFragment : Fragment() {
         dataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
 
         pieChart.data = PieData(dataSet)
+        pieChart.setUsePercentValues(true)
         pieChart.isRotationEnabled = false
         pieChart.description.isEnabled = false
+        pieChart.legend.isEnabled = false
         pieChart.setUsePercentValues(true)
+        pieChart.setEntryLabelColor(ContextCompat.getColor(requireContext(), R.color.buttonTextColor))
         pieChart.setDrawHoleEnabled(false)
         pieChart.animateY(500)
         pieChart.invalidate()
+
+        renderCustomLegend(data, colors)
     }
 
 
@@ -96,30 +115,30 @@ abstract class BaseChartFragment : Fragment() {
             ThemePalette(
                 background = Color.parseColor("#170035"),
                 spots = listOf(
-                    SpotConfig(Color.parseColor("#FF7043")),
-                    SpotConfig(Color.parseColor("#4DD0E1")),
-                    SpotConfig(Color.parseColor("#81C784")),
-                    SpotConfig(Color.parseColor("#FFB74D")),
-                    SpotConfig(Color.parseColor("#9575CD")),
-                    SpotConfig(Color.parseColor("#F06292")),
-                    SpotConfig(Color.parseColor("#BA68C8")),
-                    SpotConfig(Color.parseColor("#4FC3F7")),
-                    SpotConfig(Color.parseColor("#AED581")),
-                    SpotConfig(Color.parseColor("#FF8A65")),
-                    SpotConfig(Color.parseColor("#90CAF9")),
-                    SpotConfig(Color.parseColor("#F48FB1")),
-                    SpotConfig(Color.parseColor("#CE93D8")),
-                    SpotConfig(Color.parseColor("#64B5F6")),
-                    SpotConfig(Color.parseColor("#A5D6A7")),
-                    SpotConfig(Color.parseColor("#FFF176")),
-                    SpotConfig(Color.parseColor("#81D4FA")),
-                    SpotConfig(Color.parseColor("#E57373")),
-                    SpotConfig(Color.parseColor("#BADE7A")),
-                    SpotConfig(Color.parseColor("#FFCC80")),
-                    SpotConfig(Color.parseColor("#B39DDB")),
-                    SpotConfig(Color.parseColor("#4DD0E1")),
-                    SpotConfig(Color.parseColor("#F48FB1")),
-                    SpotConfig(Color.parseColor("#7986CB"))
+                    SpotConfig(Color.parseColor("#FF6F61")), // красно-оранжевый
+                    SpotConfig(Color.parseColor("#00BCD4")), // яркий голубой
+                    SpotConfig(Color.parseColor("#66BB6A")), // ярко-зелёный
+                    SpotConfig(Color.parseColor("#FFA726")), // яркий оранжевый
+                    SpotConfig(Color.parseColor("#7E57C2")), // яркий фиолетовый
+                    SpotConfig(Color.parseColor("#EC407A")), // малиновый
+                    SpotConfig(Color.parseColor("#AB47BC")), // сиреневый
+                    SpotConfig(Color.parseColor("#29B6F6")), // небесный
+                    SpotConfig(Color.parseColor("#9CCC65")), // оливковый
+                    SpotConfig(Color.parseColor("#FF7043")), // коралловый
+                    SpotConfig(Color.parseColor("#42A5F5")), // насыщенный синий
+                    SpotConfig(Color.parseColor("#F06292")), // розовый
+                    SpotConfig(Color.parseColor("#BA68C8")), // пастельно-фиолетовый
+                    SpotConfig(Color.parseColor("#5C6BC0")), // сине-фиолетовый
+                    SpotConfig(Color.parseColor("#26C6DA")), // бирюзовый
+                    SpotConfig(Color.parseColor("#D4E157")), // жёлто-зелёный
+                    SpotConfig(Color.parseColor("#26A69A")), // морская волна
+                    SpotConfig(Color.parseColor("#FFCA28")), // насыщенно-жёлтый
+                    SpotConfig(Color.parseColor("#EF5350")), // яркий красный
+                    SpotConfig(Color.parseColor("#00E5FF")), // лазурный
+                    SpotConfig(Color.parseColor("#81D4FA")), // светло-голубой
+                    SpotConfig(Color.parseColor("#9575CD")), // мягкий фиолетовый
+                    SpotConfig(Color.parseColor("#4DB6AC")), // тёмная мята
+                    SpotConfig(Color.parseColor("#F48FB1"))  // розово-серый
                 )
             )
         } else {
@@ -137,7 +156,7 @@ abstract class BaseChartFragment : Fragment() {
                     SpotConfig(Color.parseColor("#81C784")),
                     SpotConfig(Color.parseColor("#FFB74D")),
                     SpotConfig(Color.parseColor("#64B5F6")),
-                    SpotConfig(Color.parseColor("#A1887F")),
+                    SpotConfig(Color.parseColor("#26C6DA")), // 💧 заменённый цвет
                     SpotConfig(Color.parseColor("#E6EE9C")),
                     SpotConfig(Color.parseColor("#FFE082")),
                     SpotConfig(Color.parseColor("#4DD0E1")),
@@ -153,6 +172,29 @@ abstract class BaseChartFragment : Fragment() {
                     SpotConfig(Color.parseColor("#81D4FA"))
                 )
             )
+        }
+    }
+
+    private fun renderCustomLegend(data: List<CategorySum>, colors: List<Int>) {
+        val container = view?.findViewById<FlexboxLayout>(R.id.legendContainer) ?: return
+        container.removeAllViews()
+
+        for (i in data.indices) {
+            val category = data[i].category
+            val baseColor = colors[i % colors.size]
+            val color = (baseColor and 0x00FFFFFF) or (0xAA shl 24) // прозрачность 170/255 (~67%)
+
+            val chip = layoutInflater.inflate(R.layout.item_legend_chip, container, false) as TextView
+            chip.text = category
+
+            val drawable = chip.background.mutate()
+            if (drawable is GradientDrawable) {
+                drawable.setColor(color)
+            } else {
+                chip.setBackgroundColor(color)
+            }
+
+            container.addView(chip)
         }
     }
 
