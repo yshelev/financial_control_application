@@ -15,17 +15,24 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CardDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(transactions: List<Card>)
+    suspend fun insertAll(cards: List<Card>)
 
-    @Query("DELETE FROM transactions")
+    @Query("DELETE FROM cards")
     suspend fun deleteAll()
 
     @Transaction
     suspend fun refreshCards(cards: List<Card>) {
-        deleteAll()
-        Log.d("Transaction", "deleted all cards")
-        Log.d("Transaction", "entities size: ${cards.size}")
-        insertAll(cards)
+        try{
+            deleteAll()
+
+            Log.d("Transaction", "deleted all cards")
+            Log.d("Transaction", "entities size: ${cards.size}")
+            insertAll(cards)
+            Log.d("cards", "insert cards: $cards")
+        } catch (e: Exception) {
+            Log.e("transactionE", "transaction error", e)
+        }
+
     }
 
     @Insert
