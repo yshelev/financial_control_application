@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 
 class LoginActivity : AuthBaseActivity() {
 
@@ -29,15 +30,28 @@ class LoginActivity : AuthBaseActivity() {
         }
 
         loginButton.setOnClickListener {
+
             val email = emailInput.text.toString().trim()
             val password = passwordInput.text.toString()
+
+            if (email.isEmpty()) {
+                shakeView(emailInput)
+                emailInput.error = getString(R.string.error_enter_email)
+                return@setOnClickListener
+            }
+            if (password.isEmpty()) {
+                shakeView(passwordInput)
+                passwordInput.error = getString(R.string.error_enter_password)
+                return@setOnClickListener
+            }
 
             authController.loginAccount(
                 email = email,
                 password = password,
                 onSuccess = {
-                    Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, DashboardActivity::class.java))
+                    Toast.makeText(this, getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, MainActivity::class.java))
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
                 },
                 onFailure = { errorMessage ->
@@ -48,6 +62,7 @@ class LoginActivity : AuthBaseActivity() {
 
         goToRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             finish()
         }
     }
@@ -63,4 +78,24 @@ class LoginActivity : AuthBaseActivity() {
         }
         editText.setSelection(editText.text.length)
     }
+
+    private fun shakeView(view: EditText) {
+        view.animate()
+            .translationX(10f)
+            .setDuration(50)
+            .withEndAction {
+                view.animate()
+                    .translationX(-10f)
+                    .setDuration(50)
+                    .withEndAction {
+                        view.animate()
+                            .translationX(0f)
+                            .setDuration(50)
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
+    }
 }
+

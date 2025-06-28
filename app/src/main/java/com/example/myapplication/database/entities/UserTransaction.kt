@@ -20,10 +20,10 @@ data class UserTransaction(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val isIncome: Boolean,
     val amount: Double,
-//    val currency: String,
+    val currency: String,
     val category: String,
     val description: String?,
     val date: Long = System.currentTimeMillis(),
     val iconResId: Int,
-    val cardId: Long  // Добавленное поле для связи с картой
+    val cardId: Long
 )

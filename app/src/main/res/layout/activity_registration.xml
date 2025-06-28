@@ -29,20 +29,20 @@
             android:id="@+id/registerTitle"
             style="@style/TitleText"
             android:layout_gravity="center_horizontal"
-            android:text="Create an account" />
+            android:text="@string/create_an_account" />
 
         <EditText
             android:id="@+id/nameInput"
             style="@style/GlassInput"
             android:layout_marginTop="24dp"
-            android:hint="Full Name"
+            android:hint="@string/full_name"
             android:inputType="textPersonName" />
 
         <EditText
             android:id="@+id/emailInput"
             style="@style/GlassInput"
             android:layout_marginTop="16dp"
-            android:hint="Email"
+            android:hint="@string/email"
             android:inputType="textEmailAddress" />
 
         <RelativeLayout
@@ -53,7 +53,7 @@
             <EditText
                 android:id="@+id/passwordInput"
                 style="@style/GlassInput"
-                android:hint="Password"
+                android:hint="@string/password"
                 android:inputType="textPassword"
                 android:paddingEnd="48dp"
                 android:layout_width="match_parent"
@@ -80,7 +80,7 @@
             <EditText
                 android:id="@+id/repeatPasswordInput"
                 style="@style/GlassInput"
-                android:hint="Repeat Password"
+                android:hint="@string/repeat_password"
                 android:inputType="textPassword"
                 android:paddingEnd="48dp"
                 android:layout_width="match_parent"
@@ -105,7 +105,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="32dp"
-            android:text="REGISTER" />
+            android:text="@string/register" />
 
         <TextView
             android:id="@+id/goToLogin"
@@ -115,7 +115,7 @@
             android:layout_marginTop="16dp"
             android:clickable="true"
             android:focusable="true"
-            android:text="Already have an account? Sign in"
+            android:text="@string/already_have_an_account_sign_in"
             android:textColor="@color/forthColor"
             android:textSize="14sp"
             android:textStyle="bold" />

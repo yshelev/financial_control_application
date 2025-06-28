@@ -35,16 +35,13 @@ class RegisterActivity : AuthBaseActivity() {
 
         repeatPasswordToggle.setOnClickListener {
             isRepeatPasswordVisible = !isRepeatPasswordVisible
-            togglePasswordVisibility(
-                repeatPasswordInput,
-                repeatPasswordToggle,
-                isRepeatPasswordVisible
-            )
+            togglePasswordVisibility(repeatPasswordInput, repeatPasswordToggle, isRepeatPasswordVisible)
         }
 
         goToLogin.setOnClickListener {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, LoginActivity::class.java))
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            finish()
         }
 
         registerButton.setOnClickListener {
@@ -60,14 +57,43 @@ class RegisterActivity : AuthBaseActivity() {
             val password = passwordInput.text.toString().trim()
             val repeatPassword = repeatPasswordInput.text.toString().trim()
 
+            var hasError = false
+            if (name.isEmpty()) {
+                shakeView(nameInput)
+                nameInput.error = getString(R.string.error_enter_name)
+                hasError = true
+            }
+            if (email.isEmpty()) {
+                shakeView(emailInput)
+                emailInput.error = getString(R.string.error_enter_email)
+                hasError = true
+            }
+            if (password.isEmpty()) {
+                shakeView(passwordInput)
+                passwordInput.error = getString(R.string.error_enter_password)
+                hasError = true
+            }
+            if (repeatPassword.isEmpty()) {
+                shakeView(repeatPasswordInput)
+                repeatPasswordInput.error = getString(R.string.error_repeat_password)
+                hasError = true
+            }
+            if (password != repeatPassword) {
+                shakeView(repeatPasswordInput)
+                repeatPasswordInput.error = getString(R.string.error_passwords_no_match)
+                hasError = true
+            }
+            if (hasError) return@setOnClickListener
+
             authController.createAccount(
                 name = name,
                 email = email,
                 password = password,
                 repeatPassword = repeatPassword,
                 onSuccess = {
-                    Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, DashboardActivity::class.java))
+                    Toast.makeText(this, getString(R.string.registration_successful), Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, MainActivity::class.java))
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
                 },
                 onFailure = { errorMessage ->
@@ -75,6 +101,7 @@ class RegisterActivity : AuthBaseActivity() {
                 }
             )
         }
+
     }
 
     private fun togglePasswordVisibility(editText: EditText, toggle: ImageView, visible: Boolean) {
@@ -87,5 +114,24 @@ class RegisterActivity : AuthBaseActivity() {
             toggle.setImageResource(R.drawable.ic_eye_closed)
         }
         editText.setSelection(editText.text.length)
+    }
+
+    private fun shakeView(view: EditText) {
+        view.animate()
+            .translationX(10f)
+            .setDuration(50)
+            .withEndAction {
+                view.animate()
+                    .translationX(-10f)
+                    .setDuration(50)
+                    .withEndAction {
+                        view.animate()
+                            .translationX(0f)
+                            .setDuration(50)
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
     }
 }

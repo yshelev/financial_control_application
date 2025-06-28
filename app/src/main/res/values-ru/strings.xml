@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language">Язык</string>
+    <string name="new_card">НОВАЯ КАРТА</string>
+    <string name="card_name">Название карты</string>
+    <string name="balance">Баланс</string>
+    <string name="mm_yy">ММ/ГГ</string>
+    <string name="app_name">SmartSave</string>
+    <string name="currency_rub">₽</string>
+    <string name="currency_usd">$</string>
+    <string name="currency_eur">€</string>
+    <string name="save_card">Сохранить карту</string>
+    <string name="new_category">НОВАЯ КАТЕГОРИЯ</string>
+    <string name="category_name">Название категории</string>
+    <string name="enter_name">Введите имя</string>
+    <string name="type">Тип</string>
+    <string name="income">Доход</string>
+    <string name="expense">Расход</string>
+    <string name="choose_icon">Выберите иконку</string>
+    <string name="save_category">Сохранить категорию</string>
+    <string name="time_period">Период:</string>
+    <string name="welcome_back">С возвращением!</string>
+    <string name="email">Электронная почта</string>
+    <string name="password">Пароль</string>
+    <string name="login">ВОЙТИ</string>
+    <string name="don_t_have_an_account_sign_up">Нет аккаунта? Зарегистрируйтесь</string>
+    <string name="create_an_account">Создать аккаунт</string>
+    <string name="full_name">Полное имя</string>
+    <string name="repeat_password">Повторите пароль</string>
+    <string name="register">РЕГИСТРАЦИЯ</string>
+    <string name="already_have_an_account_sign_in">Уже есть аккаунт? Войдите</string>
+    <string name="name">Имя</string>
+    <string name="enter_new_name">Введите новое имя</string>
+    <string name="currency">Валюта</string>
+    <string name="dark_theme">Тёмная тема</string>
+    <string name="change_password">Сменить пароль</string>
+    <string name="export_data">Экспорт данных</string>
+    <string name="clear_all_data">Очистить все данные</string>
+    <string name="logout">Выйти</string>
+    <string name="save_changes">Сохранить изменения</string>
+    <string name="financial_tracker">Финансовый трекер</string>
+    <string name="track_your_spending_effortlessly">Отслеживайте расходы без усилий</string>
+    <string name="start">НАЧАТЬ</string>
+    <string name="current_password">Текущий пароль</string>
+    <string name="new_password">Новый пароль</string>
+    <string name="repeat_new_password">Повторите новый пароль</string>
+    <string name="save">сохранить</string>
+    <string name="add_transaction">ДОБАВИТЬ ТРАНЗАКЦИЮ</string>
+    <string name="choose_date">Выберите дату</string>
+    <string name="category">Категория</string>
+    <string name="description">Описание</string>
+    <string name="amount">Сумма</string>
+    <string name="add_card">Добавить карту</string>
+    <string name="error_empty_name">Имя не может быть пустым</string>
+    <string name="settings_saved">Настройки сохранены</string>
+    <string name="export_complete">Экспорт данных завершён</string>
+    <string name="data_cleared">Все данные удалены</string>
+    <string name="error_generic">Ошибка: %1$s</string>
+    <string name="light_theme">Светлая тема</string>
+    <string name="error_enter_name">Введите ваше имя</string>
+    <string name="error_enter_email">Введите ваш email</string>
+    <string name="error_enter_password">Введите пароль</string>
+    <string name="error_repeat_password">Повторите пароль</string>
+    <string name="error_passwords_no_match">Пароли не совпадают</string>
+    <string name="registration_successful">Регистрация успешна!</string>
+    <string name="login_successful">Вход выполнен успешно!</string>
+
+    <string name="filter_all">Все</string>
+    <string name="filter_today">Сегодня</string>
+    <string name="filter_week">Неделя</string>
+    <string name="filter_month">Месяц</string>
+    <string name="filter_year">Год</string>
+    <string name="filter_custom_period">Произвольный период</string>
+
+    <string name="error_end_date_before_start">Дата окончания не может быть раньше даты начала</string>
+
+    <string name="label_balance">Balance: %1$s %2$s</string>
+    <string name="label_income">Income: %1$s %2$s</string>
+    <string name="label_expenses">Expenses: %1$s %2$s</string>
+    <string name="enter_category_name">Пожалуйста, введите название категории</string>
+    <string name="icon_selected">Иконка выбрана</string>
+    <string name="fill_all_fields">Пожалуйста, заполните все поля</string>
+    <string name="passwords_do_not_match">Пароли не совпадают</string>
+    <string name="cancel">Отмена</string>
+
+    <string name="category_salary">Зарплата</string>
+    <string name="category_gift">Подарок</string>
+    <string name="category_investment">Инвестиции</string>
+
+    <string name="category_food">Еда</string>
+    <string name="category_transport">Транспорт</string>
+    <string name="category_clothes">Одежда</string>
+    <string name="category_education">Образование</string>
+    <string name="category_health">Здоровье</string>
+    <string name="category_entertainment">Развлечения</string>
+
+    <string name="category_add_new">Добавить категорию</string>
+
+    <string name="error_enter_amount">Пожалуйста, введите сумму</string>
+    <string name="error_amount_positive">Сумма должна быть больше 0</string>
+    <string name="error_enter_valid_number">Пожалуйста, введите корректное число</string>
+    <string name="error_no_cards">Нет доступных карт</string>
+    <string name="error_card_not_found">Выбранная карта не найдена в базе</string>
+
+    <string name="enter_card_name">Пожалуйста, введите название карты</string>
+    <string name="enter_4_digits">Введите 4 цифры</string>
+    <string name="date_format">Формат даты: ММ/ГГ</string>
+    <string name="balance_must_be_number">Баланс должен быть числом</string>
+    <string name="error_saving">Ошибка при сохранении: %1$s</string>
+    <string name="wallet">Кошелек</string>
+    <string name="stats">Статистика</string>
+    <string name="settings">Настройки</string>
+
+    <string name="error_enter_old_password">Введите старый пароль</string>
+
+    <string name="error_email_registered">Почта уже зарегистрирована</string>
+    <string name="error_email_required">Поле почты обязательно для заполнения</string>
+    <string name="error_password_required">Поле пароля обязательно для заполнения</string>
+    <string name="error_invalid_email">Неверная почта</string>
+    <string name="error_invalid_password">Неверный пароль</string>
+    <string name="error_no_logged_user">Нет авторизованного пользователя</string>
+    <string name="error_user_not_found">Пользователь не найден</string>
+    <string name="error_passwords_not_match">Пароли не совпадают</string>
+    <string name="error_password_empty">Пароль не может быть пустым</string>
+    <string name="error_user_not_authorized">Пользователь не авторизован</string>
+    <string name="password_changed_successfully">Пароль успешно изменен</string>
+    <string name="error_name_required">Поле имени обязательно для заполнения</string>
+    <string name="error_repeat_password_required">Поле повтора пароля обязательно для заполнения</string>
+    <string name="error_invalid_email_format">Неверный формат почты</string>
+    <string name="error_wrong_password">Неверный пароль</string>
+    <string name="confirm_password_change">Подтвердите изменение пароля</string>
+    <string name="toggle_password_visibility">Показать/скрыть пароль</string>
+    <string name="enter_new_password">Введите новый пароль</string>
+    <string name="verify">Подтвердить</string>
+    <string name="enter_current_password">Введите текущий пароль</string>
+
+    <string-array name="stats_tab_titles">
+        <item>Доходы</item>
+        <item>Расходы</item>
+    </string-array>
+</resources>

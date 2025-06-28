@@ -1,6 +1,8 @@
 package com.example.myapplication.database.dao
 
 import androidx.room.*
+import com.example.myapplication.CategorySum
+import com.example.myapplication.StatsFragment
 import com.example.myapplication.database.entities.Card
 import com.example.myapplication.database.entities.UserTransaction
 import kotlinx.coroutines.flow.Flow
@@ -41,4 +43,25 @@ interface TransactionDao {
         startDate: Long,
         endDate: Long
     ): List<UserTransaction>
+
+
+    @Query("SELECT category, SUM(amount) as category_sum " +
+            "FROM transactions " +
+            "WHERE (date BETWEEN :startDate AND :endDate)" +
+            "AND isIncome = 1 " +
+            "GROUP BY category")
+    suspend fun getSumIncomeForChart(
+        startDate: Long,
+        endDate: Long
+    ): List<CategorySum>
+
+    @Query("SELECT category, SUM(amount) as category_sum " +
+            "FROM transactions " +
+            "WHERE (date BETWEEN :startDate AND :endDate) " +
+            "AND isIncome = 0 " +
+            "GROUP BY category")
+    suspend fun getSumExpenseForChart(
+        startDate: Long,
+        endDate: Long
+    ): List<CategorySum>
 }

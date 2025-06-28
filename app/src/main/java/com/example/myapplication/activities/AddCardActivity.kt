@@ -17,7 +17,15 @@ class AddCardActivity : AuthBaseActivity() {
     private lateinit var balanceEditText: EditText
     private lateinit var saveCardButton: Button
     private lateinit var backButton: ImageButton
-//    private lateinit var currencySpinner: Spinner
+    private lateinit var currencySpinner: Spinner
+    private var selectedCurrency: String = "RUB" // Значение по умолчанию
+
+    // Маппинг символов валют на их коды
+    private val currencyMap = mapOf(
+        "₽" to "RUB",
+        "$" to "USD",
+        "€" to "EUR"
+    )
 
     private val cardRepository by lazy {
         (applicationContext as App).cardRepository
@@ -26,6 +34,7 @@ class AddCardActivity : AuthBaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         setContentView(R.layout.activity_add_card)
 
         cardNameEditText = findViewById(R.id.cardNameEditText)
@@ -34,29 +43,42 @@ class AddCardActivity : AuthBaseActivity() {
         balanceEditText = findViewById(R.id.balanceEditText)
         saveCardButton = findViewById(R.id.saveCardButton)
         backButton = findViewById(R.id.backButton)
-//        currencySpinner = findViewById(R.id.currencySpinner)
+        currencySpinner = findViewById(R.id.currencySpinner)
 
-//        val currencies = listOf("₽", "$", "€")
-//        val spinnerAdapter = object : ArrayAdapter<String>(
-//            this,
-//            android.R.layout.simple_spinner_item,
-//            currencies
-//        ) {
-//            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-//                val view = super.getView(position, convertView, parent) as TextView
-//                view.setTextColor(Color.WHITE)
-//                return view
-//            }
-//
-//            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-//                val view = super.getDropDownView(position, convertView, parent) as TextView
-//                view.setTextColor(Color.WHITE)
-//                return view
-//            }
-//        }
-//
-//        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        currencySpinner.adapter = spinnerAdapter
+        val currencySymbols = listOf("₽", "$", "€")
+        val spinnerAdapter = object : ArrayAdapter<String>(
+            this, android.R.layout.simple_spinner_item, currencySymbols
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.setTextColor(Color.WHITE)
+                return view
+            }
+
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getDropDownView(position, convertView, parent) as TextView
+                view.setTextColor(Color.WHITE)
+                return view
+            }
+        }
+
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        currencySpinner.adapter = spinnerAdapter
+
+        currencySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedCurrency = when (position) {
+                    0 -> "RUB"
+                    1 -> "USD"
+                    2 -> "EUR"
+                    else -> "RUB"
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedCurrency = "RUB"
+            }
+        }
 
         expiryDateEditText.addTextChangedListener(object : TextWatcher {
             private var isEditing = false
@@ -81,6 +103,8 @@ class AddCardActivity : AuthBaseActivity() {
         })
 
         listOf(cardNameEditText, last4DigitsEditText, expiryDateEditText, balanceEditText).forEach { editText ->
+            editText.alpha = 0f
+            editText.animate().alpha(1f).setDuration(500).start()
             editText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -92,6 +116,7 @@ class AddCardActivity : AuthBaseActivity() {
 
         backButton.setOnClickListener {
             finish()
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         saveCardButton.setOnClickListener {
@@ -99,9 +124,9 @@ class AddCardActivity : AuthBaseActivity() {
             val last4 = last4DigitsEditText.text.toString().trim()
             val date = expiryDateEditText.text.toString().trim()
             val balanceStr = balanceEditText.text.toString().trim()
-//            val currency = currencySpinner.selectedItem.toString()
 
             if (!validateInputs(name, last4, date, balanceStr)) {
+                shakeInvalidFields(name, last4, date, balanceStr)
                 return@setOnClickListener
             }
 
@@ -129,7 +154,7 @@ class AddCardActivity : AuthBaseActivity() {
                 }
 
             } catch (e: Exception) {
-                balanceEditText.error = "Ошибка при сохранении: ${e.message}"
+                balanceEditText.error = getString(R.string.error_saving, e.message ?: "")
             }
         }
     }
@@ -138,17 +163,17 @@ class AddCardActivity : AuthBaseActivity() {
         var isValid = true
 
         if (name.isEmpty()) {
-            cardNameEditText.error = "Введите название карты"
+            cardNameEditText.error = getString(R.string.enter_card_name)
             isValid = false
         }
 
         if (last4.length != 4 || !last4.all { it.isDigit() }) {
-            last4DigitsEditText.error = "Введите 4 цифры"
+            last4DigitsEditText.error = getString(R.string.enter_4_digits)
             isValid = false
         }
 
         if (!date.matches(Regex("""^(0[1-9]|1[0-2])\/\d{2}$"""))) {
-            expiryDateEditText.error = "Формат MM/YY"
+            expiryDateEditText.error = getString(R.string.date_format)
             isValid = false
         }
 
@@ -156,11 +181,32 @@ class AddCardActivity : AuthBaseActivity() {
             try {
                 balanceStr.toDouble()
             } catch (e: NumberFormatException) {
-                balanceEditText.error = "Баланс должен быть числом"
+                balanceEditText.error = getString(R.string.balance_must_be_number)
                 isValid = false
             }
         }
 
         return isValid
+    }
+
+    private fun shakeInvalidFields(name: String, last4: String, date: String, balanceStr: String) {
+        if (name.isEmpty()) animateShake(cardNameEditText)
+        if (last4.length != 4 || !last4.all { it.isDigit() }) animateShake(last4DigitsEditText)
+        if (!date.matches(Regex("""^(0[1-9]|1[0-2])\/\d{2}$"""))) animateShake(expiryDateEditText)
+        if (balanceStr.isNotEmpty()) {
+            try {
+                balanceStr.toDouble()
+            } catch (e: NumberFormatException) {
+                animateShake(balanceEditText)
+            }
+        }
+    }
+
+    private fun animateShake(view: View) {
+        view.animate().translationX(10f).setDuration(50).withEndAction {
+            view.animate().translationX(-10f).setDuration(50).withEndAction {
+                view.animate().translationX(0f).setDuration(50).start()
+            }.start()
+        }.start()
     }
 }

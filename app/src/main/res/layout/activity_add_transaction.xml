@@ -23,15 +23,34 @@
         android:clipToOutline="true"
         android:outlineProvider="background">
 
-        <ImageButton
-            android:id="@+id/backButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_back"
-            android:contentDescription="Back"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp">
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Back"
+                android:src="@drawable/ic_back" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="15dp"
+                android:elevation="6dp"
+                android:ellipsize="none"
+                android:padding="12dp"
+                android:text="@string/add_transaction"
+                android:textColor="@color/buttonTextColor"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/dateCard"
@@ -57,8 +76,8 @@
 
                 <TextView
                     android:id="@+id/selectDateText"
-                    android:text="Choose date"
-                    android:textColor="@color/forthColor"
+                    android:text="@string/choose_date"
+                    android:textColor="@color/buttonTextColor"
                     android:textSize="16sp"
                     android:layout_marginStart="12dp"
                     android:layout_width="wrap_content"
@@ -69,8 +88,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Card Name"
-            android:textColor="@color/forthColor"
+            android:text="@string/card_name"
+            android:textColor="@color/buttonTextColor"
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
@@ -78,9 +97,10 @@
             android:id="@+id/cardSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/forthColor"
-            android:popupBackground="@color/forthColor"
-            android:layout_marginBottom="20dp" />
+            android:popupBackground="@color/spinnerBackColor"
+            android:dropDownHorizontalOffset="80dp"
+            android:theme="@style/spinnerTheme"
+            android:layout_marginBottom="20dp"/>
 
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/typeGroup"
@@ -88,14 +108,15 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             app:checkedButton="@+id/incomeToggle"
-            app:singleSelection="true">
+            app:singleSelection="true"
+            app:background="@color/glass1">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/incomeToggle"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Income"
+                android:text="@string/income"
                 android:textColor="@color/green"
                 app:backgroundTint="@color/transparent"
                 app:cornerRadius="12dp" />
@@ -105,7 +126,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Expense"
+                android:text="@string/expense"
                 android:textColor="@color/red"
                 app:backgroundTint="@color/transparent"
                 app:cornerRadius="12dp" />
@@ -114,8 +135,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Category"
-            android:textColor="@color/forthColor"
+            android:text="@string/category"
+            android:textColor="@color/buttonTextColor"
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
@@ -123,21 +144,22 @@
             android:id="@+id/categorySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/forthColor"
-            android:popupBackground="@color/forthColor"
+            android:popupBackground="@color/spinnerBackColor"
+            android:dropDownHorizontalOffset="80dp"
+            android:theme="@style/spinnerTheme"
             android:layout_marginBottom="20dp" />
 
         <EditText
             android:id="@+id/descriptionEditText"
             style="@style/GlassInput"
-            android:hint="Description"
+            android:hint="@string/description"
             android:layout_marginBottom="20dp"
             android:textColor="@color/buttonTextColor" />
 
         <EditText
             android:id="@+id/amountEditText"
             style="@style/GlassInput"
-            android:hint="Amount"
+            android:hint="@string/amount"
             android:inputType="numberDecimal"
             android:layout_marginBottom="20dp"
             android:textColor="@color/buttonTextColor" />
@@ -156,18 +178,17 @@
 <!--            android:id="@+id/currencySpinner"-->
 <!--            android:layout_width="match_parent"-->
 <!--            android:layout_height="wrap_content"-->
-<!--            android:backgroundTint="@color/forthColor"-->
-<!--            android:popupBackground="@color/forthColor"-->
-<!--            android:layout_marginBottom="20dp"-->
-<!--            android:layout_marginLeft="8dp"/>-->
-<!--        -->
+<!--            android:popupBackground="@color/spinnerBackColor"-->
+<!--            android:dropDownHorizontalOffset="80dp"-->
+<!--            android:theme="@style/spinnerTheme"-->
+<!--            android:layout_marginBottom="20dp" />-->
 
         <Button
             style="@style/CandyButton"
             android:id="@+id/saveButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save" />
+            android:text="@string/save" />
     </LinearLayout>
 </ScrollView>
 </FrameLayout>

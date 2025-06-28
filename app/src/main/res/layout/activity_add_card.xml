@@ -12,20 +12,39 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="24dp"
-        android:layout_marginTop="16dp">
+        android:padding="24dp">
 
-    <ImageButton
-        android:id="@+id/backButton"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Back"
-        android:src="@drawable/ic_back" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
 
-    <com.google.android.material.card.MaterialCardView
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Back"
+                android:src="@drawable/ic_back" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="15dp"
+                android:elevation="6dp"
+                android:ellipsize="none"
+                android:padding="12dp"
+                android:text="@string/new_card"
+                android:textColor="@color/buttonTextColor"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+
+
+        <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -47,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="5dp"
-                android:hint="Card Name"
+                android:hint="@string/card_name"
                 android:textColorHint="@color/secondaryTextColor"
                 android:textColor="@color/buttonTextColor"
                 android:textSize="18sp"
@@ -76,7 +95,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:hint="MM/YY"
+                android:hint="@string/mm_yy"
                 android:textColorHint="@color/secondaryTextColor"
                 android:textColor="@color/buttonTextColor"
                 android:textSize="18sp"
@@ -99,22 +118,23 @@
                     android:id="@+id/balanceEditText"
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
-                    android:hint="Balance"
+                    android:hint="@string/balance"
                     android:textColorHint="@color/secondaryTextColor"
                     android:textColor="@color/buttonTextColor"
                     android:textSize="22sp"
                     android:background="@null"
                     android:inputType="numberDecimal" />
 
-<!--                <Spinner-->
-<!--                    android:id="@+id/currencySpinner"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="12dp"-->
-<!--                    android:popupBackground="@color/cardColor"-->
-<!--                    android:padding="8dp"-->
-<!--                    android:entries="@array/currencies"-->
-<!--                    android:background="@drawable/spinner_background"/>-->
+                <Spinner
+                    android:id="@+id/currencySpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:popupBackground="@color/cardColor"
+                    android:padding="8dp"
+                    android:theme="@style/spinnerTheme"
+                    android:entries="@array/currencies"
+                    android:background="@drawable/spinner_background"/>
             </LinearLayout>
 
 
@@ -125,7 +145,7 @@
         android:id="@+id/saveCardButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save Card"
+        android:text="@string/save_card"
         android:layout_marginBottom="24dp"
         android:layout_alignParentBottom="true"
         style="@style/CandyButton" />

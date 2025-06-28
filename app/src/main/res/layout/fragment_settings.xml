@@ -4,18 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient"
+    android:background="@android:color/transparent"
     >
-
-    <com.example.myapplication.GradientBackgroundView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
 
     <ScrollView
         android:id="@+id/settingsScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottomNavigation"
         android:padding="24dp"
         android:clipToPadding="false"
         android:overScrollMode="never"
@@ -32,8 +27,8 @@
                 android:layout_marginLeft="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Email"
-                android:textColor="@color/secondaryTextColor"/>
+                android:text="@string/email"
+                android:textColor="@color/buttonTextColor"/>
             <TextView
                 android:layout_marginLeft="8dp"
                 android:id="@+id/emailTextView"
@@ -46,10 +41,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Name"
-                android:textColor="@color/secondaryTextColor"
+                android:text="@string/name"
+                android:textColor="@color/buttonTextColor"
                 android:layout_marginTop="8dp"
-                android:layout_marginLeft="8dp"/>
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="4dp"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -60,13 +56,13 @@
                     android:id="@+id/nameEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter new name"
+                    android:hint="@string/enter_new_name"
                     android:inputType="textPersonName"
                     android:enabled="false"
                     android:paddingEnd="40dp" />
 
                 <ImageButton
-                    android:layout_marginRight="8dp"
+                    android:layout_marginEnd="8dp"
                     android:id="@+id/editNameButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -79,20 +75,22 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Currency"
+                android:text="@string/currency"
                 android:textSize="14sp"
-                android:textColor="@color/secondaryTextColor"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"  />
+                android:textColor="@color/buttonTextColor"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp"/>
 
             <Spinner
                 android:id="@+id/currencySpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/forthColor"
-                android:popupBackground="@color/forthColor"
-                android:layout_marginBottom="20dp"
-                android:layout_marginLeft="8dp"/>
+                android:popupBackground="@color/spinnerBackColor"
+                android:dropDownHorizontalOffset="80dp"
+                android:theme="@style/spinnerTheme"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="8dp"/>
 
             <LinearLayout
                 android:id="@+id/themeSwitcherLayout"
@@ -111,10 +109,11 @@
                     android:layout_marginEnd="12dp"/>
 
                 <TextView
+                    android:id="@+id/themeText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Dark theme"
+                    android:text="@string/dark_theme"
                     android:textColor="@color/textColor"
                     android:textSize="16sp" />
 
@@ -123,16 +122,35 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:thumbTint="@color/textColor"
-                    android:trackTint="@color/secondaryTextColor" />
+                    android:trackTint="@color/buttonTextColor" />
             </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/language"
+                android:textSize="14sp"
+                android:textColor="@color/secondaryTextColor"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp" />
+
+            <Spinner
+                android:id="@+id/languageSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:popupBackground="@color/spinnerBackColor"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="8dp"
+                android:entries="@array/language_options"
+                android:theme="@style/spinnerTheme"/>
 
             <Button
                 android:id="@+id/changePass"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Change password"
+                android:text="@string/change_password"
                 style="@style/CandyButton"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="8dp"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -145,7 +163,7 @@
                     android:id="@+id/oldPasswordEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter current password"
+                    android:hint="@string/enter_current_password"
                     android:inputType="textPassword"
                     style="@style/GlassInput"
                     android:paddingEnd="40dp"/>
@@ -158,14 +176,14 @@
                     android:layout_centerVertical="true"
                     android:background="@android:color/transparent"
                     android:src="@drawable/ic_eye"
-                    android:contentDescription="Toggle password visibility"/>
+                    android:contentDescription="@string/toggle_password_visibility"/>
             </RelativeLayout>
 
             <Button
                 android:id="@+id/verifyOldPasswordButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Verify"
+                android:text="@string/verify"
                 android:visibility="gone"
                 style="@style/CandyButton"
                 android:layout_marginTop="8dp"/>
@@ -181,7 +199,7 @@
                     android:id="@+id/newPasswordEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter new password"
+                    android:hint="@string/enter_new_password"
                     android:inputType="textPassword"
                     style="@style/GlassInput"
                     android:paddingEnd="40dp"/>
@@ -194,7 +212,7 @@
                     android:layout_centerVertical="true"
                     android:background="@android:color/transparent"
                     android:src="@drawable/ic_eye"
-                    android:contentDescription="Toggle password visibility"/>
+                    android:contentDescription="@string/toggle_password_visibility"/>
             </RelativeLayout>
 
             <RelativeLayout
@@ -208,7 +226,7 @@
                     android:id="@+id/repeatPasswordEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Repeat new password"
+                    android:hint="@string/repeat_new_password"
                     android:inputType="textPassword"
                     style="@style/GlassInput"
                     android:paddingEnd="40dp"/>
@@ -221,14 +239,14 @@
                     android:layout_centerVertical="true"
                     android:background="@android:color/transparent"
                     android:src="@drawable/ic_eye"
-                    android:contentDescription="Toggle password visibility"/>
+                    android:contentDescription="@string/toggle_password_visibility"/>
             </RelativeLayout>
 
             <Button
                 android:id="@+id/confirmPasswordChangeButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Confirm password change"
+                android:text="@string/confirm_password_change"
                 android:visibility="gone"
                 style="@style/CandyButton"
                 android:layout_marginTop="8dp"/>
@@ -236,7 +254,7 @@
                 android:id="@+id/exportDataButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Export data"
+                android:text="@string/export_data"
                 style="@style/CandyButton"
                 android:layout_marginTop="16dp"/>
 
@@ -244,7 +262,7 @@
                 android:id="@+id/clearDataButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Clear all data"
+                android:text="@string/clear_all_data"
                 style="@style/CandyButton"
                 android:layout_marginTop="8dp"/>
 
@@ -252,7 +270,7 @@
                 android:id="@+id/logoutButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Logout"
+                android:text="@string/logout"
                 style="@style/CandyButton"
                 android:layout_marginTop="8dp"/>
 
@@ -260,24 +278,9 @@
                 android:id="@+id/saveSettingsButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Save changes"
+                android:text="@string/save_changes"
                 style="@style/CandyButton"
                 android:layout_marginTop="16dp"/>
         </LinearLayout>
     </ScrollView>
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@color/bottomColor"
-        app:menu="@menu/bottom_nav_menu"
-        app:itemIconTint="@color/textColor"
-        app:itemTextColor="@color/secondaryTextColor"
-        app:labelVisibilityMode="labeled"
-        app:elevation="0dp"
-        app:layout_insetEdge="bottom"
-        app:paddingBottomSystemWindowInsets="false"
-        android:fitsSystemWindows="false"/>
 </RelativeLayout>

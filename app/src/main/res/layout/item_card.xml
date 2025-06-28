@@ -18,7 +18,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Card Name"
+            android:text="@string/card_name"
             android:textColor="@color/buttonTextColor"
             android:textSize="14sp" />
 
@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="Balance"
+        android:text="@string/balance"
         android:textColor="@color/buttonTextColor" />
 
     <LinearLayout

@@ -17,13 +17,20 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class TransactionsAdapter(
-    private val lifecycleOwner: LifecycleOwner,
-    private val transactionsFlow: Flow<List<UserTransaction>>,
+    lifecycleOwner: LifecycleOwner,
+    transactionsFlow: Flow<List<UserTransaction>>,
     private val onDeleteClicked: (UserTransaction) -> Unit
 ) : RecyclerView.Adapter<TransactionsAdapter.TransactionViewHolder>() {
 
     private val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    private var transactions: List<UserTransaction> = emptyList()
+    private val currencySymbols = mapOf(
+        "RUB" to "₽",
+        "USD" to "$",
+        "EUR" to "€"
+    )
+
+    var transactions: List<UserTransaction> = emptyList()
+        private set
 
     init {
         lifecycleOwner.lifecycleScope.launch {
@@ -48,24 +55,12 @@ class TransactionsAdapter(
         return TransactionViewHolder(view)
     }
 
-    fun updateTransactions(newTransactions: List<UserTransaction>) {
-        this.transactions = newTransactions
-        notifyDataSetChanged()
-    }
-
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val tx = transactions[position]
         holder.title.text = tx.category
         holder.date.text = dateFormatter.format(Date(tx.date))
-
-//        val currencySymbol = when (tx.currency.uppercase()) {
-//            "RUB" -> "₽"
-//            "EUR" -> "€"
-//            "USD" -> "$"
-//            else -> tx.currency
-//        }
-//        holder.amount.text = if (tx.isIncome) "+${tx.amount}${currencySymbol}" else "-${tx.amount}${tx.currency}"
-        holder.amount.text = if (tx.isIncome) "+${tx.amount}₽" else "-${tx.amount}₽"
+        val symbol = currencySymbols[tx.currency] ?: "₽"
+        holder.amount.text = if (tx.isIncome) "+${tx.amount}${symbol}" else "-${tx.amount}${symbol}"
         holder.amount.setTextColor(
             holder.itemView.context.getColor(
                 if (tx.isIncome) R.color.green else R.color.red
@@ -79,4 +74,9 @@ class TransactionsAdapter(
     }
 
     override fun getItemCount(): Int = transactions.size
+
+    fun updateTransactions(newTransactions: List<UserTransaction>) {
+        transactions = newTransactions
+        notifyDataSetChanged()
+    }
 }

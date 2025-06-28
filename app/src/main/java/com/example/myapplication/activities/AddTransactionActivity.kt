@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -35,7 +36,6 @@ class AddTransactionActivity : AppCompatActivity() {
     private lateinit var descriptionEditText: EditText
     private lateinit var amountEditText: EditText
     private lateinit var saveButton: Button
-//    private lateinit var currencySpinner: Spinner
     private lateinit var backButton: ImageButton
 
     private lateinit var createCategoryLauncher: ActivityResultLauncher<Intent>
@@ -53,9 +53,8 @@ class AddTransactionActivity : AppCompatActivity() {
     private val inactiveIncomeText = Color.parseColor("#50FF9D")
     private val inactiveExpenseText = Color.parseColor("#FF6E6E")
 
-    private val incomeCategories = mutableListOf("Salary", "Gift", "Investment", "Create category")
-    private val expenseCategories = mutableListOf(
-        "Food", "Transport", "Clothes", "Education", "Health", "Entertainment", "Create category")
+    private lateinit var incomeCategories: MutableList<String>
+    private lateinit var expenseCategories: MutableList<String>
 
     val db = App.database
     val transactionDao = db.transactionDao()
@@ -67,7 +66,8 @@ class AddTransactionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.fragment_add_transaction)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        setContentView(R.layout.activity_add_transaction)
 
         dateCard = findViewById(R.id.dateCard)
         selectDateText = findViewById(R.id.selectDateText)
@@ -78,13 +78,24 @@ class AddTransactionActivity : AppCompatActivity() {
         categorySpinner = findViewById(R.id.categorySpinner)
         descriptionEditText = findViewById(R.id.descriptionEditText)
         amountEditText = findViewById(R.id.amountEditText)
-//        currencySpinner = findViewById(R.id.currencySpinner)
         backButton = findViewById(R.id.backButton)
         saveButton = findViewById(R.id.saveButton)
 
-        backButton.setOnClickListener { finish() }
+        updateCategoriesStrings()
 
-        // Initialize ActivityResultLauncher
+        listOf(
+            dateCard, cardSpinner, incomeToggle, expenseToggle,
+            categorySpinner, descriptionEditText, amountEditText, saveButton
+        ).forEach {
+            it.alpha = 0f
+            it.animate().alpha(1f).setDuration(500).start()
+        }
+
+        backButton.setOnClickListener {
+            finish()
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        }
+
         createCategoryLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -107,15 +118,12 @@ class AddTransactionActivity : AppCompatActivity() {
             cardDao.getAllCards().collect { cards ->
                 cardsMap = cards.associate { "${it.name} (${it.maskedNumber})" to it.id }
                 val cardsList = cardsMap.keys.toList()
-
                 val cardsAdapter = object : ArrayAdapter<String>(
-                    this@AddTransactionActivity,
-                    android.R.layout.simple_spinner_item,
-                    cardsList
+                    this@AddTransactionActivity, android.R.layout.simple_spinner_item, cardsList
                 ) {
                     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                         val view = super.getView(position, convertView, parent) as TextView
-                        view.setTextColor(Color.parseColor("#D0B8F5"))
+                        view.setTextColor(ContextCompat.getColor(context, R.color.buttonTextColor))
                         return view
                     }
                 }
@@ -123,53 +131,39 @@ class AddTransactionActivity : AppCompatActivity() {
             }
         }
 
-
-        val cards = listOf("T-bank 0567", "Sber 8989", "Alfa 6666")
-        val cardsAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, cards) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(Color.parseColor("#D0B8F5"))
-                return view
-            }
-        }
-        cardSpinner.adapter = cardsAdapter
-
-//        val currencies = listOf("RUB", "USD", "EUR")
-//        val currencyAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, currencies) {
-//            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-//                val view = super.getView(position, convertView, parent) as TextView
-//                view.setTextColor(Color.parseColor("#D0B8F5"))
-//                return view
-//            }
-//        }
-//        currencySpinner.adapter = currencyAdapter
-
         updateDateLabel()
-
-        dateCard.setOnClickListener { showDatePicker() }
+        dateCard.setOnClickListener {
+            it.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction {
+                it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+                showDatePicker()
+            }.start()
+        }
 
         incomeToggle.setOnClickListener {
+            it.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction {
+                it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+            }.start()
             isIncomeSelected = true
             updateToggleButtons("income")
             updateCategorySpinner()
         }
 
         expenseToggle.setOnClickListener {
+            it.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction {
+                it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+            }.start()
             isIncomeSelected = false
             updateToggleButtons("expense")
             updateCategorySpinner()
         }
 
         categorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?, view: View?, position: Int, id: Long
-            ) {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selected = categorySpinner.selectedItem.toString()
-                if (selected == "Create category") {
+                if (selected == getString(R.string.category_add_new)) {
                     openCreateCategoryScreen()
                 }
             }
-
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
@@ -179,8 +173,33 @@ class AddTransactionActivity : AppCompatActivity() {
         saveButton.setOnClickListener {
             if (validateInputs()) {
                 saveTransaction()
+            } else {
+                amountEditText.animate().translationX(10f).setDuration(50).withEndAction {
+                    amountEditText.animate().translationX(-10f).setDuration(50).withEndAction {
+                        amountEditText.animate().translationX(0f).setDuration(50).start()
+                    }.start()
+                }.start()
             }
         }
+    }
+
+    private fun updateCategoriesStrings() {
+        incomeCategories = mutableListOf(
+            getString(R.string.category_salary),
+            getString(R.string.category_gift),
+            getString(R.string.category_investment),
+            getString(R.string.category_add_new)
+        )
+        expenseCategories = mutableListOf(
+            getString(R.string.category_food),
+            getString(R.string.category_transport),
+            getString(R.string.category_clothes),
+            getString(R.string.category_education),
+            getString(R.string.category_health),
+            getString(R.string.category_entertainment),
+            getString(R.string.category_add_new)
+        )
+        updateCategorySpinner()
     }
 
     private fun updateCategorySpinner() {
@@ -189,7 +208,9 @@ class AddTransactionActivity : AppCompatActivity() {
         val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val view = super.getView(position, convertView, parent) as TextView
-                view.setTextColor(Color.parseColor("#D0B8F5"))
+                view.setTextColor(
+                    ContextCompat.getColor(context, R.color.buttonTextColor)
+                )
                 return view
             }
         }
@@ -207,23 +228,23 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun validateInputs(): Boolean {
         val amountText = amountEditText.text.toString().trim()
         if (amountText.isEmpty()) {
-            amountEditText.error = "Please enter an amount"
+            amountEditText.error = getString(R.string.error_enter_amount)
             return false
         }
 
         try {
             val amount = amountText.toDouble()
             if (amount <= 0) {
-                amountEditText.error = "Amount must be greater than 0"
+                amountEditText.error = getString(R.string.error_amount_positive)
                 return false
             }
         } catch (e: NumberFormatException) {
-            amountEditText.error = "Please enter a valid number"
+            amountEditText.error = getString(R.string.error_enter_valid_number)
             return false
         }
 
         if (cardsMap.isEmpty()) {
-            Toast.makeText(this, "No cards available", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.error_no_cards), Toast.LENGTH_SHORT).show()
             return false
         }
 
@@ -232,7 +253,6 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private fun saveTransaction() {
         val amount = amountEditText.text.toString().toDouble()
-//        val currency = currencySpinner.selectedItem.toString()
         val category = categorySpinner.selectedItem.toString()
         val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
         val dateInMillis = selectedDate.timeInMillis
@@ -241,39 +261,46 @@ class AddTransactionActivity : AppCompatActivity() {
         val cardId = cardsMap[selectedCardName]
 
         if (cardId == null) {
-            Toast.makeText(this, "Selected card not found in database", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.error_card_not_found), Toast.LENGTH_SHORT).show()
             return
         }
 
         val iconResId = if (isIncomeSelected) {
             when (category) {
-                "Salary" -> R.drawable.ic_salary
-                "Gift" -> R.drawable.ic_gift
-                "Investment" -> R.drawable.ic_investment
+                getString(R.string.category_salary) -> R.drawable.ic_salary
+                getString(R.string.category_gift) -> R.drawable.ic_gift
+                getString(R.string.category_investment) -> R.drawable.ic_investment
                 else -> R.drawable.ic_default
             }
         } else {
             when (category) {
-                "Food" -> R.drawable.ic_food
-                "Transport" -> R.drawable.ic_transport
-                "Clothes" -> R.drawable.ic_clothes
-                "Education" -> R.drawable.ic_education
-                "Health" -> R.drawable.ic_health
-                "Entertainment" -> R.drawable.ic_entertainment
+                getString(R.string.category_food) -> R.drawable.ic_food
+                getString(R.string.category_transport) -> R.drawable.ic_transport
+                getString(R.string.category_clothes) -> R.drawable.ic_clothes
+                getString(R.string.category_education) -> R.drawable.ic_education
+                getString(R.string.category_health) -> R.drawable.ic_health
+                getString(R.string.category_entertainment) -> R.drawable.ic_entertainment
                 else -> R.drawable.ic_default
             }
         }
 
         lifecycleScope.launch {
+            val card = cardDao.getCardById(cardId)
+            if (card == null) {
+                Toast.makeText(this@AddTransactionActivity,
+                    getString(R.string.error_card_not_found), Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
             val transaction = UserTransaction(
                 isIncome = isIncomeSelected,
                 amount = amount,
-//                currency = currency,
                 category = category,
                 description = description,
                 date = dateInMillis,
                 iconResId = iconResId,
-                cardId = cardId
+                cardId = cardId,
+                currency = card.currency
             )
             val transactionS = TransactionSchema(
                 is_income = isIncomeSelected,
@@ -287,15 +314,6 @@ class AddTransactionActivity : AppCompatActivity() {
             transactionRepository.addTransaction(transactionS)
 
             transactionDao.insert(transaction)
-            val card = cardDao.getCardById(cardId)
-            if (card != null) {
-                val newBalance = if (isIncomeSelected) {
-                    card.balance + amount
-                } else {
-                    card.balance - amount
-                }
-                cardDao.update(card.copy(balance = newBalance))
-            }
 
             finish()
         }
@@ -335,4 +353,3 @@ class AddTransactionActivity : AppCompatActivity() {
         }
     }
 }
-

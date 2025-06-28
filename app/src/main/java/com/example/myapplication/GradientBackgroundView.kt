@@ -5,11 +5,11 @@ import android.content.res.Configuration
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import kotlin.math.cos
+import kotlin.math.sin
 
 class GradientBackgroundView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
     private data class ThemePalette(
@@ -28,18 +28,11 @@ class GradientBackgroundView @JvmOverloads constructor(
         val sizeRatio: Float
     )
 
-    private data class GradientData(
-        val shader: RadialGradient,
-        val cx: Float,
-        val cy: Float,
-        val radius: Float
-    )
-
     private val lightTheme = ThemePalette(
         background = Color.parseColor("#FAFAFA"),
         spots = listOf(
             SpotConfig(Color.parseColor("#FF9E80")),
-            SpotConfig(Color.parseColor("#80DEEA")),
+            SpotConfig(Color.parseColor("#47d9ed")),
             SpotConfig(Color.parseColor("#C5E1A5")),
             SpotConfig(Color.parseColor("#FFD54F")),
             SpotConfig(Color.parseColor("#B39DDB")),
@@ -72,11 +65,12 @@ class GradientBackgroundView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
-    private var lightGradients: List<GradientData> = emptyList()
-    private var darkGradients: List<GradientData> = emptyList()
+    private var startTime = 0L
 
-    init {
-        setLayerType(LAYER_TYPE_HARDWARE, null)
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        startTime = System.currentTimeMillis()
+        invalidate()
     }
 
     private fun isDarkTheme(): Boolean {
@@ -85,68 +79,44 @@ class GradientBackgroundView @JvmOverloads constructor(
         return uiMode == Configuration.UI_MODE_NIGHT_YES
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        lightGradients = buildGradients(w, h, lightTheme, smooth = false)
-        darkGradients = buildGradients(w, h, darkTheme, smooth = true)
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        invalidate()
-    }
-
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
+        val now = System.currentTimeMillis()
+        val elapsed = (now - startTime) / 1000f
+
+        val speed = 0.2f
+        val progress = elapsed * 2 * Math.PI.toFloat() * speed
 
         val theme = if (isDarkTheme()) darkTheme else lightTheme
-        val gradients = if (isDarkTheme()) darkGradients else lightGradients
-
         canvas.drawColor(theme.background)
 
-        gradients.forEach { data ->
-            paint.shader = data.shader
-            canvas.drawCircle(data.cx, data.cy, data.radius, paint)
-        }
-
-        paint.shader = null
-    }
-
-    private fun buildGradients(
-        width: Int,
-        height: Int,
-        palette: ThemePalette,
-        smooth: Boolean
-    ): List<GradientData> {
-        return spotPositions.mapIndexed { index, pos ->
-            val config = palette.spots[index]
-            val baseAlpha = (config.alpha + if (palette == darkTheme) 3 else 5).coerceIn(0, 255)
+        for (i in spotPositions.indices) {
+            val pos = spotPositions[i]
+            val config = theme.spots[i]
 
             val cx = width * pos.xRatio
             val cy = height * pos.yRatio
-            val radius = width * pos.sizeRatio * if (smooth) 1.5f else 1.2f
+            val baseRadius = width * pos.sizeRatio * 1.8f
 
-            val centerColor = Color.argb(baseAlpha,
+            val offsetX = 18f * sin(progress + i)
+            val offsetY = 18f * cos(progress * 1.2f + i)
+            val dynamicRadius = baseRadius * (1f + 0.06f * sin(progress * 1.5f + i))
+
+            val centerColor = Color.argb(
+                config.alpha,
                 Color.red(config.color),
                 Color.green(config.color),
-                Color.blue(config.color))
+                Color.blue(config.color)
+            )
 
-            val shader = if (smooth && palette == darkTheme) {
-                RadialGradient(
-                    cx, cy, radius,
-                    intArrayOf(centerColor, Color.TRANSPARENT),
-                    floatArrayOf(0f, 1f),
-                    Shader.TileMode.CLAMP
-                )
-            } else {
-                RadialGradient(
-                    cx, cy, radius,
-                    centerColor, Color.TRANSPARENT,
-                    Shader.TileMode.CLAMP
-                )
-            }
-
-            GradientData(shader, cx, cy, radius)
+            paint.shader = RadialGradient(
+                cx + offsetX, cy + offsetY, dynamicRadius,
+                centerColor, Color.TRANSPARENT,
+                Shader.TileMode.CLAMP
+            )
+            canvas.drawCircle(cx + offsetX, cy + offsetY, dynamicRadius, paint)
         }
+
+        paint.shader = null
+        invalidate()
     }
 }

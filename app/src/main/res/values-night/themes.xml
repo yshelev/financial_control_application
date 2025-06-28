@@ -4,8 +4,24 @@
 
     <style name="Theme.MyApplication" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Основные цвета -->
-        <item name="colorPrimary">#782AAB</item>
+        <item name="colorPrimary">#C08130B6</item>
+        <item name="colorPrimaryDark">#A77232A6</item>
 
+        <item name="android:textColor">@color/buttonTextColor</item>
+        <item name="colorAccent">@color/primaryColor</item>
+
+        <item name="android:textColorPrimary">@color/buttonTextColor</item>
+        <item name="android:textColorSecondary">@color/secondaryTextColor</item>
+
+        <item name="android:colorBackground">@color/transparent</item>
+        <item name="android:popupBackground">@color/transparent</item>
+        <item name="android:colorControlNormal">@color/buttonTextColor</item>
+
+
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:clipToPadding">false</item>
+        <item name="android:clipChildren">false</item>
 
         <!-- Цвет фона по умолчанию -->
         <item name="android:windowBackground">@color/backgroundColor</item>
