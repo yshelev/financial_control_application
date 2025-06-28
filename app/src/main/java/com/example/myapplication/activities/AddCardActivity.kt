@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -138,8 +139,10 @@ class AddCardActivity : AuthBaseActivity() {
                 authController.getCurrentUser {
                     user ->
                     if (user?.email == null) {
+                        Log.d("create card activity", "user.email not found")
                         return@getCurrentUser
                     }
+                    Log.d("create card activity", "user.email found")
                     val card = CardSchema(
                         name = name,
                         balance = balance,

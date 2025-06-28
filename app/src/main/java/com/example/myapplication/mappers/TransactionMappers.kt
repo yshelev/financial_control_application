@@ -14,6 +14,7 @@ fun TransactionDto.toEntity(): UserTransaction {
         description = this.description,
         date = this.date.toTimestamp(),
         iconResId = this.iconResId,
+        currency = this.currency,
         cardId = this.cardId
     )
 }

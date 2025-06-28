@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
@@ -20,7 +21,9 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.currency.ExchangeRateClient
 import com.example.myapplication.database.entities.ExchangeRateEntity
 import com.example.myapplication.database.entities.UserTransaction
+import com.example.myapplication.mappers.toEntityList
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
@@ -41,6 +44,16 @@ class DashboardFragment : Fragment() {
     private lateinit var incomeTextView: TextView
     private lateinit var expensesTextView: TextView
 
+    private val transactionRepository by lazy {
+        (requireActivity().applicationContext as App).transactionRepository
+    }
+    private val cardRepository by lazy {
+        (requireActivity().applicationContext as App).cardRepository
+    }
+
+    protected lateinit var authController: AuthController
+
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -51,7 +64,7 @@ class DashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         currentFilter = savedInstanceState?.getString("CURRENT_FILTER", "All") ?: "All"
-
+        authController = AuthController(requireActivity(), App.database)
         val db = App.database
 
         totalBalanceTextView = view.findViewById(R.id.totalBalance)
@@ -93,6 +106,7 @@ class DashboardFragment : Fragment() {
                         db.cardDao().update(card.copy(balance = newBalance))
                     }
                     db.transactionDao().delete(transaction)
+                    transactionRepository.deleteTransaction(transaction.id)
                 }
             }
         )
@@ -125,6 +139,7 @@ class DashboardFragment : Fragment() {
                         db.cardDao().update(card.copy(balance = newBalance))
                     }
                     db.transactionDao().delete(transaction)
+                    transactionRepository.deleteTransaction(transaction.id)
                 }
             }
 
@@ -189,6 +204,50 @@ class DashboardFragment : Fragment() {
         updateTransactionsByPeriod(getString(R.string.filter_all))
     }
 
+    override fun onResume() {
+        super.onResume()
+        val db = App.database
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            authController.getCurrentUser {
+                    user ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    if (user?.email == null) {
+                        Log.e("CardRefresh", "User or email not found from callback")
+                        return@launch
+                    }
+                    val email = user.email
+                    val transactionDtos = transactionRepository.getTransactions(email)
+                    val transactionEntities = transactionDtos.toEntityList()
+                    Log.d("dashboardAct", transactionEntities.toString())
+                    db.transactionDao().refreshTransactions(transactionEntities)
+                    Log.d("DashboardActivity", "Transactions successfully refreshed from API.")
+                }
+            }
+        }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            authController.getCurrentUser {
+                    user ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    if (user?.email == null) {
+                        Log.e("CardRefresh", "User or email not found from callback")
+                        return@launch
+                    }
+                    Log.d("DashboardActivity", "User email: ${user.email}")
+                    val email = user.email
+
+                    val cardDtos = cardRepository.getCards(email)
+
+                    Log.d("DashboardActivity", "CardDtos count: ${cardDtos.size}")
+                    val cardEntities = cardDtos.toEntityList()
+                    db.cardDao().refreshCards(cardEntities)
+                    Log.d("CardRefresh", "Cards updated. Count: ${cardEntities.size}")
+                }
+            }
+        }
+    }
+
     private fun setupCardsViewPager() {
         val db = App.database
 
@@ -202,6 +261,7 @@ class DashboardFragment : Fragment() {
             onDeleteCardClicked = { card ->
                 lifecycleScope.launch {
                     db.cardDao().delete(card)
+                    cardRepository.deleteCard(card.id)
                     updateBalanceStats(emptyList())
                 }
             }
@@ -312,6 +372,7 @@ class DashboardFragment : Fragment() {
 
         try {
             val response = ExchangeRateClient.api.getRates(fromCurrency)
+            Log.d("convert currency", "${response.result} ${response.rates}")
 
             if (response.result == "success" && response.rates != null) {
                 val now = System.currentTimeMillis()

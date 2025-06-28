@@ -9,6 +9,7 @@ fun CardDto.toEntity(): Card {
         name = this.name,
         maskedNumber = this.maskedNumber,
         date = this.date,
+        currency = this.currency,
         balance = this.balance
     )
 }

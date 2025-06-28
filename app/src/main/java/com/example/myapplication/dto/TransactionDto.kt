@@ -10,5 +10,6 @@ data class TransactionDto(
     @SerializedName("description") val description: String?,
     @SerializedName("date") val date: String,
     @SerializedName("icon_res_id") val iconResId: Int,
-    @SerializedName("card_id") val cardId: Long
+    @SerializedName("card_id") val cardId: Long,
+    @SerializedName("currency") val currency: String
 )
