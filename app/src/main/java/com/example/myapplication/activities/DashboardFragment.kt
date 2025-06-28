@@ -114,71 +114,80 @@ class DashboardFragment : Fragment() {
         transactionsRecycler.layoutManager = LinearLayoutManager(requireContext())
         transactionsRecycler.adapter = transactionsAdapter
 
-        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        val itemTouchHelperCallback =
+            object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
 
-            private val backgroundPaint = Paint().apply { color = Color.RED }
+                private val backgroundPaint = Paint().apply { color = Color.RED }
 
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean = false
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean = false
 
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                val transaction = transactionsAdapter.transactions[position]
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    val position = viewHolder.adapterPosition
+                    val transaction = transactionsAdapter.transactions[position]
 
-                lifecycleScope.launch {
-                    val card = db.cardDao().getCardById(transaction.cardId)
-                    if (card != null) {
-                        val newBalance = if (transaction.isIncome) {
-                            card.balance - transaction.amount
-                        } else {
-                            card.balance + transaction.amount
+                    lifecycleScope.launch {
+                        val card = db.cardDao().getCardById(transaction.cardId)
+                        if (card != null) {
+                            val newBalance = if (transaction.isIncome) {
+                                card.balance - transaction.amount
+                            } else {
+                                card.balance + transaction.amount
+                            }
+                            db.cardDao().update(card.copy(balance = newBalance))
                         }
-                        db.cardDao().update(card.copy(balance = newBalance))
+                        db.transactionDao().delete(transaction)
+                        transactionRepository.deleteTransaction(transaction.id)
                     }
-                    db.transactionDao().delete(transaction)
-                    transactionRepository.deleteTransaction(transaction.id)
                 }
-            }
 
-            override fun onChildDraw(
-                c: Canvas,
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                dX: Float, dY: Float,
-                actionState: Int,
-                isCurrentlyActive: Boolean
-            ) {
-                val itemView = viewHolder.itemView
-                val cornerRadius = 30f  // радиус скругления
+                override fun onChildDraw(
+                    c: Canvas,
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    dX: Float, dY: Float,
+                    actionState: Int,
+                    isCurrentlyActive: Boolean
+                ) {
+                    val itemView = viewHolder.itemView
+                    val cornerRadius = 30f  // радиус скругления
 
-                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                    val backgroundLeft = itemView.right + dX
-                    val backgroundRight = itemView.right.toFloat()
-                    val backgroundTop = itemView.top.toFloat()
-                    val backgroundBottom = itemView.bottom.toFloat()
+                    if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                        val backgroundLeft = itemView.right + dX
+                        val backgroundRight = itemView.right.toFloat()
+                        val backgroundTop = itemView.top.toFloat()
+                        val backgroundBottom = itemView.bottom.toFloat()
 
-                    val alpha = (255 * (abs(dX) / itemView.width)).toInt().coerceIn(0, 255)
-                    val smoothPaint = Paint().apply {
-                        color = Color.argb(alpha, 255, 69, 58)
-                        isAntiAlias = true
+                        val alpha = (255 * (abs(dX) / itemView.width)).toInt().coerceIn(0, 255)
+                        val smoothPaint = Paint().apply {
+                            color = Color.argb(alpha, 255, 69, 58)
+                            isAntiAlias = true
+                        }
+
+                        val rectF = android.graphics.RectF(
+                            backgroundLeft,
+                            backgroundTop,
+                            backgroundRight,
+                            backgroundBottom
+                        )
+
+                        c.drawRoundRect(rectF, cornerRadius, cornerRadius, smoothPaint)
                     }
 
-                    val rectF = android.graphics.RectF(
-                        backgroundLeft,
-                        backgroundTop,
-                        backgroundRight,
-                        backgroundBottom
+                    super.onChildDraw(
+                        c,
+                        recyclerView,
+                        viewHolder,
+                        dX,
+                        dY,
+                        actionState,
+                        isCurrentlyActive
                     )
-
-                    c.drawRoundRect(rectF, cornerRadius, cornerRadius, smoothPaint)
                 }
-
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             }
-        }
 
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(transactionsRecycler)
 
@@ -209,8 +218,7 @@ class DashboardFragment : Fragment() {
         val db = App.database
 
         lifecycleScope.launch(Dispatchers.IO) {
-            authController.getCurrentUser {
-                    user ->
+            authController.getCurrentUser { user ->
                 lifecycleScope.launch(Dispatchers.IO) {
                     if (user?.email == null) {
                         Log.e("CardRefresh", "User or email not found from callback")
@@ -227,8 +235,7 @@ class DashboardFragment : Fragment() {
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
-            authController.getCurrentUser {
-                    user ->
+            authController.getCurrentUser { user ->
                 lifecycleScope.launch(Dispatchers.IO) {
                     if (user?.email == null) {
                         Log.e("CardRefresh", "User or email not found from callback")
@@ -297,32 +304,40 @@ class DashboardFragment : Fragment() {
                             calendar.set(Calendar.MINUTE, 0)
                             calendar.set(Calendar.SECOND, 0)
                             calendar.set(Calendar.MILLISECOND, 0)
-                            App.database.transactionDao().getTransactionsByDateRange(calendar.timeInMillis, now)
+                            App.database.transactionDao()
+                                .getTransactionsByDateRange(calendar.timeInMillis, now)
                         }
+
                         getString(R.string.filter_week) -> {
                             calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
                             calendar.set(Calendar.HOUR_OF_DAY, 0)
                             calendar.set(Calendar.MINUTE, 0)
                             calendar.set(Calendar.SECOND, 0)
                             calendar.set(Calendar.MILLISECOND, 0)
-                            App.database.transactionDao().getTransactionsByDateRange(calendar.timeInMillis, now)
+                            App.database.transactionDao()
+                                .getTransactionsByDateRange(calendar.timeInMillis, now)
                         }
+
                         getString(R.string.filter_month) -> {
                             calendar.set(Calendar.DAY_OF_MONTH, 1)
                             calendar.set(Calendar.HOUR_OF_DAY, 0)
                             calendar.set(Calendar.MINUTE, 0)
                             calendar.set(Calendar.SECOND, 0)
                             calendar.set(Calendar.MILLISECOND, 0)
-                            App.database.transactionDao().getTransactionsByDateRange(calendar.timeInMillis, now)
+                            App.database.transactionDao()
+                                .getTransactionsByDateRange(calendar.timeInMillis, now)
                         }
+
                         getString(R.string.filter_year) -> {
                             calendar.set(Calendar.DAY_OF_YEAR, 1)
                             calendar.set(Calendar.HOUR_OF_DAY, 0)
                             calendar.set(Calendar.MINUTE, 0)
                             calendar.set(Calendar.SECOND, 0)
                             calendar.set(Calendar.MILLISECOND, 0)
-                            App.database.transactionDao().getTransactionsByDateRange(calendar.timeInMillis, now)
+                            App.database.transactionDao()
+                                .getTransactionsByDateRange(calendar.timeInMillis, now)
                         }
+
                         else -> {
                             App.database.transactionDao().getAllTransactions().collect {
                                 transactionsAdapter.updateTransactions(it)
@@ -342,32 +357,55 @@ class DashboardFragment : Fragment() {
     private fun showDateRangeDialog() {
         val calendar = Calendar.getInstance()
 
-        DatePickerDialog(requireContext(), { _, year, month, day ->
-            val startCalendar = Calendar.getInstance()
-            startCalendar.set(year, month, day, 0, 0, 0)
-            startCalendar.set(Calendar.MILLISECOND, 0)
+        DatePickerDialog(
+            requireContext(),
+            { _, year, month, day ->
+                val startCalendar = Calendar.getInstance()
+                startCalendar.set(year, month, day, 0, 0, 0)
+                startCalendar.set(Calendar.MILLISECOND, 0)
 
-            DatePickerDialog(requireContext(), { _, endYear, endMonth, endDay ->
-                val endCalendar = Calendar.getInstance()
-                endCalendar.set(endYear, endMonth, endDay, 23, 59, 59)
-                endCalendar.set(Calendar.MILLISECOND, 999)
+                DatePickerDialog(
+                    requireContext(),
+                    { _, endYear, endMonth, endDay ->
+                        val endCalendar = Calendar.getInstance()
+                        endCalendar.set(endYear, endMonth, endDay, 23, 59, 59)
+                        endCalendar.set(Calendar.MILLISECOND, 999)
 
-                if (endCalendar.timeInMillis < startCalendar.timeInMillis) {
-                    Toast.makeText(requireContext(), getString(R.string.error_end_date_before_start), Toast.LENGTH_LONG).show()
-                    return@DatePickerDialog
-                }
+                        if (endCalendar.timeInMillis < startCalendar.timeInMillis) {
+                            Toast.makeText(
+                                requireContext(),
+                                getString(R.string.error_end_date_before_start),
+                                Toast.LENGTH_LONG
+                            ).show()
+                            return@DatePickerDialog
+                        }
 
-                lifecycleScope.launch {
-                    val transactions = App.database.transactionDao()
-                        .getTransactionsByDateRange(startCalendar.timeInMillis, endCalendar.timeInMillis)
-                    transactionsAdapter.updateTransactions(transactions)
-                    updateBalanceStats(transactions)
-                }
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+                        lifecycleScope.launch {
+                            val transactions = App.database.transactionDao()
+                                .getTransactionsByDateRange(
+                                    startCalendar.timeInMillis,
+                                    endCalendar.timeInMillis
+                                )
+                            transactionsAdapter.updateTransactions(transactions)
+                            updateBalanceStats(transactions)
+                        }
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+                ).show()
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 
-    private suspend fun convertCurrency(amount: Double, fromCurrency: String, toCurrency: String): Double {
+    private suspend fun convertCurrency(
+        amount: Double,
+        fromCurrency: String,
+        toCurrency: String
+    ): Double {
         val db = App.database
 
         try {
@@ -378,7 +416,12 @@ class DashboardFragment : Fragment() {
                 val now = System.currentTimeMillis()
                 val rates = response.rates.mapNotNull { (currency, rateAny) ->
                     val rate = rateAny as? Double ?: return@mapNotNull null
-                    ExchangeRateEntity(currencyCode = currency, rate = rate, baseCurrency = fromCurrency, lastUpdated = now)
+                    ExchangeRateEntity(
+                        currencyCode = currency,
+                        rate = rate,
+                        baseCurrency = fromCurrency,
+                        lastUpdated = now
+                    )
                 }
                 db.exchangeRateDao().insertAll(rates)
 
@@ -399,16 +442,24 @@ class DashboardFragment : Fragment() {
 
     private fun updateBalanceStats(transactions: List<UserTransaction>) {
         lifecycleScope.launch {
+            val userPrefCurrency = "RUB"
             val db = App.database
             var totalBalance = 0.0
             var totalIncome = 0.0
             var totalExpenses = 0.0
 
-            val cards = db.cardDao().getAllCards()
-            val userPrefCurrency = "RUB"
+            val cards = db.cardDao().getAllCardsOnce()
+            cards.forEach { card ->
+                val convertedAmount = if (card.currency != userPrefCurrency) {
+                    convertCurrency(card.balance, card.currency, userPrefCurrency)
+                }
+                else {
+                    card.balance
+                }
+                totalBalance += convertedAmount
+            }
             transactions.forEach { transaction ->
 
-                // Convert transaction amount to card's currency
                 val convertedAmount = if (transaction.currency != userPrefCurrency) {
                     convertCurrency(transaction.amount, transaction.currency, userPrefCurrency)
                 } else {
@@ -422,16 +473,19 @@ class DashboardFragment : Fragment() {
                 }
             }
 
-            totalBalance = totalIncome - totalExpenses
-
-
             val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
-            totalBalanceTextView.text = getString(R.string.label_balance,
-                numberFormat.format(totalBalance), userPrefCurrency)
-            incomeTextView.text = getString(R.string.label_income,
-                numberFormat.format(totalIncome), userPrefCurrency)
-            expensesTextView.text = getString(R.string.label_expenses,
-                numberFormat.format(totalExpenses), userPrefCurrency)
+            totalBalanceTextView.text = getString(
+                R.string.label_balance,
+                numberFormat.format(totalBalance), userPrefCurrency
+            )
+            incomeTextView.text = getString(
+                R.string.label_income,
+                numberFormat.format(totalIncome), userPrefCurrency
+            )
+            expensesTextView.text = getString(
+                R.string.label_expenses,
+                numberFormat.format(totalExpenses), userPrefCurrency
+            )
         }
     }
 

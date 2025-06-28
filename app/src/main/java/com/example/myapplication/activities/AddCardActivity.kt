@@ -148,7 +148,7 @@ class AddCardActivity : AuthBaseActivity() {
                         balance = balance,
                         masked_number = last4,
                         date = date,
-//                    currency = currency,
+                        currency = selectedCurrency,
                         owner_email = user.email
                     )
                     lifecycleScope.launch{

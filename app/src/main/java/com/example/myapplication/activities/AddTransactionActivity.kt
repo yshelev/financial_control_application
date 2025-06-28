@@ -286,7 +286,16 @@ class AddTransactionActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val card = cardDao.getCardById(cardId)
-            if (card == null) {
+
+            if (card != null) {
+                val newBalance = if (isIncomeSelected) {
+                    card.balance + amount
+                } else {
+                    card.balance - amount
+                }
+                cardDao.update(card.copy(balance = newBalance))
+            }
+            else {
                 Toast.makeText(this@AddTransactionActivity,
                     getString(R.string.error_card_not_found), Toast.LENGTH_SHORT).show()
                 return@launch
@@ -308,6 +317,7 @@ class AddTransactionActivity : AppCompatActivity() {
                 category = category,
                 description = description,
                 card_id = cardId,
+                currency = card.currency,
                 icon_res_id = iconResId
             )
 
