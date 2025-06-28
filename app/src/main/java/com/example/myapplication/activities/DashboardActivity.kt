@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.CompositePageTransformer
@@ -25,7 +24,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -104,6 +102,7 @@ class DashboardActivity : AuthBaseActivity() {
                         db.cardDao().update(card.copy(balance = newBalance))
                     }
                     db.transactionDao().delete(transaction)
+                    transactionRepository.deleteTransaction(transaction.id)
                 }
             }
         )
@@ -130,6 +129,7 @@ class DashboardActivity : AuthBaseActivity() {
             onDeleteCardClicked = { card ->
                 lifecycleScope.launch {
                     db.cardDao().delete(card)
+                    cardRepository.deleteCard(card.id)
 
                     updateBalanceStats(emptyList())
                 }
@@ -384,6 +384,7 @@ class DashboardActivity : AuthBaseActivity() {
                 onDeleteCardClicked = { card ->
                     lifecycleScope.launch {
                         db.cardDao().delete(card)
+                        cardRepository.deleteCard(card.id)
 
                         updateBalanceStats(emptyList())
                     }

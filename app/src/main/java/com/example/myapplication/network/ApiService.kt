@@ -1,6 +1,5 @@
 package com.example.myapplication.network
 
-import com.example.myapplication.database.entities.User
 import com.example.myapplication.dto.CardDto
 import com.example.myapplication.dto.TransactionDto
 import com.example.myapplication.dto.UserDto
@@ -36,10 +35,14 @@ interface ApiService {
     suspend fun getCard(@Path("id") cardId: Int): CardDto
 
     @DELETE("cards/{id}/")
-    suspend fun deleteCard(@Path("id") cardId: Int): Void
+    suspend fun deleteCard(@Path("id") cardId: Long): Response<Void>
 
     @GET("users/{email}/transactions/")
     suspend fun getUserTransactions(@Path("email") email: String): List<TransactionDto>
+
+
+    @DELETE("transactions/{id}/")
+    suspend fun deleteTransaction(@Path("id") cardId: Long): Response<Void>
 
     @GET("transactions/{id}")
     suspend fun getTransaction(@Path("id") transactionId: Int): TransactionDto
