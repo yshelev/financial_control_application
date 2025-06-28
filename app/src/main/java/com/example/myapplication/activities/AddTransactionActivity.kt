@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.entities.UserTransaction
 import com.example.myapplication.mappers.toEntityList
+import com.example.myapplication.schemas.BalanceCardUpdateSchema
 import com.example.myapplication.schemas.TransactionSchema
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
@@ -62,6 +63,10 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private val transactionRepository by lazy {
         (applicationContext as App).transactionRepository
+    }
+
+    private val cardRepository by lazy {
+        (applicationContext as App).cardRepository
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -255,7 +260,6 @@ class AddTransactionActivity : AppCompatActivity() {
         val amount = amountEditText.text.toString().toDouble()
         val category = categorySpinner.selectedItem.toString()
         val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
-        val dateInMillis = selectedDate.timeInMillis
         val selectedCardName = cardSpinner.selectedItem.toString()
 
         val cardId = cardsMap[selectedCardName]
@@ -293,7 +297,13 @@ class AddTransactionActivity : AppCompatActivity() {
                 } else {
                     card.balance - amount
                 }
+                val updateSchema = BalanceCardUpdateSchema(
+                    card_id = card.id,
+                    new_balance = newBalance
+                )
+
                 cardDao.update(card.copy(balance = newBalance))
+                cardRepository.updateBalanceCard(updateSchema)
             }
             else {
                 Toast.makeText(this@AddTransactionActivity,
@@ -301,16 +311,6 @@ class AddTransactionActivity : AppCompatActivity() {
                 return@launch
             }
 
-            val transaction = UserTransaction(
-                isIncome = isIncomeSelected,
-                amount = amount,
-                category = category,
-                description = description,
-                date = dateInMillis,
-                iconResId = iconResId,
-                cardId = cardId,
-                currency = card.currency
-            )
             val transactionS = TransactionSchema(
                 is_income = isIncomeSelected,
                 amount = amount,
@@ -322,9 +322,6 @@ class AddTransactionActivity : AppCompatActivity() {
             )
 
             transactionRepository.addTransaction(transactionS)
-
-            transactionDao.insert(transaction)
-
             finish()
         }
     }

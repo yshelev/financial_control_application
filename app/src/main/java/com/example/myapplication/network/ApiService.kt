@@ -3,6 +3,7 @@ package com.example.myapplication.network
 import com.example.myapplication.dto.CardDto
 import com.example.myapplication.dto.TransactionDto
 import com.example.myapplication.dto.UserDto
+import com.example.myapplication.schemas.BalanceCardUpdateSchema
 import com.example.myapplication.schemas.CardSchema
 import com.example.myapplication.schemas.TransactionSchema
 import com.example.myapplication.schemas.UserSchema
@@ -33,6 +34,9 @@ interface ApiService {
 
     @GET("cards/{id}")
     suspend fun getCard(@Path("id") cardId: Int): CardDto
+
+    @PATCH("cards")
+    suspend fun updateCardBalance(@Body updateSchema: BalanceCardUpdateSchema): CardDto
 
     @DELETE("cards/{id}/")
     suspend fun deleteCard(@Path("id") cardId: Long): Response<Void>

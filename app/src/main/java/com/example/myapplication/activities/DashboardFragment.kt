@@ -22,6 +22,7 @@ import com.example.myapplication.currency.ExchangeRateClient
 import com.example.myapplication.database.entities.ExchangeRateEntity
 import com.example.myapplication.database.entities.UserTransaction
 import com.example.myapplication.mappers.toEntityList
+import com.example.myapplication.schemas.BalanceCardUpdateSchema
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -103,7 +104,14 @@ class DashboardFragment : Fragment() {
                         } else {
                             card.balance + transaction.amount
                         }
+
+                        val updateSchema = BalanceCardUpdateSchema(
+                            card_id = card.id,
+                            new_balance = newBalance
+                        )
+
                         db.cardDao().update(card.copy(balance = newBalance))
+                        cardRepository.updateBalanceCard(updateSchema)
                     }
                     db.transactionDao().delete(transaction)
                     transactionRepository.deleteTransaction(transaction.id)
@@ -137,7 +145,13 @@ class DashboardFragment : Fragment() {
                             } else {
                                 card.balance + transaction.amount
                             }
+                            val updateSchema = BalanceCardUpdateSchema(
+                                card_id = card.id,
+                                new_balance = newBalance
+                            )
+
                             db.cardDao().update(card.copy(balance = newBalance))
+                            cardRepository.updateBalanceCard(updateSchema)
                         }
                         db.transactionDao().delete(transaction)
                         transactionRepository.deleteTransaction(transaction.id)
