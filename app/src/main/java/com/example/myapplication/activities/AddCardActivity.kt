@@ -9,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.database.MainDatabase
+import com.example.myapplication.database.entities.Card
 import com.example.myapplication.schemas.CardSchema
 import kotlinx.coroutines.launch
 
@@ -21,6 +23,7 @@ class AddCardActivity : AuthBaseActivity() {
     private lateinit var saveCardButton: Button
     private lateinit var backButton: ImageButton
     private lateinit var currencySpinner: Spinner
+    private lateinit var db: MainDatabase
     private var selectedCurrency: String = "RUB" // Значение по умолчанию
 
     // Маппинг символов валют на их коды
@@ -47,6 +50,8 @@ class AddCardActivity : AuthBaseActivity() {
         saveCardButton = findViewById(R.id.saveCardButton)
         backButton = findViewById(R.id.backButton)
         currencySpinner = findViewById(R.id.currencySpinner)
+
+        db = App.database
 
         val currencySymbols = listOf("₽", "$", "€")
         val spinnerAdapter = object : ArrayAdapter<String>(
@@ -142,17 +147,15 @@ class AddCardActivity : AuthBaseActivity() {
                         Log.d("create card activity", "user.email not found")
                         return@getCurrentUser
                     }
-                    Log.d("create card activity", "user.email found")
-                    val card = CardSchema(
+                    val card = Card(
                         name = name,
                         balance = balance,
-                        masked_number = last4,
+                        maskedNumber = last4,
                         date = date,
-                        currency = selectedCurrency,
-                        owner_email = user.email
+                        currency = selectedCurrency
                     )
                     lifecycleScope.launch{
-                        cardRepository.addCard(card)
+                        db.cardDao().insert(card)
                         finish()
                     }
 

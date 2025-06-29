@@ -297,13 +297,7 @@ class AddTransactionActivity : AppCompatActivity() {
                 } else {
                     card.balance - amount
                 }
-                val updateSchema = BalanceCardUpdateSchema(
-                    card_id = card.id,
-                    new_balance = newBalance
-                )
-
                 cardDao.update(card.copy(balance = newBalance))
-                cardRepository.updateBalanceCard(updateSchema)
             }
             else {
                 Toast.makeText(this@AddTransactionActivity,
@@ -311,17 +305,17 @@ class AddTransactionActivity : AppCompatActivity() {
                 return@launch
             }
 
-            val transactionS = TransactionSchema(
-                is_income = isIncomeSelected,
+            val transaction = UserTransaction(
+                isIncome = isIncomeSelected,
                 amount = amount,
                 category = category,
                 description = description,
-                card_id = cardId,
+                cardId = cardId,
                 currency = card.currency,
-                icon_res_id = iconResId
+                iconResId = iconResId
             )
 
-            transactionRepository.addTransaction(transactionS)
+            transactionDao.insert(transaction)
             finish()
         }
     }

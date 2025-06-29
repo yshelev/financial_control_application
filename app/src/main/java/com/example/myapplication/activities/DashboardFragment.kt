@@ -45,13 +45,6 @@ class DashboardFragment : Fragment() {
     private lateinit var incomeTextView: TextView
     private lateinit var expensesTextView: TextView
 
-    private val transactionRepository by lazy {
-        (requireActivity().applicationContext as App).transactionRepository
-    }
-    private val cardRepository by lazy {
-        (requireActivity().applicationContext as App).cardRepository
-    }
-
     protected lateinit var authController: AuthController
 
 
@@ -105,16 +98,9 @@ class DashboardFragment : Fragment() {
                             card.balance + transaction.amount
                         }
 
-                        val updateSchema = BalanceCardUpdateSchema(
-                            card_id = card.id,
-                            new_balance = newBalance
-                        )
-
                         db.cardDao().update(card.copy(balance = newBalance))
-                        cardRepository.updateBalanceCard(updateSchema)
                     }
                     db.transactionDao().delete(transaction)
-                    transactionRepository.deleteTransaction(transaction.id)
                 }
             }
         )
@@ -151,10 +137,8 @@ class DashboardFragment : Fragment() {
                             )
 
                             db.cardDao().update(card.copy(balance = newBalance))
-                            cardRepository.updateBalanceCard(updateSchema)
                         }
                         db.transactionDao().delete(transaction)
-                        transactionRepository.deleteTransaction(transaction.id)
                     }
                 }
 
@@ -227,48 +211,6 @@ class DashboardFragment : Fragment() {
         updateTransactionsByPeriod(getString(R.string.filter_all))
     }
 
-    override fun onResume() {
-        super.onResume()
-        val db = App.database
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            authController.getCurrentUser { user ->
-                lifecycleScope.launch(Dispatchers.IO) {
-                    if (user?.email == null) {
-                        Log.e("CardRefresh", "User or email not found from callback")
-                        return@launch
-                    }
-                    val email = user.email
-                    val transactionDtos = transactionRepository.getTransactions(email)
-                    val transactionEntities = transactionDtos.toEntityList()
-                    Log.d("dashboardAct", transactionEntities.toString())
-                    db.transactionDao().refreshTransactions(transactionEntities)
-                    Log.d("DashboardActivity", "Transactions successfully refreshed from API.")
-                }
-            }
-        }
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            authController.getCurrentUser { user ->
-                lifecycleScope.launch(Dispatchers.IO) {
-                    if (user?.email == null) {
-                        Log.e("CardRefresh", "User or email not found from callback")
-                        return@launch
-                    }
-                    Log.d("DashboardActivity", "User email: ${user.email}")
-                    val email = user.email
-
-                    val cardDtos = cardRepository.getCards(email)
-
-                    Log.d("DashboardActivity", "CardDtos count: ${cardDtos.size}")
-                    val cardEntities = cardDtos.toEntityList()
-                    db.cardDao().refreshCards(cardEntities)
-                    Log.d("CardRefresh", "Cards updated. Count: ${cardEntities.size}")
-                }
-            }
-        }
-    }
-
     private fun setupCardsViewPager() {
         val db = App.database
 
@@ -282,7 +224,6 @@ class DashboardFragment : Fragment() {
             onDeleteCardClicked = { card ->
                 lifecycleScope.launch {
                     db.cardDao().delete(card)
-                    cardRepository.deleteCard(card.id)
                     updateBalanceStats(emptyList())
                 }
             }
