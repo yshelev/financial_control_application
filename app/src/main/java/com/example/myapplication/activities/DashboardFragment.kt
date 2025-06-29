@@ -32,6 +32,11 @@ import kotlin.math.abs
 import retrofit2.Response
 import retrofit2.Call
 import retrofit2.Callback
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.DateValidatorPointForward
 
 class DashboardFragment : Fragment() {
 
@@ -310,51 +315,72 @@ class DashboardFragment : Fragment() {
     }
 
     private fun showDateRangeDialog() {
-        val calendar = Calendar.getInstance()
+        val dateRangePicker =
+            MaterialDatePicker.Builder.dateRangePicker()
+                .setTitleText(getString(R.string.select_date_range))
+                .build()
 
-        DatePickerDialog(
-            requireContext(),
-            { _, year, month, day ->
-                val startCalendar = Calendar.getInstance()
-                startCalendar.set(year, month, day, 0, 0, 0)
-                startCalendar.set(Calendar.MILLISECOND, 0)
+        dateRangePicker.addOnPositiveButtonClickListener { selection ->
+            val startDate = selection.first ?: return@addOnPositiveButtonClickListener
+            val endDate = selection.second ?: return@addOnPositiveButtonClickListener
 
-                DatePickerDialog(
-                    requireContext(),
-                    { _, endYear, endMonth, endDay ->
-                        val endCalendar = Calendar.getInstance()
-                        endCalendar.set(endYear, endMonth, endDay, 23, 59, 59)
-                        endCalendar.set(Calendar.MILLISECOND, 999)
+            lifecycleScope.launch {
+                val transactions = App.database.transactionDao()
+                    .getTransactionsByDateRange(startDate, endDate)
+                transactionsAdapter.updateTransactions(transactions)
+                updateBalanceStats(transactions)
+            }
+        }
 
-                        if (endCalendar.timeInMillis < startCalendar.timeInMillis) {
-                            Toast.makeText(
-                                requireContext(),
-                                getString(R.string.error_end_date_before_start),
-                                Toast.LENGTH_LONG
-                            ).show()
-                            return@DatePickerDialog
-                        }
-
-                        lifecycleScope.launch {
-                            val transactions = App.database.transactionDao()
-                                .getTransactionsByDateRange(
-                                    startCalendar.timeInMillis,
-                                    endCalendar.timeInMillis
-                                )
-                            transactionsAdapter.updateTransactions(transactions)
-                            updateBalanceStats(transactions)
-                        }
-                    },
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH),
-                    calendar.get(Calendar.DAY_OF_MONTH)
-                ).show()
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        dateRangePicker.show(parentFragmentManager, "DATE_RANGE_PICKER")
     }
+
+//    private fun showDateRangeDialog() {
+//        val calendar = Calendar.getInstance()
+//
+//        DatePickerDialog(
+//            requireContext(),
+//            { _, year, month, day ->
+//                val startCalendar = Calendar.getInstance()
+//                startCalendar.set(year, month, day, 0, 0, 0)
+//                startCalendar.set(Calendar.MILLISECOND, 0)
+//
+//                DatePickerDialog(
+//                    requireContext(),
+//                    { _, endYear, endMonth, endDay ->
+//                        val endCalendar = Calendar.getInstance()
+//                        endCalendar.set(endYear, endMonth, endDay, 23, 59, 59)
+//                        endCalendar.set(Calendar.MILLISECOND, 999)
+//
+//                        if (endCalendar.timeInMillis < startCalendar.timeInMillis) {
+//                            Toast.makeText(
+//                                requireContext(),
+//                                getString(R.string.error_end_date_before_start),
+//                                Toast.LENGTH_LONG
+//                            ).show()
+//                            return@DatePickerDialog
+//                        }
+//
+//                        lifecycleScope.launch {
+//                            val transactions = App.database.transactionDao()
+//                                .getTransactionsByDateRange(
+//                                    startCalendar.timeInMillis,
+//                                    endCalendar.timeInMillis
+//                                )
+//                            transactionsAdapter.updateTransactions(transactions)
+//                            updateBalanceStats(transactions)
+//                        }
+//                    },
+//                    calendar.get(Calendar.YEAR),
+//                    calendar.get(Calendar.MONTH),
+//                    calendar.get(Calendar.DAY_OF_MONTH)
+//                ).show()
+//            },
+//            calendar.get(Calendar.YEAR),
+//            calendar.get(Calendar.MONTH),
+//            calendar.get(Calendar.DAY_OF_MONTH)
+//        ).show()
+//    }
 
     private suspend fun convertCurrency(
         amount: Double,
