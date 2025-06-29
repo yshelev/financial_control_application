@@ -3,6 +3,7 @@ package com.example.myapplication.database.dao
 import androidx.room.*
 import com.example.myapplication.CategorySum
 import com.example.myapplication.StatsFragment
+import com.example.myapplication.dataClasses.PeriodTransaction
 import com.example.myapplication.database.entities.Card
 import com.example.myapplication.database.entities.UserTransaction
 import kotlinx.coroutines.flow.Flow
@@ -37,7 +38,9 @@ interface TransactionDao {
     fun getAllTransactions(): Flow<List<UserTransaction>>
 
     @Query(
-        "SELECT * FROM transactions WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC"
+        "SELECT * FROM transactions " +
+                "WHERE date BETWEEN :startDate AND :endDate " +
+                "ORDER BY date DESC"
     )
     suspend fun getTransactionsByDateRange(
         startDate: Long,
@@ -64,4 +67,82 @@ interface TransactionDao {
         startDate: Long,
         endDate: Long
     ): List<CategorySum>
+
+//    @Query("SELECT " +
+//            "    strftime('%d.%m.%Y', datetime(date / 1000, 'unixepoch')) AS day, " +
+//            "    SUM(amount) AS sum " +
+//            "FROM transactions\n" +
+//            "WHERE date BETWEEN :startDate AND :endDate " +
+//            "AND isIncome = 0 " +
+//            "GROUP BY day " +
+//            "ORDER BY date")
+//    suspend fun getExpenseForDays(
+//        startDate: Long,
+//        endDate: Long
+//    ): List<PeriodTransaction>
+//
+//    @Query("SELECT " +
+//            "    strftime('%m.%Y', datetime(date / 1000, 'unixepoch')) AS month, " +
+//            "    SUM(amount) AS sum " +
+//            "FROM transactions " +
+//            "WHERE date BETWEEN :startDate AND :endDate " +
+//            "AND isIncome = 0 " +
+//            "GROUP BY month " +
+//            "ORDER BY date")
+//    suspend fun getExpenseForMonth(
+//        startDate: Long,
+//        endDate: Long
+//    ): List<PeriodTransaction>
+//
+//    @Query("SELECT " +
+//            "    strftime('%Y', datetime(date / 1000, 'unixepoch')) AS year, " +
+//            "    SUM(amount) AS sum " +
+//            "FROM transactions " +
+//            "WHERE date BETWEEN :startDate AND :endDate " +
+//            "AND isIncome = 0 " +
+//            "GROUP BY year " +
+//            "ORDER BY date")
+//    suspend fun getExpenseForYears(
+//        startDate: Long,
+//        endDate: Long
+//    ): List<PeriodTransaction>
+//
+//    @Query("SELECT " +
+//            "    strftime('%d.%m.%Y', datetime(date / 1000, 'unixepoch')) AS day, " +
+//            "    SUM(amount) AS sum " +
+//            "FROM transactions\n" +
+//            "WHERE date BETWEEN :startDate AND :endDate " +
+//            "AND isIncome = 1 " +
+//            "GROUP BY day " +
+//            "ORDER BY date")
+//    suspend fun getIncomeForDays(
+//        startDate: Long,
+//        endDate: Long
+//    ): List<PeriodTransaction>
+//
+//    @Query("SELECT " +
+//            "    strftime('%m.%Y', datetime(date / 1000, 'unixepoch')) AS month, " +
+//            "    SUM(amount) AS sum " +
+//            "FROM transactions " +
+//            "WHERE date BETWEEN :startDate AND :endDate " +
+//            "AND isIncome = 1 " +
+//            "GROUP BY month " +
+//            "ORDER BY date")
+//    suspend fun getIncomeForMonth(
+//        startDate: Long,
+//        endDate: Long
+//    ): List<PeriodTransaction>
+//
+//    @Query("SELECT " +
+//            "    strftime('%Y', datetime(date / 1000, 'unixepoch')) AS year, " +
+//            "    SUM(amount) AS sum " +
+//            "FROM transactions " +
+//            "WHERE date BETWEEN :startDate AND :endDate " +
+//            "AND isIncome = 1 " +
+//            "GROUP BY year " +
+//            "ORDER BY date")
+//    suspend fun getIncomeForYears(
+//        startDate: Long,
+//        endDate: Long
+//    ): List<PeriodTransaction>
 }

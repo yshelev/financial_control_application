@@ -133,6 +133,7 @@
     <string name="enter_new_password">Введите новый пароль</string>
     <string name="verify">Подтвердить</string>
     <string name="enter_current_password">Введите текущий пароль</string>
+    <string name="select_date_range">Выберите период</string>
 
     <string-array name="stats_tab_titles">
         <item>Доходы</item>

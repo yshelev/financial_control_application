@@ -25,6 +25,7 @@ import android.graphics.Paint
 import android.graphics.RectF
 import androidx.core.content.ContentProviderCompat.requireContext
 import com.github.mikephil.charting.utils.Utils
+import java.util.TimeZone
 
 
 abstract class BaseChartFragment : Fragment() {
@@ -40,24 +41,73 @@ abstract class BaseChartFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val db = MainDatabase.getDatabase(requireContext().applicationContext)
         val dao = db.transactionDao()
+        val loader = view.findViewById<View>(R.id.chartLoader)
+        val pieChart = view.findViewById<PieChart>(R.id.pieChart)
+        val dateCard = view.findViewById<View>(R.id.dateCard)
+        val dateText = view.findViewById<TextView>(R.id.selectDateText)
+
         val start = getStartOfMonth()
         val end = getEndOfMonth()
+        loadAndDisplayChart(start, end, pieChart, loader)
 
-        val loader = view.findViewById<View>(R.id.chartLoader) // или R.id.chartLoadingText
-        val pieChart = view.findViewById<PieChart>(R.id.pieChart)
+        dateCard.setOnClickListener {
+            val picker = com.google.android.material.datepicker.MaterialDatePicker.Builder
+                .dateRangePicker()
+                .setTitleText(getString(R.string.select_date_range))
+                .build()
 
-        lifecycleScope.launch {
-            loader.visibility = View.VISIBLE
-            pieChart.visibility = View.INVISIBLE
+            picker.addOnPositiveButtonClickListener { selection ->
+                val startDateUtc = selection.first ?: return@addOnPositiveButtonClickListener
+                val endDateUtc = selection.second ?: return@addOnPositiveButtonClickListener
 
-            val data = loadData(start, end)
+                // Преобразуем из UTC в локальное время и выставляем границы дней
+                val localStartDate = getStartOfDayInLocal(startDateUtc)
+                val localEndDate = getEndOfDayInLocal(endDateUtc - 1)
 
-            loader.visibility = View.GONE
-            pieChart.visibility = View.VISIBLE
+                val formatted = formatDate(localStartDate) + " – " + formatDate(localEndDate)
+                dateText.text = formatted
 
-            setupChart(pieChart, data, chartTitle)
+                loadAndDisplayChart(localStartDate, localEndDate, pieChart, loader)
+                loadAndDisplayChart(localStartDate, localEndDate, pieChart, loader)
+
+            }
+            picker.show(parentFragmentManager, "DATE_PICKER")
         }
     }
+
+    private fun getStartOfDayInLocal(utcMillis: Long): Long {
+        val cal = Calendar.getInstance()
+        cal.timeInMillis = utcMillis
+        // Смещаем на текущий часовой пояс
+        val tzOffset = cal.timeZone.getOffset(cal.timeInMillis)
+        cal.timeInMillis += tzOffset
+
+        // Устанавливаем 00:00:00.000
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+
+        // Возвращаем обратно в UTC
+        return cal.timeInMillis
+    }
+
+    // Функция для конца дня в локальном времени
+    private fun getEndOfDayInLocal(utcMillis: Long): Long {
+        val cal = Calendar.getInstance()
+        cal.timeInMillis = utcMillis
+        val tzOffset = cal.timeZone.getOffset(cal.timeInMillis)
+        cal.timeInMillis += tzOffset
+
+        // Устанавливаем 23:59:59.999
+        cal.set(Calendar.HOUR_OF_DAY, 23)
+        cal.set(Calendar.MINUTE, 59)
+        cal.set(Calendar.SECOND, 59)
+        cal.set(Calendar.MILLISECOND, 999)
+
+        return cal.timeInMillis
+    }
+
 
     private fun setupChart(
         pieChart: PieChart,
@@ -100,6 +150,27 @@ abstract class BaseChartFragment : Fragment() {
         pieChart.invalidate()
 
         renderCustomLegend(data, colors)
+    }
+
+    private fun loadAndDisplayChart(start: Long, end: Long, pieChart: PieChart, loader: View) {
+        lifecycleScope.launch {
+            loader.visibility = View.VISIBLE
+            pieChart.visibility = View.INVISIBLE
+
+            val data = loadData(start, end)
+
+            loader.visibility = View.GONE
+            pieChart.visibility = View.VISIBLE
+
+            setupChart(pieChart, data, chartTitle)
+        }
+    }
+
+    private fun formatDate(timestamp: Long): String {
+        val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
+        val day = cal.get(Calendar.DAY_OF_MONTH).toString().padStart(2, '0')
+        val month = (cal.get(Calendar.MONTH) + 1).toString().padStart(2, '0')
+        return "$day.$month"
     }
 
 
