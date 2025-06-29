@@ -144,8 +144,7 @@ class AddCardActivity : AuthBaseActivity() {
                 authController.getCurrentUser {
                     user ->
                     if (user?.email == null) {
-                        Log.d("create card activity", "user.email not found")
-                        return@getCurrentUser
+                        Log.d("add card activity", "user.email not found")
                     }
                     val card = Card(
                         name = name,
@@ -158,7 +157,6 @@ class AddCardActivity : AuthBaseActivity() {
                         db.cardDao().insert(card)
                         finish()
                     }
-
                 }
 
             } catch (e: Exception) {

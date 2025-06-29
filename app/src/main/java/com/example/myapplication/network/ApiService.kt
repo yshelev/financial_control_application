@@ -1,6 +1,9 @@
 package com.example.myapplication.network
 
+import com.example.myapplication.dto.BackupData
 import com.example.myapplication.dto.CardDto
+import com.example.myapplication.dto.CreateBackupRequest
+import com.example.myapplication.dto.GetBackupRequest
 import com.example.myapplication.dto.TransactionDto
 import com.example.myapplication.dto.UserDto
 import com.example.myapplication.schemas.BalanceCardUpdateSchema
@@ -13,6 +16,12 @@ import retrofit2.http.*
 interface ApiService {
     @GET("users/{id}")
     suspend fun getUserById(@Path("id") userId: Int): UserDto
+
+    @PUT("/backup/")
+    suspend fun createBackup(@Body backupData: CreateBackupRequest): Response<Any>
+
+    @PUT("/backup/")
+    suspend fun getBackup(@Body backupData: GetBackupRequest): Response<BackupData>
 
     @GET("users/{email}")
     suspend fun getUserByEmail(@Path("email") email: String): Response<UserDto>

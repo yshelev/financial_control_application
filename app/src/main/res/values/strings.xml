@@ -24,6 +24,7 @@
     <string name="time_period">Time period:</string>
     <string name="welcome_back">Welcome back!</string>
     <string name="email">Email</string>
+    <string name="anon">anonymous User</string>
     <string name="password">Password</string>
     <string name="login">LOGIN</string>
     <string name="don_t_have_an_account_sign_up">Don\'t have an account? Sign up</string>
@@ -105,6 +106,7 @@
     <string name="error_enter_valid_number">Please enter a valid number</string>
     <string name="error_no_cards">No cards available</string>
     <string name="error_card_not_found">Selected card not found in database</string>
+    <string name="error_server_saving_data">Some error occured when push data to server.</string>
 
     <string name="enter_card_name">Please enter the card name</string>
     <string name="enter_4_digits">Enter 4 digits</string>

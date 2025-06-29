@@ -12,6 +12,7 @@ class WelcomeActivity : AuthBaseActivity() {
         setContentView(R.layout.activity_welcome)
 
         val startButton = findViewById<Button>(R.id.startButton)
+        val skipRegistrationButton = findViewById<Button>(R.id.startWithoutRegistrationButton)
         val registerLink = findViewById<TextView>(R.id.registerLink)
 
         startButton.setOnClickListener {
@@ -20,6 +21,9 @@ class WelcomeActivity : AuthBaseActivity() {
 
         registerLink.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
+        }
+        skipRegistrationButton.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
         }
     }
 
