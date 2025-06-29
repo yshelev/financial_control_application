@@ -120,7 +120,11 @@
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/timeFilterLayout"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.0"
+            android:paddingBottom="16dp"
+            android:paddingTop="8dp"
+            android:clipChildren="true"
+            android:clipToPadding="true"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/addTransactionButton"
@@ -134,7 +138,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="12dp"
             android:layout_marginEnd="12dp"
-            app:elevation="0dp"/>
+            app:elevation="0dp"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

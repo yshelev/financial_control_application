@@ -136,6 +136,7 @@
     <string name="verify">Подтвердить</string>
     <string name="enter_current_password">Введите текущий пароль</string>
     <string name="start_without_registration">Начать без регистрации</string>
+    <string name="select_date_range">Выберите период</string>
 
     <string-array name="stats_tab_titles">
         <item>Доходы</item>

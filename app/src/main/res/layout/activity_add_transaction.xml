@@ -150,17 +150,17 @@
             android:layout_marginBottom="20dp" />
 
         <EditText
-            android:id="@+id/descriptionEditText"
-            style="@style/GlassInput"
-            android:hint="@string/description"
-            android:layout_marginBottom="20dp"
-            android:textColor="@color/buttonTextColor" />
-
-        <EditText
             android:id="@+id/amountEditText"
             style="@style/GlassInput"
             android:hint="@string/amount"
             android:inputType="numberDecimal"
+            android:layout_marginBottom="20dp"
+            android:textColor="@color/buttonTextColor" />
+
+        <EditText
+            android:id="@+id/descriptionEditText"
+            style="@style/GlassInput"
+            android:hint="@string/description"
             android:layout_marginBottom="20dp"
             android:textColor="@color/buttonTextColor" />
 
