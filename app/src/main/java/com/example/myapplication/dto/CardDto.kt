@@ -1,6 +1,5 @@
 package com.example.myapplication.dto
 
-import android.icu.util.Currency
 import com.google.gson.annotations.SerializedName
 
 data class CardDto(
