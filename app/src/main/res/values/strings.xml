@@ -136,6 +136,7 @@
     <string name="enter_new_password">Enter new password</string>
     <string name="verify">Verify</string>
     <string name="enter_current_password">Enter current password</string>
+    <string name="start_without_registration">start without registration</string>
 
 
     <string-array name="currencies">
