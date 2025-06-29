@@ -21,6 +21,7 @@
     <string name="time_period">Период:</string>
     <string name="welcome_back">С возвращением!</string>
     <string name="email">Электронная почта</string>
+    <string name="anon">Неизвестный пользователь</string>
     <string name="password">Пароль</string>
     <string name="login">ВОЙТИ</string>
     <string name="don_t_have_an_account_sign_up">Нет аккаунта? Зарегистрируйтесь</string>
