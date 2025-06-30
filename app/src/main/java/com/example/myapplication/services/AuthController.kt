@@ -52,8 +52,8 @@ class AuthController(private val context: Context, private val database: MainDat
         }
 
         (context as? AppCompatActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
-            val existingUser = database.userDao().getUserByEmail(email)
-            if (existingUser != null) {
+            val existingUser_ = userRepository.getUserByEmail(email).body()
+            if (existingUser_ != null) {
                 Log.d("AuthController", "user not null")
                 context.runOnUiThread {
                     onFailure(context.getString(R.string.error_email_registered))
@@ -62,7 +62,19 @@ class AuthController(private val context: Context, private val database: MainDat
             }
 
             val hashedPassword = hash(password)
-            val newUser = User(username = name, email = email, password = hashedPassword)
+            val newUserSchema = UserSchema(
+                username = name,
+                email = email,
+                password = hashedPassword
+            )
+
+            val ans = userRepository.registerUser(newUserSchema)
+            val newUser = User(
+                id = ans.id,
+                username = name,
+                email = email,
+                password = hashedPassword
+            )
             database.userDao().insert(newUser)
             loginAccount(email, password, onSuccess, onFailure)
         }
@@ -136,7 +148,7 @@ class AuthController(private val context: Context, private val database: MainDat
 
         (context as? AppCompatActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
             val user = database.userDao().getUserByEmail(email)
-            (context as? AppCompatActivity)?.runOnUiThread {
+            context.runOnUiThread {
                 callback(user)
             }
         }

@@ -55,6 +55,15 @@
             android:text="@string/start"
             android:layout_marginTop="24dp"/>
 
+        <Button
+            android:id="@+id/startWithoutRegistrationButton"
+            style="@style/CandyButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/start_without_registration"
+            android:layout_marginTop="24dp"/>
+
+
         <TextView
             android:id="@+id/registerLink"
             android:layout_width="wrap_content"

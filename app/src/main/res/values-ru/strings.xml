@@ -21,6 +21,7 @@
     <string name="time_period">Период:</string>
     <string name="welcome_back">С возвращением!</string>
     <string name="email">Электронная почта</string>
+    <string name="anon">Неизвестный пользователь</string>
     <string name="password">Пароль</string>
     <string name="login">ВОЙТИ</string>
     <string name="don_t_have_an_account_sign_up">Нет аккаунта? Зарегистрируйтесь</string>
@@ -101,6 +102,7 @@
     <string name="error_enter_valid_number">Пожалуйста, введите корректное число</string>
     <string name="error_no_cards">Нет доступных карт</string>
     <string name="error_card_not_found">Выбранная карта не найдена в базе</string>
+    <string name="error_server_saving_data">Ошибка при отправке данных на сервер</string>
 
     <string name="enter_card_name">Пожалуйста, введите название карты</string>
     <string name="enter_4_digits">Введите 4 цифры</string>
@@ -133,6 +135,7 @@
     <string name="enter_new_password">Введите новый пароль</string>
     <string name="verify">Подтвердить</string>
     <string name="enter_current_password">Введите текущий пароль</string>
+    <string name="start_without_registration">Начать без регистрации</string>
     <string name="select_date_range">Выберите период</string>
 
     <string-array name="stats_tab_titles">
