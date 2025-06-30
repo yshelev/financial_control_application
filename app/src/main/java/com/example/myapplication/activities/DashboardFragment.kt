@@ -11,6 +11,9 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -45,6 +48,7 @@ class DashboardFragment : Fragment() {
     private lateinit var totalBalanceTextView: TextView
     private lateinit var incomeTextView: TextView
     private lateinit var expensesTextView: TextView
+    private lateinit var addCardLauncher: ActivityResultLauncher<Intent>
 
     protected lateinit var authController: AuthController
 
@@ -205,6 +209,15 @@ class DashboardFragment : Fragment() {
 
         setupCardsViewPager()
 
+        addCardLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            if (it.resultCode == AppCompatActivity.RESULT_OK) {
+                setupCardsViewPager()
+                updateTransactionsByPeriod(currentFilter)
+            }
+        }
+
         addTransactionButton.setOnClickListener {
             startActivity(Intent(requireContext(), AddTransactionActivity::class.java))
         }
@@ -220,7 +233,7 @@ class DashboardFragment : Fragment() {
             db.transactionDao().getAllTransactions(),
             lifecycleScope,
             onAddCardClicked = {
-                startActivity(Intent(requireContext(), AddCardActivity::class.java))
+                addCardLauncher.launch(Intent(requireContext(), AddCardActivity::class.java))
             },
             onDeleteCardClicked = { card ->
                 lifecycleScope.launch {

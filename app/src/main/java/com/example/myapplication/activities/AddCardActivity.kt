@@ -123,6 +123,7 @@ class AddCardActivity : AuthBaseActivity() {
         }
 
         backButton.setOnClickListener {
+            setResult(RESULT_OK)
             finish()
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
@@ -155,6 +156,7 @@ class AddCardActivity : AuthBaseActivity() {
                     )
                     lifecycleScope.launch{
                         db.cardDao().insert(card)
+                        setResult(RESULT_OK)
                         finish()
                     }
                 }
