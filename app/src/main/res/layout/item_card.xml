@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/glass_background"
     android:padding="16dp">
@@ -40,20 +40,21 @@
         android:text="@string/balance"
         android:textColor="@color/buttonTextColor" />
 
+    <TextView
+        android:id="@+id/cardBalance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="120,000₽"
+        android:textColor="@color/buttonTextColor"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="10dp">
 
-        <TextView
-            android:id="@+id/cardBalance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="120,000₽"
-            android:textColor="@color/buttonTextColor"
-            android:textSize="24sp"
-            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/cardIncome"
@@ -82,12 +83,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="20dp">
 
         <TextView
             android:id="@+id/cardNumber"
             android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_weight="7"
             android:layout_height="wrap_content"
             android:textColor="@color/buttonTextColor"
             android:text="**** ***** **** 1234" />
@@ -96,8 +98,10 @@
             android:id="@+id/cardDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:textColor="@color/buttonTextColor"
-            android:text="12/25" />
+            android:text="12/25"
+            />
     </LinearLayout>
 </LinearLayout>
 
