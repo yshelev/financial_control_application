@@ -5,15 +5,12 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
-import androidx.core.content.ContextCompat
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.entities.UserTransaction
-import com.example.myapplication.R
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.launch
@@ -52,9 +49,9 @@ class AddTransactionActivity : AppCompatActivity() {
     private lateinit var incomeCategories: MutableList<String>
     private lateinit var expenseCategories: MutableList<String>
 
-    val db = App.database
-    val transactionDao = db.transactionDao()
-    val cardDao = db.cardDao()
+    private val db = App.database
+    private val transactionDao = db.transactionDao()
+    private val cardDao = db.cardDao()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,6 +70,8 @@ class AddTransactionActivity : AppCompatActivity() {
         saveButton = findViewById(R.id.saveButton)
 
         updateCategoriesStrings()
+
+        updateDateText()
 
         backButton.setOnClickListener { finish() }
 
@@ -197,7 +196,8 @@ class AddTransactionActivity : AppCompatActivity() {
                     description = description,
                     cardId = cardId,
                     currency = card.currency,
-                    iconResId = iconResId
+                    iconResId = iconResId,
+                    date = selectedDate.timeInMillis
                 )
                 transactionDao.insert(transaction)
                 finish()
@@ -208,9 +208,13 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun showDatePicker() {
         DatePickerDialog(this, { _, y, m, d ->
             selectedDate.set(y, m, d)
-            val format = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-            selectDateText.text = format.format(selectedDate.time)
+            updateDateText()
         }, selectedDate.get(Calendar.YEAR), selectedDate.get(Calendar.MONTH), selectedDate.get(Calendar.DAY_OF_MONTH)).show()
+    }
+
+    private fun updateDateText() {
+        val format = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+        selectDateText.text = format.format(selectedDate.time)
     }
 
     private fun updateToggleButtons() {
