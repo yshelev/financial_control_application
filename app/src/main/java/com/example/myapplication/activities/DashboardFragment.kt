@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
@@ -397,7 +398,8 @@ class DashboardFragment : Fragment() {
 
     private fun updateBalanceStats(transactions: List<UserTransaction>) {
         lifecycleScope.launch {
-            val userPrefCurrency = "RUB"
+            val prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+            val userPrefCurrency = prefs.getString("PreferredCurrency", "RUB") ?: "RUB"
             val db = App.database
             var totalBalance = 0.0
             var totalIncome = 0.0
@@ -429,18 +431,28 @@ class DashboardFragment : Fragment() {
             }
 
             val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
+            val currencySymbol = getCurrencySymbol(userPrefCurrency)
+
             totalBalanceTextView.text = getString(
                 R.string.label_balance,
-                numberFormat.format(totalBalance), userPrefCurrency
+                numberFormat.format(totalBalance), currencySymbol
             )
             incomeTextView.text = getString(
                 R.string.label_income,
-                numberFormat.format(totalIncome), userPrefCurrency
+                numberFormat.format(totalIncome), currencySymbol
             )
             expensesTextView.text = getString(
                 R.string.label_expenses,
-                numberFormat.format(totalExpenses), userPrefCurrency
+                numberFormat.format(totalExpenses), currencySymbol
             )
+        }
+    }
+
+    private fun getCurrencySymbol(currencyCode: String): String {
+        return try {
+            Currency.getInstance(currencyCode).symbol
+        } catch (e: Exception) {
+            currencyCode
         }
     }
 
