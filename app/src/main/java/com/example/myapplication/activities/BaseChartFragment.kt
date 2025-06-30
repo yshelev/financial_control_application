@@ -130,6 +130,11 @@ abstract class BaseChartFragment : Fragment() {
         dataSet.colors = colors
         dataSet.valueTextSize = 14f
         dataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
+        dataSet.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return "%.1f%%".format(value)
+            }
+        }
 
         pieChart.data = PieData(dataSet)
         pieChart.setUsePercentValues(true)
@@ -318,6 +323,7 @@ abstract class BaseChartFragment : Fragment() {
             val absoluteAngles = mChart.absoluteAngles
 
             val data = mChart.data
+            val total = data.yValueSum // ОБЩАЯ СУММА
             val dataSets = data.dataSets
 
             var angle = 0f
@@ -327,7 +333,9 @@ abstract class BaseChartFragment : Fragment() {
 
                 for (j in 0 until dataSet.entryCount) {
                     val entry = dataSet.getEntryForIndex(j) as PieEntry
-                    val value = dataSet.getEntryForIndex(j).y
+                    val value = entry.y
+
+                    val percent = if (total != 0f) (value / total) * 100 else 0f
 
                     val offset = drawAngles[j] / 2f
                     val sliceAngle = drawAngles[j]
@@ -336,12 +344,11 @@ abstract class BaseChartFragment : Fragment() {
                     val sliceXBase = Math.cos(Math.toRadians(transformedAngle.toDouble())).toFloat()
                     val sliceYBase = Math.sin(Math.toRadians(transformedAngle.toDouble())).toFloat()
 
-                    val label = "${entry.label}\n${"%.1f".format(value)}%"
+                    val label = "${entry.label}\n${"%.1f".format(percent)}%"
 
                     val x = center.x + radius / 1.8f * sliceXBase
                     val y = center.y + radius / 1.8f * sliceYBase
 
-                    // Рамка
                     val padding = Utils.convertDpToPixel(6f)
                     val textBounds = RectF()
                     val lines = label.split("\n")
