@@ -29,14 +29,16 @@
                 android:layout_marginTop="40dp"
                 android:text="@string/email"
                 android:textColor="@color/buttonTextColor" />
+
             <TextView
-                android:layout_marginLeft="8dp"
                 android:id="@+id/emailTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:paddingBottom="8dp"
+                android:text="@string/anon"
                 android:textColor="@color/textColor"
-                android:textSize="16sp"
-                android:paddingBottom="8dp"/>
+                android:textSize="16sp" />
 
             <TextView
                 android:layout_width="wrap_content"
