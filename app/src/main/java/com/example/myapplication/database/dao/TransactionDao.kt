@@ -75,24 +75,24 @@ interface TransactionDao {
 //            "WHERE date BETWEEN :startDate AND :endDate " +
 //            "AND isIncome = 0 " +
 //            "GROUP BY day " +
-//            "ORDER BY date")
+//            "ORDER BY MIN(date)")
 //    suspend fun getExpenseForDays(
 //        startDate: Long,
 //        endDate: Long
 //    ): List<PeriodTransaction>
 //
-//    @Query("SELECT " +
-//            "    strftime('%m.%Y', datetime(date / 1000, 'unixepoch')) AS month, " +
-//            "    SUM(amount) AS sum " +
-//            "FROM transactions " +
-//            "WHERE date BETWEEN :startDate AND :endDate " +
-//            "AND isIncome = 0 " +
-//            "GROUP BY month " +
-//            "ORDER BY date")
-//    suspend fun getExpenseForMonth(
-//        startDate: Long,
-//        endDate: Long
-//    ): List<PeriodTransaction>
+    @Query("SELECT " +
+            "    strftime('%m.%Y', datetime(date / 1000, 'unixepoch')) AS month, " +
+            "    SUM(amount) AS sum " +
+            "FROM transactions " +
+            "WHERE date BETWEEN :startDate AND :endDate " +
+            "AND isIncome = 0 " +
+            "GROUP BY month " +
+            "ORDER BY MIN(date)")
+    suspend fun getExpenseForMonth(
+        startDate: Long,
+        endDate: Long
+    ): List<PeriodTransaction>
 //
 //    @Query("SELECT " +
 //            "    strftime('%Y', datetime(date / 1000, 'unixepoch')) AS year, " +
@@ -101,7 +101,7 @@ interface TransactionDao {
 //            "WHERE date BETWEEN :startDate AND :endDate " +
 //            "AND isIncome = 0 " +
 //            "GROUP BY year " +
-//            "ORDER BY date")
+//            "ORDER BY MIN(date)")
 //    suspend fun getExpenseForYears(
 //        startDate: Long,
 //        endDate: Long
@@ -114,24 +114,24 @@ interface TransactionDao {
 //            "WHERE date BETWEEN :startDate AND :endDate " +
 //            "AND isIncome = 1 " +
 //            "GROUP BY day " +
-//            "ORDER BY date")
+//            "ORDER BY MIN(date)")
 //    suspend fun getIncomeForDays(
 //        startDate: Long,
 //        endDate: Long
 //    ): List<PeriodTransaction>
 //
-//    @Query("SELECT " +
-//            "    strftime('%m.%Y', datetime(date / 1000, 'unixepoch')) AS month, " +
-//            "    SUM(amount) AS sum " +
-//            "FROM transactions " +
-//            "WHERE date BETWEEN :startDate AND :endDate " +
-//            "AND isIncome = 1 " +
-//            "GROUP BY month " +
-//            "ORDER BY date")
-//    suspend fun getIncomeForMonth(
-//        startDate: Long,
-//        endDate: Long
-//    ): List<PeriodTransaction>
+    @Query("SELECT " +
+            "    strftime('%m.%Y', datetime(date / 1000, 'unixepoch')) AS month, " +
+            "    SUM(amount) AS sum " +
+            "FROM transactions " +
+            "WHERE date BETWEEN :startDate AND :endDate " +
+            "AND isIncome = 1 " +
+            "GROUP BY month " +
+            "ORDER BY MIN(date)")
+    suspend fun getIncomeForMonth(
+        startDate: Long,
+        endDate: Long
+    ): List<PeriodTransaction>
 //
 //    @Query("SELECT " +
 //            "    strftime('%Y', datetime(date / 1000, 'unixepoch')) AS year, " +
@@ -140,7 +140,7 @@ interface TransactionDao {
 //            "WHERE date BETWEEN :startDate AND :endDate " +
 //            "AND isIncome = 1 " +
 //            "GROUP BY year " +
-//            "ORDER BY date")
+//            "ORDER BY MIN(date)")
 //    suspend fun getIncomeForYears(
 //        startDate: Long,
 //        endDate: Long

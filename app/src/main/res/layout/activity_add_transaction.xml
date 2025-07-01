@@ -161,7 +161,7 @@
             android:id="@+id/descriptionEditText"
             style="@style/GlassInput"
             android:hint="@string/description"
-            android:layout_marginBottom="20dp"
+            android:visibility="gone"
             android:textColor="@color/buttonTextColor" />
 
 
