@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.database.entities.Category
 import com.example.myapplication.database.entities.UserTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -19,6 +20,7 @@ import java.util.*
 class TransactionsAdapter(
     lifecycleOwner: LifecycleOwner,
     transactionsFlow: Flow<List<UserTransaction>>,
+    categoriesFlow: Flow<List<Category>>, // Добавляем Flow категорий
     private val onDeleteClicked: (UserTransaction) -> Unit
 ) : RecyclerView.Adapter<TransactionsAdapter.TransactionViewHolder>() {
 
@@ -32,10 +34,22 @@ class TransactionsAdapter(
     var transactions: List<UserTransaction> = emptyList()
         private set
 
+    var categories: List<Category> = emptyList() // Добавляем список категорий
+        private set
+
     init {
         lifecycleOwner.lifecycleScope.launch {
+            // Подписываемся на обновления транзакций
             transactionsFlow.collectLatest { newTransactions ->
                 transactions = newTransactions
+                notifyDataSetChanged()
+            }
+        }
+
+        lifecycleOwner.lifecycleScope.launch {
+            // Подписываемся на обновления категорий
+            categoriesFlow.collectLatest { newCategories ->
+                categories = newCategories
                 notifyDataSetChanged()
             }
         }
@@ -57,7 +71,11 @@ class TransactionsAdapter(
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val tx = transactions[position]
-        holder.title.text = tx.category
+
+        // Находим категорию по ID
+        val category = categories.find { it.id == tx.categoryId }
+
+        holder.title.text = category?.name ?: "Unknown" // Используем название категории
         holder.date.text = dateFormatter.format(Date(tx.date))
         val symbol = currencySymbols[tx.currency] ?: "₽"
         holder.amount.text = if (tx.isIncome) "+${tx.amount}${symbol}" else "-${tx.amount}${symbol}"
@@ -66,7 +84,10 @@ class TransactionsAdapter(
                 if (tx.isIncome) R.color.green else R.color.red
             )
         )
-        holder.icon.setImageResource(tx.iconResId)
+
+        category?.iconResId?.let { resId ->
+            holder.icon.setImageResource(resId)
+        } ?: holder.icon.setImageResource(R.drawable.ic_default) // Иконка по умолчанию
 
         holder.deleteButton.setOnClickListener {
             onDeleteClicked(tx)

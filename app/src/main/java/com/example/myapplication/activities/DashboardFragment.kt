@@ -105,6 +105,7 @@ class DashboardFragment : Fragment() {
         transactionsAdapter = TransactionsAdapter(
             viewLifecycleOwner,
             db.transactionDao().getAllTransactions(),
+            db.categoryDao().getAllCategories(),
             onDeleteClicked = { transaction ->
                 lifecycleScope.launch {
                     val card = cardRepository.getCard(transaction.cardId)

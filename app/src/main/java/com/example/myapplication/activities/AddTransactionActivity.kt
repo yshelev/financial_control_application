@@ -41,6 +41,8 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private var cardsMap: Map<String, Long> = emptyMap()
 
+    private var newCategoryToSelect: String? = null
+
     private val activeIncomeBg = Color.parseColor("#50FF9D")
     private val activeIncomeText = Color.BLACK
     private val activeExpenseBg = Color.parseColor("#FF6E6E")
@@ -80,7 +82,10 @@ class AddTransactionActivity : AppCompatActivity() {
         backButton = findViewById(R.id.backButton)
         saveButton = findViewById(R.id.saveButton)
 
-        updateCategoriesStrings()
+        incomeCategories = mutableListOf()
+        expenseCategories = mutableListOf()
+
+        updateCategoriesFromDb()
 
         updateDateText()
 
@@ -94,14 +99,18 @@ class AddTransactionActivity : AppCompatActivity() {
                 val iconResId = result.data?.getIntExtra("iconResId", R.drawable.ic_default)
 
                 if (newCategory != null && iconResId != null) {
+                    val fullCategory = "$newCategory|$iconResId"
+
                     if (isIncomeSelected) {
-                        incomeCategories.add("$newCategory|$iconResId")
+                        incomeCategories.add(incomeCategories.size - 1, fullCategory)
                     } else {
-                        expenseCategories.add("$newCategory|$iconResId")
+                        expenseCategories.add(expenseCategories.size - 1, fullCategory)
                     }
+
                     updateCategorySpinner()
-                    val index = getCategoriesList().indexOf("$newCategory|$iconResId")
-                    categorySpinner.setSelection(index)
+
+                    val index = getCategoriesList().indexOf(fullCategory)
+                    if (index != -1) categorySpinner.setSelection(index)
                 }
             }
         }
@@ -140,23 +149,24 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private fun extractCategoryName(full: String) = full.substringBefore("|")
 
-    private fun updateCategoriesStrings() {
-        incomeCategories = mutableListOf(
-            "${getString(R.string.category_salary)}|${R.drawable.ic_salary}",
-            "${getString(R.string.category_gift)}|${R.drawable.ic_gift}",
-            "${getString(R.string.category_investment)}|${R.drawable.ic_investment}",
-            "${getString(R.string.category_add_new)}|${R.drawable.ic_default}"
-        )
-
-        expenseCategories = mutableListOf(
-            "${getString(R.string.category_food)}|${R.drawable.ic_food}",
-            "${getString(R.string.category_transport)}|${R.drawable.ic_transport}",
-            "${getString(R.string.category_clothes)}|${R.drawable.ic_clothes}",
-            "${getString(R.string.category_education)}|${R.drawable.ic_education}",
-            "${getString(R.string.category_health)}|${R.drawable.ic_health}",
-            "${getString(R.string.category_entertainment)}|${R.drawable.ic_entertainment}",
-            "${getString(R.string.category_add_new)}|${R.drawable.ic_default}"
-        )
+    private fun updateCategoriesFromDb() {
+        lifecycleScope.launch {
+            App.database.categoryDao()
+                .getCategoriesByType(isIncomeSelected)
+                .collect { categories ->
+                    val list = categories.map { "${it.name}|${it.iconResId}" }.toMutableList()
+                    list.add("${getString(R.string.category_add_new)}|${R.drawable.ic_default}")
+                    if (isIncomeSelected) incomeCategories = list else expenseCategories = list
+                    updateCategorySpinner()
+                }
+            if (newCategoryToSelect != null) {
+                val index = getCategoriesList().indexOfFirst { extractCategoryName(it) == newCategoryToSelect }
+                if (index >= 0) {
+                    categorySpinner.setSelection(index)
+                }
+                newCategoryToSelect = null
+            }
+        }
     }
 
     private fun updateCategorySpinner() {
@@ -188,16 +198,17 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun saveTransaction() {
         val amount = amountEditText.text.toString().toDouble()
         val selected = getCategoriesList()[categorySpinner.selectedItemPosition]
-        val category = extractCategoryName(selected)
+        val categoryName = extractCategoryName(selected)
         val iconResId = selected.substringAfter("|").toIntOrNull() ?: R.drawable.ic_default
-
         val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
         val cardId = cardsMap[cardSpinner.selectedItem.toString()] ?: return
 
         lifecycleScope.launch {
             val card = cardRepository.getCard(cardId)
-            val cardEntity = card.toEntity()
-            if (card != null) {
+            val category = App.database.categoryDao().getCategoryByNameAndType(categoryName, isIncomeSelected)
+
+            if (card != null && category != null) {
+                val cardEntity = card.toEntity()
                 val updatedBalance = if (isIncomeSelected) card.balance + amount else card.balance - amount
                 cardDao.update(cardEntity.copy(balance = updatedBalance))
 
@@ -205,25 +216,23 @@ class AddTransactionActivity : AppCompatActivity() {
                     card_id = card.id,
                     new_balance = updatedBalance
                 )
-
                 cardRepository.updateBalanceCard(ubs)
 
                 val transactionSchema = TransactionSchema(
                     is_income = isIncomeSelected,
                     amount = amount,
-                    category = category,
                     description = description,
                     card_id = cardId,
                     currency = card.currency,
-                    icon_res_id = iconResId
+                    category_id = category.id  // передаем ID категории
                 )
 
                 val responseTransaction = transactionRepository.addTransaction(transactionSchema)
-
                 val transaction = responseTransaction.toEntity()
-
                 transactionDao.insert(transaction)
                 finish()
+            } else {
+                Toast.makeText(this@AddTransactionActivity, "Ошибка: карта или категория не найдены", Toast.LENGTH_SHORT).show()
             }
         }
     }
