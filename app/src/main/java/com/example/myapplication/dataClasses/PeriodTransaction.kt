@@ -1,6 +1,6 @@
 package com.example.myapplication.dataClasses
 
 data class PeriodTransaction (
-    val month: String,
+    val period: String,
     val sum: Double
 )

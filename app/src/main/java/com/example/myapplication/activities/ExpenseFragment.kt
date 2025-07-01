@@ -13,4 +13,12 @@ class ExpenseFragment : BaseChartFragment() {
         return MainDatabase.getDatabase(requireContext()).transactionDao()
             .getExpenseForMonth(start, end)
     }
+    override suspend fun loadBarDataDays(start: Long, end: Long): List<PeriodTransaction> {
+        return MainDatabase.getDatabase(requireContext()).transactionDao()
+            .getExpenseForDays(start, end)
+    }
+    override suspend fun loadBarDataYears(start: Long, end: Long): List<PeriodTransaction> {
+        return MainDatabase.getDatabase(requireContext()).transactionDao()
+            .getExpenseForYears(start, end)
+    }
 }

@@ -14,4 +14,13 @@ class IncomeFragment : BaseChartFragment() {
         return MainDatabase.getDatabase(requireContext()).transactionDao()
             .getIncomeForMonth(start, end)
     }
+    override suspend fun loadBarDataDays(start: Long, end: Long): List<PeriodTransaction> {
+        return MainDatabase.getDatabase(requireContext()).transactionDao()
+            .getIncomeForDays(start, end)
+    }
+    override suspend fun loadBarDataYears(start: Long, end: Long): List<PeriodTransaction> {
+        return MainDatabase.getDatabase(requireContext()).transactionDao()
+            .getIncomeForYears(start, end)
+    }
+
 }
