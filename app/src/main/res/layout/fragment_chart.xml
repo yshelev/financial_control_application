@@ -50,7 +50,6 @@
         </com.google.android.material.card.MaterialCardView>
 
 
-        <!-- Индикатор загрузки -->
         <ProgressBar
             android:id="@+id/chartLoader"
             android:layout_width="wrap_content"
@@ -59,14 +58,12 @@
             android:visibility="gone"
             android:indeterminate="true" />
 
-        <!-- Круговая диаграмма -->
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/pieChart"
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginTop="8dp" />
 
-        <!-- Легенда категорий -->
         <com.google.android.flexbox.FlexboxLayout
             android:id="@+id/legendContainer"
             android:layout_width="match_parent"
@@ -78,13 +75,20 @@
             app:alignItems="flex_start"
             app:alignContent="flex_start" />
 
-        <!-- Столбчатая диаграмма -->
+        <ProgressBar
+            android:id="@+id/barChartLoader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:layout_marginTop="8dp"/>
+
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/barChart"
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp" />
-
     </LinearLayout>
+
 </androidx.core.widget.NestedScrollView>

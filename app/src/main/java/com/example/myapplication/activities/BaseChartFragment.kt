@@ -24,6 +24,14 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
 import androidx.core.content.ContentProviderCompat.requireContext
+import com.example.myapplication.dataClasses.PeriodTransaction
+import com.github.mikephil.charting.animation.Easing
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.utils.Utils
 import java.util.TimeZone
 
@@ -157,19 +165,126 @@ abstract class BaseChartFragment : Fragment() {
         renderCustomLegend(data, colors)
     }
 
+    protected abstract suspend fun loadBarData(start: Long, end: Long): List<PeriodTransaction>
+
+    private fun setupBarChart(
+        barChart: BarChart,
+        data: List<PeriodTransaction>
+    ) {
+        if (data.isEmpty()) {
+            barChart.visibility = View.GONE
+            return
+        }
+
+        // Настройка внешнего вида
+        barChart.apply {
+            setDrawBarShadow(false)
+            setDrawValueAboveBar(true)
+            description.isEnabled = false
+            legend.isEnabled = false
+            setPinchZoom(true) // Включаем масштабирование
+            setDrawGridBackground(false)
+            setScaleEnabled(true) // Разрешаем масштабирование
+            setVisibleXRangeMaximum(6f) // Показывать 6 месяцев одновременно
+            moveViewToX(data.size.toFloat()) // Прокрутка к концу
+        }
+
+        // Получаем цвета из текущей темы
+        val isDark = resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+        var colors = getCurrentThemePalette(isDark).spots.shuffled().map { it.color }
+
+        // Подготовка данных
+        val entries = data.mapIndexed { index, item ->
+            BarEntry(index.toFloat(), item.sum.toFloat())
+        }
+
+        val dataSet = BarDataSet(entries, "Доходы по месяцам").apply {
+            // Циклически используем цвета из палитры
+            colors = List(data.size) { i -> colors[i % colors.size] }
+            valueTextColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
+            valueTextSize = 12f
+            highLightAlpha = 0
+        }
+
+        // Форматирование значений
+        barChart.data = BarData(dataSet).apply {
+            barWidth = 0.7f // Ширина столбцов
+            setValueFormatter(object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString()
+                }
+            })
+        }
+
+        // Настройка оси X
+        barChart.xAxis.apply {
+            position = XAxis.XAxisPosition.BOTTOM
+            setDrawGridLines(false)
+            granularity = 1f
+            labelCount = data.size
+            valueFormatter = object : ValueFormatter() {
+                override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                    val parts = data.getOrNull(value.toInt())?.month?.split(".") ?: return ""
+                    val month = parts[0].toIntOrNull()?.minus(1) ?: return ""
+                    val monthNames = resources.getStringArray(R.array.month_names)
+                    return "${monthNames.getOrNull(month) ?: ""} ${parts.getOrNull(1) ?: ""}"
+                }
+            }
+            textColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
+        }
+
+        // Настройка осей Y
+        barChart.axisLeft.apply {
+            axisMinimum = 0f
+            setDrawGridLines(true)
+            textColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
+            gridColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
+        }
+
+        barChart.axisRight.isEnabled = false
+        barChart.legend.textColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
+
+        // Анимация
+        barChart.animateY(500, Easing.EaseInOutQuad)
+        barChart.invalidate()
+    }
+
     private fun loadAndDisplayChart(start: Long, end: Long, pieChart: PieChart, loader: View) {
         lifecycleScope.launch {
             loader.visibility = View.VISIBLE
             pieChart.visibility = View.INVISIBLE
+            val barChart = view?.findViewById<BarChart>(R.id.barChart)
+            barChart?.visibility = View.INVISIBLE
 
-            val data = loadData(start, end)
+            // Загрузка данных для обеих диаграмм
+            val pieData = loadData(start, end)
+            val barData = loadBarData(start, end)
 
             loader.visibility = View.GONE
             pieChart.visibility = View.VISIBLE
+            barChart?.visibility = View.VISIBLE
 
-            setupChart(pieChart, data, chartTitle)
+            setupChart(pieChart, pieData, chartTitle)
+            barChart?.let { setupBarChart(it, barData) }
         }
     }
+
+//
+//    private fun loadAndDisplayChart(start: Long, end: Long, pieChart: PieChart, loader: View) {
+//        lifecycleScope.launch {
+//            loader.visibility = View.VISIBLE
+//            pieChart.visibility = View.INVISIBLE
+//
+//            val data = loadData(start, end)
+//
+//            loader.visibility = View.GONE
+//            pieChart.visibility = View.VISIBLE
+//
+//            setupChart(pieChart, data, chartTitle)
+//        }
+//    }
 
     private fun formatDate(timestamp: Long): String {
         val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
