@@ -144,17 +144,30 @@ class AddCardActivity : AuthBaseActivity() {
 
                 authController.getCurrentUser {
                     user ->
-                    if (user?.email == null) {
+                    if (user == null) {
                         Log.d("add card activity", "user.email not found")
+                        return@getCurrentUser
                     }
-                    val card = Card(
+
+                    val cardSchema = CardSchema(
                         name = name,
                         balance = balance,
-                        maskedNumber = last4,
+                        masked_number = last4,
                         date = date,
-                        currency = selectedCurrency
+                        currency = selectedCurrency,
+                        owner_id = user.id
                     )
                     lifecycleScope.launch{
+                        val res = cardRepository.addCard(cardSchema)
+                        val card = Card(
+                            id = res.id,
+                            name = name,
+                            balance = balance,
+                            maskedNumber = last4,
+                            date = date,
+                            currency = selectedCurrency
+                        )
+
                         db.cardDao().insert(card)
                         setResult(RESULT_OK)
                         finish()

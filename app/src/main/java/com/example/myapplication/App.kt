@@ -8,6 +8,7 @@ import com.example.myapplication.repositories.UserRepository
 import com.example.myapplication.repositories.CardRepository
 import com.example.myapplication.repositories.TransactionRepository
 import android.content.Context
+import com.example.myapplication.repositories.BackupRepository
 
 class App : Application() {
 
@@ -20,6 +21,7 @@ class App : Application() {
     val userRepository by lazy { UserRepository(apiService) }
     val cardRepository by lazy { CardRepository(apiService) }
     val transactionRepository by lazy { TransactionRepository(apiService) }
+    val backupRepository by lazy { BackupRepository(apiService) }
 
     override fun onCreate() {
         super.onCreate()

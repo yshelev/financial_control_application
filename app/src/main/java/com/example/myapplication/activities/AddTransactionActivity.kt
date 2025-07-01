@@ -11,6 +11,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.entities.UserTransaction
+import com.example.myapplication.mappers.toEntity
+import com.example.myapplication.schemas.BalanceCardUpdateSchema
+import com.example.myapplication.schemas.TransactionSchema
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.launch
@@ -48,6 +51,14 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private lateinit var incomeCategories: MutableList<String>
     private lateinit var expenseCategories: MutableList<String>
+
+    val transactionRepository by lazy {
+        (applicationContext as App).transactionRepository
+    }
+
+    val cardRepository by lazy {
+        (applicationContext as App).cardRepository
+    }
 
     private val db = App.database
     private val transactionDao = db.transactionDao()
@@ -184,21 +195,33 @@ class AddTransactionActivity : AppCompatActivity() {
         val cardId = cardsMap[cardSpinner.selectedItem.toString()] ?: return
 
         lifecycleScope.launch {
-            val card = cardDao.getCardById(cardId)
+            val card = cardRepository.getCard(cardId)
+            val cardEntity = card.toEntity()
             if (card != null) {
                 val updatedBalance = if (isIncomeSelected) card.balance + amount else card.balance - amount
-                cardDao.update(card.copy(balance = updatedBalance))
+                cardDao.update(cardEntity.copy(balance = updatedBalance))
 
-                val transaction = UserTransaction(
-                    isIncome = isIncomeSelected,
+                val ubs = BalanceCardUpdateSchema(
+                    card_id = card.id,
+                    new_balance = updatedBalance
+                )
+
+                cardRepository.updateBalanceCard(ubs)
+
+                val transactionSchema = TransactionSchema(
+                    is_income = isIncomeSelected,
                     amount = amount,
                     category = category,
                     description = description,
-                    cardId = cardId,
+                    card_id = cardId,
                     currency = card.currency,
-                    iconResId = iconResId,
-                    date = selectedDate.timeInMillis
+                    icon_res_id = iconResId
                 )
+
+                val responseTransaction = transactionRepository.addTransaction(transactionSchema)
+
+                val transaction = responseTransaction.toEntity()
+
                 transactionDao.insert(transaction)
                 finish()
             }

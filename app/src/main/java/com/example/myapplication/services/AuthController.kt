@@ -68,9 +68,9 @@ class AuthController(private val context: Context, private val database: MainDat
                 password = hashedPassword
             )
 
-            val ans = userRepository.registerUser(newUserSchema)
+            val uResponse = userRepository.registerUser(newUserSchema)
             val newUser = User(
-                id = ans.id,
+                id = uResponse.id,
                 username = name,
                 email = email,
                 password = hashedPassword

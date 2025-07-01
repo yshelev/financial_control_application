@@ -4,7 +4,6 @@ import com.example.myapplication.dto.BackupData
 import com.example.myapplication.dto.CreateBackupRequest
 import com.example.myapplication.dto.GetBackupRequest
 import com.example.myapplication.network.ApiService
-import okhttp3.Response
 
 class BackupRepository(private val apiService: ApiService) {
     suspend fun createBackup(data: CreateBackupRequest): retrofit2.Response<Any> {

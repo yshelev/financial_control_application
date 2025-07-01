@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.app.Application
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
@@ -23,8 +24,10 @@ import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.currency.ExchangeRateClient
+import com.example.myapplication.database.MainDatabase
 import com.example.myapplication.database.entities.ExchangeRateEntity
 import com.example.myapplication.database.entities.UserTransaction
+import com.example.myapplication.mappers.toEntity
 import com.example.myapplication.mappers.toEntityList
 import com.example.myapplication.schemas.BalanceCardUpdateSchema
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -46,11 +49,20 @@ class DashboardFragment : Fragment() {
     private lateinit var addTransactionButton: FloatingActionButton
     private lateinit var transactionsAdapter: TransactionsAdapter
     private lateinit var totalBalanceTextView: TextView
+    private lateinit var db: MainDatabase
     private lateinit var incomeTextView: TextView
     private lateinit var expensesTextView: TextView
     private lateinit var addCardLauncher: ActivityResultLauncher<Intent>
 
     protected lateinit var authController: AuthController
+
+    val transactionRepository by lazy {
+        (requireActivity().applicationContext as App).transactionRepository
+    }
+
+    val cardRepository by lazy {
+        (requireActivity().applicationContext as App).cardRepository
+    }
 
 
     override fun onCreateView(
@@ -64,7 +76,7 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         currentFilter = savedInstanceState?.getString("CURRENT_FILTER", "All") ?: "All"
         authController = AuthController(requireActivity(), App.database)
-        val db = App.database
+        db = App.database
 
         totalBalanceTextView = view.findViewById(R.id.totalBalance)
         incomeTextView = view.findViewById(R.id.income)
@@ -95,7 +107,8 @@ class DashboardFragment : Fragment() {
             db.transactionDao().getAllTransactions(),
             onDeleteClicked = { transaction ->
                 lifecycleScope.launch {
-                    val card = db.cardDao().getCardById(transaction.cardId)
+                    val card = cardRepository.getCard(transaction.cardId)
+                    val cardEntity = card.toEntity()
                     if (card != null) {
                         val newBalance = if (transaction.isIncome) {
                             card.balance - transaction.amount
@@ -103,8 +116,15 @@ class DashboardFragment : Fragment() {
                             card.balance + transaction.amount
                         }
 
-                        db.cardDao().update(card.copy(balance = newBalance))
+                        val ubs = BalanceCardUpdateSchema(
+                            card.id,
+                            new_balance = newBalance
+                        )
+
+                        cardRepository.updateBalanceCard(ubs)
+                        db.cardDao().update(cardEntity.copy(balance = newBalance))
                     }
+                    transactionRepository.deleteTransaction(transaction.id)
                     db.transactionDao().delete(transaction)
                 }
             }
@@ -129,20 +149,24 @@ class DashboardFragment : Fragment() {
                     val transaction = transactionsAdapter.transactions[position]
 
                     lifecycleScope.launch {
-                        val card = db.cardDao().getCardById(transaction.cardId)
+                        val card = cardRepository.getCard(transaction.cardId)
+                        val cardEntity = card.toEntity()
                         if (card != null) {
                             val newBalance = if (transaction.isIncome) {
                                 card.balance - transaction.amount
                             } else {
                                 card.balance + transaction.amount
                             }
-                            val updateSchema = BalanceCardUpdateSchema(
-                                card_id = card.id,
+
+                            val ubs = BalanceCardUpdateSchema(
+                                card.id,
                                 new_balance = newBalance
                             )
 
-                            db.cardDao().update(card.copy(balance = newBalance))
+                            cardRepository.updateBalanceCard(ubs)
+                            db.cardDao().update(cardEntity.copy(balance = newBalance))
                         }
+                        transactionRepository.deleteTransaction(transaction.id)
                         db.transactionDao().delete(transaction)
                     }
                 }
@@ -237,6 +261,7 @@ class DashboardFragment : Fragment() {
             },
             onDeleteCardClicked = { card ->
                 lifecycleScope.launch {
+                    cardRepository.deleteCard(card.id)
                     db.cardDao().delete(card)
                     updateBalanceStats(emptyList())
                 }

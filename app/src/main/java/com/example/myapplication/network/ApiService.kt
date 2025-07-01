@@ -42,7 +42,7 @@ interface ApiService {
     suspend fun addCard(@Body card: CardSchema): CardDto
 
     @GET("cards/{id}")
-    suspend fun getCard(@Path("id") cardId: Int): CardDto
+    suspend fun getCard(@Path("id") cardId: Long): CardDto
 
     @PATCH("cards")
     suspend fun updateCardBalance(@Body updateSchema: BalanceCardUpdateSchema): CardDto
