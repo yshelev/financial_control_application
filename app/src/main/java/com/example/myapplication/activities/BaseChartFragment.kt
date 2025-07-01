@@ -40,6 +40,9 @@ import java.util.TimeZone
 abstract class BaseChartFragment : Fragment() {
     protected abstract val chartTitle: String
     protected abstract suspend fun loadData(start: Long, end: Long): List<CategorySum>
+    protected abstract suspend fun loadBarData(start: Long, end: Long): List<PeriodTransaction>
+    protected abstract suspend fun loadBarDataDays(start: Long, end: Long): List<PeriodTransaction>
+    protected abstract suspend fun loadBarDataYears(start: Long, end: Long): List<PeriodTransaction>
     private var currentPeriodType = PeriodType.MONTH // По умолчанию месяц
 
     enum class PeriodType { DAY, MONTH, YEAR }
@@ -183,8 +186,6 @@ abstract class BaseChartFragment : Fragment() {
         renderCustomLegend(data, colors)
     }
 
-    protected abstract suspend fun loadBarData(start: Long, end: Long): List<PeriodTransaction>
-
     private fun setupBarChart(
         barChart: BarChart,
         data: List<PeriodTransaction>
@@ -192,44 +193,6 @@ abstract class BaseChartFragment : Fragment() {
         if (data.isEmpty()) {
             barChart.visibility = View.GONE
             return
-        }
-
-        // Настройка внешнего вида
-        barChart.apply {
-            setDrawBarShadow(false)
-            setDrawValueAboveBar(true)
-            description.isEnabled = false
-            legend.isEnabled = false
-            setDrawGridBackground(false)
-            moveViewToX(data.size.toFloat()) // Прокрутка к концу
-            setTouchEnabled(true)
-            isDragEnabled = true
-            setScaleXEnabled(true)
-            setScaleYEnabled(false)
-            setPinchZoom(true)
-
-            // 2. Настройка видимой области
-            setViewPortOffsets(40f, 0f, 40f, 0f)
-            setVisibleXRangeMaximum(6f)
-
-            // 3. Автомасштабирование по вертикали
-            axisLeft.resetAxisMinimum()
-            axisRight.resetAxisMinimum()
-
-            // 4. Настройка осей для прокрутки
-            xAxis.apply {
-                granularity = 1f
-                isGranularityEnabled = true
-                setDrawGridLines(false)
-            }
-
-            // 5. Прокрутка к началу/концу при загрузке
-            if (data.size > 6) {
-                post {
-                    moveViewToX(data.size - 6f)
-                    animateX(500) // Плавная анимация
-                }
-            }
         }
 
         // Получаем цвета из текущей темы
@@ -263,20 +226,51 @@ abstract class BaseChartFragment : Fragment() {
             })
         }
 
+        // Настройка внешнего вида
+        barChart.apply {
+            // 2. Настройка видимой области
+            setViewPortOffsets(40f, 0f, 40f, 0f)
+            setVisibleXRangeMaximum(6f)
+
+            setDrawBarShadow(false)
+            setDrawValueAboveBar(true)
+            description.isEnabled = false
+            legend.isEnabled = false
+            setDrawGridBackground(false)
+            moveViewToX(data.size.toFloat()) // Прокрутка к концу
+            setTouchEnabled(true)
+            isDragEnabled = true
+            setScaleXEnabled(true)
+            setScaleYEnabled(false)
+            setPinchZoom(true)
+
+            // 3. Автомасштабирование по вертикали
+            axisLeft.resetAxisMinimum()
+            axisRight.resetAxisMinimum()
+
+            // 4. Настройка осей для прокрутки
+            xAxis.apply {
+                granularity = 1f
+                isGranularityEnabled = true
+                setDrawGridLines(false)
+            }
+
+            // 5. Прокрутка к началу/концу при загрузке
+            if (data.size > 6) {
+                post {
+                    moveViewToX(data.size - 6f)
+                    animateX(500) // Плавная анимация
+                }
+            }
+        }
+
         // Настройка оси X
         barChart.xAxis.apply {
             position = XAxis.XAxisPosition.BOTTOM
             setDrawGridLines(false)
             granularity = 1f
             labelCount = data.size
-            valueFormatter = object : ValueFormatter() {
-                override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                    val parts = data.getOrNull(value.toInt())?.month?.split(".") ?: return ""
-                    val month = parts[0].toIntOrNull()?.minus(1) ?: return ""
-                    val monthNames = resources.getStringArray(R.array.month_names)
-                    return "${monthNames.getOrNull(month) ?: ""} ${parts.getOrNull(1) ?: ""}"
-                }
-            }
+            valueFormatter = UniversalPeriodFormatter(currentPeriodType, data)
             textColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
         }
 
@@ -287,8 +281,6 @@ abstract class BaseChartFragment : Fragment() {
             textColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
             gridColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
         }
-
-        barChart.data?.barWidth = 0.8f
 
         barChart.axisRight.isEnabled = false
         barChart.legend.textColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
@@ -323,12 +315,18 @@ abstract class BaseChartFragment : Fragment() {
             barChart?.visibility = View.INVISIBLE
 
             // Загрузка данных для столбчатой диаграммы за ВСЕ время
-            val allTimeData = loadBarData(0, Long.MAX_VALUE)
+            val allData = when (currentPeriodType) {
+                PeriodType.DAY -> loadBarDataDays(0, Long.MAX_VALUE)
+
+                PeriodType.MONTH -> loadBarData(0, Long.MAX_VALUE)
+
+                PeriodType.YEAR -> loadBarDataYears(0, Long.MAX_VALUE)
+            }
 
             loader.visibility = View.GONE
             barChart?.visibility = View.VISIBLE
 
-            barChart?.let { setupBarChart(it, allTimeData) }
+            barChart?.let { setupBarChart(it, allData) }
         }
     }
 
@@ -556,4 +554,42 @@ abstract class BaseChartFragment : Fragment() {
         }
     }
 
+    inner class UniversalPeriodFormatter(
+        private val periodType: PeriodType,
+        private val entries: List<PeriodTransaction>
+    ) : ValueFormatter() {
+        override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+            val index = value.toInt()
+            if (index in entries.indices) {
+                return formatPeriod(entries[index].period)
+            }
+            return ""
+        }
+
+        private fun formatPeriod(periodString: String): String {
+            return when (periodType) {
+                PeriodType.DAY -> formatDay(periodString)
+                PeriodType.MONTH -> formatMonth(periodString)
+                PeriodType.YEAR -> formatYear(periodString)
+            }
+        }
+
+        private fun formatDay(dayString: String): String {
+            return dayString.substringBeforeLast(".") // "день.месяц.год" → "день.месяц"
+        }
+
+        private fun formatMonth(monthString: String): String {
+            val parts = monthString.split(".")
+            if (parts.size == 2) {
+                val month = parts[0].toIntOrNull()?.minus(1) ?: return monthString
+                val monthNames = resources.getStringArray(R.array.month_names)
+                return "${monthNames.getOrNull(month) ?: parts[0]} ${parts[1]}"
+            }
+            return monthString
+        }
+
+        private fun formatYear(yearString: String): String {
+            return yearString
+        }
+    }
 }
