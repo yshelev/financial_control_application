@@ -4,7 +4,7 @@
 
     <style name="Theme.MyApplication" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Основные цвета -->
-        <item name="colorPrimary">#C08130B6</item>
+        <item name="colorPrimary">#D68130B6</item>
         <item name="colorPrimaryDark">#A77232A6</item>
 
         <item name="android:textColor">@color/buttonTextColor</item>

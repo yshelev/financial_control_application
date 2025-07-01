@@ -33,12 +33,16 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.utils.Utils
+import com.google.android.material.button.MaterialButtonToggleGroup
 import java.util.TimeZone
 
 
 abstract class BaseChartFragment : Fragment() {
     protected abstract val chartTitle: String
     protected abstract suspend fun loadData(start: Long, end: Long): List<CategorySum>
+    private var currentPeriodType = PeriodType.MONTH // По умолчанию месяц
+
+    enum class PeriodType { DAY, MONTH, YEAR }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,6 +61,7 @@ abstract class BaseChartFragment : Fragment() {
         val start = getStartOfMonth()
         val end = getEndOfMonth()
         loadAndDisplayChart(start, end, pieChart, loader)
+        loadAndDisplayBarChart(loader)
 
         dateCard.setOnClickListener {
             val picker = com.google.android.material.datepicker.MaterialDatePicker.Builder
@@ -70,16 +75,29 @@ abstract class BaseChartFragment : Fragment() {
 
                 // Преобразуем из UTC в локальное время и выставляем границы дней
                 val localStartDate = getStartOfDayInLocal(startDateUtc)
-                val localEndDate = getEndOfDayInLocal(endDateUtc - 1)
+                val localEndDate = getEndOfDayInLocal(endDateUtc)
 
                 val formatted = formatDate(localStartDate) + " – " + formatDate(localEndDate)
                 dateText.text = formatted
 
                 loadAndDisplayChart(localStartDate, localEndDate, pieChart, loader)
-                loadAndDisplayChart(localStartDate, localEndDate, pieChart, loader)
-
             }
             picker.show(parentFragmentManager, "DATE_PICKER")
+        }
+
+
+
+        val typeGroup = view.findViewById<MaterialButtonToggleGroup>(R.id.typeGroup)
+        typeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                currentPeriodType = when (checkedId) {
+                    R.id.dayToggle -> PeriodType.DAY
+                    R.id.monthToggle -> PeriodType.MONTH
+                    R.id.yearToggle -> PeriodType.YEAR
+                    else -> PeriodType.MONTH
+                }
+                loadAndDisplayBarChart(loader)
+            }
         }
     }
 
@@ -182,18 +200,46 @@ abstract class BaseChartFragment : Fragment() {
             setDrawValueAboveBar(true)
             description.isEnabled = false
             legend.isEnabled = false
-            setPinchZoom(true) // Включаем масштабирование
             setDrawGridBackground(false)
-            setScaleEnabled(true) // Разрешаем масштабирование
-            setVisibleXRangeMaximum(6f) // Показывать 6 месяцев одновременно
             moveViewToX(data.size.toFloat()) // Прокрутка к концу
+            setTouchEnabled(true)
+            isDragEnabled = true
+            setScaleXEnabled(true)
+            setScaleYEnabled(false)
+            setPinchZoom(true)
+
+            // 2. Настройка видимой области
+            setViewPortOffsets(40f, 0f, 40f, 0f)
+            setVisibleXRangeMaximum(6f)
+
+            // 3. Автомасштабирование по вертикали
+            axisLeft.resetAxisMinimum()
+            axisRight.resetAxisMinimum()
+
+            // 4. Настройка осей для прокрутки
+            xAxis.apply {
+                granularity = 1f
+                isGranularityEnabled = true
+                setDrawGridLines(false)
+            }
+
+            // 5. Прокрутка к началу/концу при загрузке
+            if (data.size > 6) {
+                post {
+                    moveViewToX(data.size - 6f)
+                    animateX(500) // Плавная анимация
+                }
+            }
         }
 
         // Получаем цвета из текущей темы
         val isDark = resources.configuration.uiMode and
                 android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
                 android.content.res.Configuration.UI_MODE_NIGHT_YES
-        var colors = getCurrentThemePalette(isDark).spots.shuffled().map { it.color }
+        val palette = getCurrentThemePalette(isDark)
+        val colors = palette.spots.map { it.color }
+        val randomColor = colors.random()
+
 
         // Подготовка данных
         val entries = data.mapIndexed { index, item ->
@@ -201,8 +247,7 @@ abstract class BaseChartFragment : Fragment() {
         }
 
         val dataSet = BarDataSet(entries, "Доходы по месяцам").apply {
-            // Циклически используем цвета из палитры
-            colors = List(data.size) { i -> colors[i % colors.size] }
+            color = randomColor
             valueTextColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
             valueTextSize = 12f
             highLightAlpha = 0
@@ -243,6 +288,8 @@ abstract class BaseChartFragment : Fragment() {
             gridColor = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
         }
 
+        barChart.data?.barWidth = 0.8f
+
         barChart.axisRight.isEnabled = false
         barChart.legend.textColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
 
@@ -258,16 +305,30 @@ abstract class BaseChartFragment : Fragment() {
             val barChart = view?.findViewById<BarChart>(R.id.barChart)
             barChart?.visibility = View.INVISIBLE
 
-            // Загрузка данных для обеих диаграмм
+            // Загрузка данных для круговой диаграммы с выбранным диапазоном
             val pieData = loadData(start, end)
-            val barData = loadBarData(start, end)
 
             loader.visibility = View.GONE
             pieChart.visibility = View.VISIBLE
             barChart?.visibility = View.VISIBLE
 
             setupChart(pieChart, pieData, chartTitle)
-            barChart?.let { setupBarChart(it, barData) }
+        }
+    }
+
+    private fun loadAndDisplayBarChart(loader: View) {
+        lifecycleScope.launch {
+            loader.visibility = View.VISIBLE
+            val barChart = view?.findViewById<BarChart>(R.id.barChart)
+            barChart?.visibility = View.INVISIBLE
+
+            // Загрузка данных для столбчатой диаграммы за ВСЕ время
+            val allTimeData = loadBarData(0, Long.MAX_VALUE)
+
+            loader.visibility = View.GONE
+            barChart?.visibility = View.VISIBLE
+
+            barChart?.let { setupBarChart(it, allTimeData) }
         }
     }
 

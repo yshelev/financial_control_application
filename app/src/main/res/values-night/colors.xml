@@ -9,7 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green">#6FB821</color>
     <color name="red">#DB3C0A</color>
-    <color name="colorPrimary">#B3782AAB</color>
+    <color name="colorPrimary">#D3782AAB</color>
     <color name="colorPrimaryDark">#A77232A6</color>
     <color name="primaryColor">#7C2DC3</color>
     <color name="secondaryColor">#9F36E7</color>
@@ -17,7 +17,7 @@
     <color name="forthColor">#E2D7F4</color>
     <color name="backgroundColor">#170035</color>
     <color name="backgroundColor2">#E41A003C</color>
-    <color name="bottomColor">#7F1A003C</color>
+    <color name="bottomColor">#BA1A003C</color>
     <color name="cardColor">#942E2E2E</color>
     <color name="buttonTextColor">#FEFEFE</color>
     <color name="textColor">#FEFEFE</color>

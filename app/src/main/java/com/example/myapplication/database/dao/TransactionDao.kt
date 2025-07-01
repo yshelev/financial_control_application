@@ -80,7 +80,7 @@ interface TransactionDao {
 //        startDate: Long,
 //        endDate: Long
 //    ): List<PeriodTransaction>
-//
+
     @Query("SELECT " +
             "    strftime('%m.%Y', datetime(date / 1000, 'unixepoch')) AS month, " +
             "    SUM(amount) AS sum " +
