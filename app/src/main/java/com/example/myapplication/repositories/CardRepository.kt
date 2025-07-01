@@ -14,7 +14,7 @@ class CardRepository(private val apiService: ApiService) {
         return apiService.addCard(card)
     }
 
-    suspend fun getCard(cardId: Int): CardDto {
+    suspend fun getCard(cardId: Long): CardDto {
         return apiService.getCard(cardId)
     }
 

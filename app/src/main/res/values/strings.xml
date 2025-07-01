@@ -82,7 +82,7 @@
     <string name="label_income">Income: %1$s %2$s</string>
     <string name="label_expenses">Expenses: %1$s %2$s</string>
     <string name="enter_category_name">Enter category name</string>
-    <string name="icon_selected">Icon sekected</string>
+    <string name="icon_selected">Icon selected</string>
 
     <string name="fill_all_fields">Fill all fields</string>
     <string name="passwords_do_not_match">Passwords do not match</string>
@@ -139,6 +139,16 @@
     <string name="verify">Verify</string>
     <string name="enter_current_password">Enter current password</string>
     <string name="start_without_registration">start without registration</string>
+    <string name="verification_email_sent">Verification Email Sent</string>
+    <string name="verify_email_message">We\'ve sent a verification email to %s. Please check your inbox and verify your email address to complete registration.</string>
+    <string name="resend_email">Resend Email</string>
+    <string name="email_not_verified">Email Not Verified</string>
+    <string name="verify_email_first">Please verify your email address first. Check your inbox for the verification email.</string>
+    <string name="email_verified_successfully">Email verified successfully!</string>
+    <string name="verification_failed">Verification failed. Please try again.</string>
+    <string name="verification_email_resent">Verification email resent</string>
+    <string name="failed_to_resend_email">Failed to resend verification email</string>
+    <string name="ok">OK</string>
     <string name="select_date_range">Select date range</string>
     <string name="current_month">Current month</string>
     <string name="day">Day</string>

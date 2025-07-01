@@ -119,6 +119,24 @@ class SettingsFragment : Fragment() {
         val currencyAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, currencies)
         currencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         currencySpinner.adapter = currencyAdapter
+        val prefs = requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        val savedCurrency = prefs.getString("PreferredCurrency", "RUB") ?: "RUB"
+        val savedIndex = currencies.indexOf(savedCurrency).takeIf { it >= 0 } ?: 0
+        currencySpinner.setSelection(savedIndex)
+
+        currencySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedCurrency = parent.getItemAtPosition(position) as String
+                requireActivity()
+                    .getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+                    .edit()
+                    .putString("PreferredCurrency", selectedCurrency)
+                    .apply()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+
 
         setupLanguageSpinner()
 

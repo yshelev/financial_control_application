@@ -4,10 +4,11 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "users")
 data class User(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey() val id: Long = 0,
     val username: String,
     val email: String,
     val password: String,
     val registrationDate: Long = System.currentTimeMillis(),
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
+    val isVerified: Boolean = false
 )

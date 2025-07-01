@@ -22,4 +22,10 @@ interface UserDao {
 
     @Query("SELECT * FROM users")
     suspend fun getAllUsers(): List<User>
+
+    @Query("UPDATE users SET isVerified = :isVerified WHERE email = :email")
+    suspend fun updateVerificationStatus(email: String, isVerified: Boolean)
+
+    @Query("SELECT isVerified FROM users WHERE email = :email")
+    suspend fun isUserVerified(email: String): Boolean?
 }

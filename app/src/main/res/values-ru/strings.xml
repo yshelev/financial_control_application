@@ -136,6 +136,16 @@
     <string name="verify">Подтвердить</string>
     <string name="enter_current_password">Введите текущий пароль</string>
     <string name="start_without_registration">Начать без регистрации</string>
+    <string name="verification_email_sent">Письмо подтверждения отправлено</string>
+    <string name="verify_email_message">Мы отправили письмо с подтверждением на %s. Пожалуйста, проверьте вашу почту и подтвердите email для завершения регистрации.</string>
+    <string name="resend_email">Отправить письмо повторно</string>
+    <string name="email_not_verified">Email не подтверждён</string>
+    <string name="verify_email_first">Пожалуйста, сначала подтвердите ваш email. Проверьте вашу почту для получения письма с подтверждением.</string>
+    <string name="email_verified_successfully">Email успешно подтверждён!</string>
+    <string name="verification_failed">Ошибка подтверждения. Пожалуйста, попробуйте снова.</string>
+    <string name="verification_email_resent">Письмо с подтверждением отправлено повторно</string>
+    <string name="failed_to_resend_email">Не удалось отправить письмо повторно</string>
+    <string name="ok">OK</string>
     <string name="select_date_range">Выберите период</string>
     <string name="current_month">Текущий месяц</string>
     <string name="day">День</string>

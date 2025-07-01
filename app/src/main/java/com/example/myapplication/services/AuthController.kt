@@ -12,6 +12,7 @@ import java.security.MessageDigest
 import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import androidx.core.content.edit
@@ -68,15 +69,70 @@ class AuthController(private val context: Context, private val database: MainDat
                 password = hashedPassword
             )
 
-            val ans = userRepository.registerUser(newUserSchema)
+            val uResponse = userRepository.registerWithEmailVerification(newUserSchema)
             val newUser = User(
-                id = ans.id,
+                id = uResponse.body()?.id ?: 0,
                 username = name,
                 email = email,
-                password = hashedPassword
+                password = hashedPassword,
+                isVerified = false
             )
             database.userDao().insert(newUser)
-            loginAccount(email, password, onSuccess, onFailure)
+//            loginAccount(email, password, onSuccess, onFailure)
+
+            context.runOnUiThread {
+                showVerificationEmailSent(email, onSuccess, onFailure)
+            }
+        }
+    }
+
+    private fun showVerificationEmailSent(
+        email: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val alert = AlertDialog.Builder(context)
+            .setTitle(context.getString(R.string.verification_email_sent))
+            .setMessage(context.getString(R.string.verify_email_message, email))
+            .setPositiveButton(context.getString(R.string.ok)) { dialog, _ ->
+                dialog.dismiss()
+                onSuccess()
+            }
+            .setNeutralButton(context.getString(R.string.resend_email)) { dialog, _ ->
+                dialog.dismiss()
+                resendVerificationEmail(email, onSuccess, onFailure)
+            }
+            .create()
+
+        alert.show()
+    }
+
+    private fun resendVerificationEmail(
+        email: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        (context as? AppCompatActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
+            try {
+                val response = userRepository.resendVerificationEmail(email)
+                if (response.isSuccessful) {
+                    context.runOnUiThread {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.verification_email_resent),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    context.runOnUiThread {
+                        onFailure(context.getString(R.string.failed_to_resend_email))
+                    }
+                }
+            } catch (e: Exception) {
+                context.runOnUiThread {
+                    onFailure(context.getString(R.string.error_server_saving_data))
+                }
+            }
         }
     }
 

@@ -1,6 +1,8 @@
 package com.example.myapplication
 
+import android.app.Application
 import android.app.DatePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
@@ -10,6 +12,9 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -19,8 +24,10 @@ import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.example.myapplication.currency.ExchangeRateClient
+import com.example.myapplication.database.MainDatabase
 import com.example.myapplication.database.entities.ExchangeRateEntity
 import com.example.myapplication.database.entities.UserTransaction
+import com.example.myapplication.mappers.toEntity
 import com.example.myapplication.mappers.toEntityList
 import com.example.myapplication.schemas.BalanceCardUpdateSchema
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -47,10 +54,20 @@ class DashboardFragment : Fragment() {
     private lateinit var addTransactionButton: FloatingActionButton
     private lateinit var transactionsAdapter: TransactionsAdapter
     private lateinit var totalBalanceTextView: TextView
+    private lateinit var db: MainDatabase
     private lateinit var incomeTextView: TextView
     private lateinit var expensesTextView: TextView
+    private lateinit var addCardLauncher: ActivityResultLauncher<Intent>
 
     protected lateinit var authController: AuthController
+
+    val transactionRepository by lazy {
+        (requireActivity().applicationContext as App).transactionRepository
+    }
+
+    val cardRepository by lazy {
+        (requireActivity().applicationContext as App).cardRepository
+    }
 
 
     override fun onCreateView(
@@ -64,7 +81,7 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         currentFilter = savedInstanceState?.getString("CURRENT_FILTER", "All") ?: "All"
         authController = AuthController(requireActivity(), App.database)
-        val db = App.database
+        db = App.database
 
         totalBalanceTextView = view.findViewById(R.id.totalBalance)
         incomeTextView = view.findViewById(R.id.income)
@@ -93,9 +110,11 @@ class DashboardFragment : Fragment() {
         transactionsAdapter = TransactionsAdapter(
             viewLifecycleOwner,
             db.transactionDao().getAllTransactions(),
+            db.categoryDao().getAllCategories(),
             onDeleteClicked = { transaction ->
                 lifecycleScope.launch {
-                    val card = db.cardDao().getCardById(transaction.cardId)
+                    val card = cardRepository.getCard(transaction.cardId)
+                    val cardEntity = card.toEntity()
                     if (card != null) {
                         val newBalance = if (transaction.isIncome) {
                             card.balance - transaction.amount
@@ -103,8 +122,15 @@ class DashboardFragment : Fragment() {
                             card.balance + transaction.amount
                         }
 
-                        db.cardDao().update(card.copy(balance = newBalance))
+                        val ubs = BalanceCardUpdateSchema(
+                            card.id,
+                            new_balance = newBalance
+                        )
+
+                        cardRepository.updateBalanceCard(ubs)
+                        db.cardDao().update(cardEntity.copy(balance = newBalance))
                     }
+                    transactionRepository.deleteTransaction(transaction.id)
                     db.transactionDao().delete(transaction)
                 }
             }
@@ -129,20 +155,24 @@ class DashboardFragment : Fragment() {
                     val transaction = transactionsAdapter.transactions[position]
 
                     lifecycleScope.launch {
-                        val card = db.cardDao().getCardById(transaction.cardId)
+                        val card = cardRepository.getCard(transaction.cardId)
+                        val cardEntity = card.toEntity()
                         if (card != null) {
                             val newBalance = if (transaction.isIncome) {
                                 card.balance - transaction.amount
                             } else {
                                 card.balance + transaction.amount
                             }
-                            val updateSchema = BalanceCardUpdateSchema(
-                                card_id = card.id,
+
+                            val ubs = BalanceCardUpdateSchema(
+                                card.id,
                                 new_balance = newBalance
                             )
 
-                            db.cardDao().update(card.copy(balance = newBalance))
+                            cardRepository.updateBalanceCard(ubs)
+                            db.cardDao().update(cardEntity.copy(balance = newBalance))
                         }
+                        transactionRepository.deleteTransaction(transaction.id)
                         db.transactionDao().delete(transaction)
                     }
                 }
@@ -209,6 +239,15 @@ class DashboardFragment : Fragment() {
 
         setupCardsViewPager()
 
+        addCardLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            if (it.resultCode == AppCompatActivity.RESULT_OK) {
+                setupCardsViewPager()
+                updateTransactionsByPeriod(currentFilter)
+            }
+        }
+
         addTransactionButton.setOnClickListener {
             startActivity(Intent(requireContext(), AddTransactionActivity::class.java))
         }
@@ -224,10 +263,11 @@ class DashboardFragment : Fragment() {
             db.transactionDao().getAllTransactions(),
             lifecycleScope,
             onAddCardClicked = {
-                startActivity(Intent(requireContext(), AddCardActivity::class.java))
+                addCardLauncher.launch(Intent(requireContext(), AddCardActivity::class.java))
             },
             onDeleteCardClicked = { card ->
                 lifecycleScope.launch {
+                    cardRepository.deleteCard(card.id)
                     db.cardDao().delete(card)
                     updateBalanceStats(emptyList())
                 }
@@ -423,7 +463,8 @@ class DashboardFragment : Fragment() {
 
     private fun updateBalanceStats(transactions: List<UserTransaction>) {
         lifecycleScope.launch {
-            val userPrefCurrency = "RUB"
+            val prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+            val userPrefCurrency = prefs.getString("PreferredCurrency", "RUB") ?: "RUB"
             val db = App.database
             var totalBalance = 0.0
             var totalIncome = 0.0
@@ -455,18 +496,28 @@ class DashboardFragment : Fragment() {
             }
 
             val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
+            val currencySymbol = getCurrencySymbol(userPrefCurrency)
+
             totalBalanceTextView.text = getString(
                 R.string.label_balance,
-                numberFormat.format(totalBalance), userPrefCurrency
+                numberFormat.format(totalBalance), currencySymbol
             )
             incomeTextView.text = getString(
                 R.string.label_income,
-                numberFormat.format(totalIncome), userPrefCurrency
+                numberFormat.format(totalIncome), currencySymbol
             )
             expensesTextView.text = getString(
                 R.string.label_expenses,
-                numberFormat.format(totalExpenses), userPrefCurrency
+                numberFormat.format(totalExpenses), currencySymbol
             )
+        }
+    }
+
+    private fun getCurrencySymbol(currencyCode: String): String {
+        return try {
+            Currency.getInstance(currencyCode).symbol
+        } catch (e: Exception) {
+            currencyCode
         }
     }
 

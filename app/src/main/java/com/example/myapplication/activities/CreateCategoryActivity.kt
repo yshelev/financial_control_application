@@ -9,8 +9,11 @@ import android.widget.GridView
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.database.entities.Category
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
+import kotlinx.coroutines.launch
 
 class CreateCategoryActivity : AppCompatActivity() {
 
@@ -33,14 +36,33 @@ class CreateCategoryActivity : AppCompatActivity() {
     private var isIncomeSelected: Boolean = true
 
     private val iconList = listOf(
-        R.drawable.ic_food, R.drawable.ic_transport,
-        R.drawable.ic_salary, R.drawable.ic_gift, R.drawable.ic_health, R.drawable.ic_airport,
-        R.drawable.ic_bar, R.drawable.ic_cafe, R.drawable.ic_car_wash, R.drawable.ic_clothes,
-        R.drawable.ic_dining, R.drawable.ic_education, R.drawable.ic_entertainment,
-        R.drawable.ic_flower, R.drawable.ic_game, R.drawable.ic_gas_station, R.drawable.ic_hospital,
-        R.drawable.ic_investment, R.drawable.ic_phone, R.drawable.ic_store, R.drawable.ic_attractions,
-        R.drawable.ic_cake, R.drawable.ic_child, R.drawable.ic_church, R.drawable.ic_roller,
-        R.drawable.ic_selebration, R.drawable.ic_sports
+        R.drawable.ic_food,
+        R.drawable.ic_transport,
+        R.drawable.ic_salary,
+        R.drawable.ic_gift,
+        R.drawable.ic_health,
+        R.drawable.ic_airport,
+        R.drawable.ic_bar,
+        R.drawable.ic_cafe,
+        R.drawable.ic_car_wash,
+        R.drawable.ic_clothes,
+        R.drawable.ic_dining,
+        R.drawable.ic_education,
+        R.drawable.ic_entertainment,
+        R.drawable.ic_flower,
+        R.drawable.ic_game,
+        R.drawable.ic_gas_station,
+        R.drawable.ic_hospital,
+        R.drawable.ic_investment,
+        R.drawable.ic_phone,
+        R.drawable.ic_store,
+        R.drawable.ic_attractions,
+        R.drawable.ic_cake,
+        R.drawable.ic_child,
+        R.drawable.ic_church,
+        R.drawable.ic_roller,
+        R.drawable.ic_selebration,
+        R.drawable.ic_sports
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +83,6 @@ class CreateCategoryActivity : AppCompatActivity() {
 
         iconGridView.adapter = IconAdapter(this, iconList)
 
-        // Анимации появления
         listOf(iconGridView, nameEditText, saveButton, incomeToggle, expenseToggle).forEach {
             it.alpha = 0f
             it.animate().alpha(1f).setDuration(500).start()
@@ -103,15 +124,26 @@ class CreateCategoryActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val resultIntent = Intent().apply {
-                putExtra("newCategory", name)
-                putExtra("isIncome", isIncomeSelected)
-                putExtra("iconResId", selectedIconResId)
-            }
+            val category = Category(
+                name = name,
+                iconResId = selectedIconResId,
+                isIncome = isIncomeSelected,
+                color = "#000000"
+            )
 
-            setResult(RESULT_OK, resultIntent)
-            finish()
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            lifecycleScope.launch {
+                val categoryDao = App.database.categoryDao()
+                categoryDao.insert(category)
+
+                val resultIntent = Intent().apply {
+                    putExtra("newCategory", name)
+                    putExtra("iconResId", selectedIconResId)
+                    putExtra("isIncome", isIncomeSelected)
+                }
+                setResult(RESULT_OK, resultIntent)
+                finish()
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            }
         }
     }
 

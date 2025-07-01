@@ -13,17 +13,23 @@ import androidx.room.Index
             childColumns = ["cardId"],
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Category::class,
+            parentColumns = ["id"],
+            childColumns = ["categoryId"],
+            onDelete = ForeignKey.SET_NULL,
+            onUpdate = ForeignKey.CASCADE
         )
     ]
 )
 data class UserTransaction(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey val id: Long = 0,
     val isIncome: Boolean,
     val amount: Double,
     val currency: String,
-    val category: String,
     val description: String?,
     val date: Long = System.currentTimeMillis(),
-    val iconResId: Int,
-    val cardId: Long
+    val cardId: Long,
+    val categoryId: Long?
 )

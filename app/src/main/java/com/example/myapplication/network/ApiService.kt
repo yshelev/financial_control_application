@@ -35,6 +35,18 @@ interface ApiService {
         @Query("password") password: String
     ): UserDto
 
+    @POST("users/register")
+    suspend fun registerWithVerification(@Body user: UserSchema): Response<UserDto>
+
+    @GET("users/verify-email")
+    suspend fun verifyEmail(@Query("token") token: String): Response<Unit>
+
+    @POST("users/resend-verification")
+    suspend fun resendVerification(@Body email: String): Response<Unit>
+
+    @GET("users/check-verified")
+    suspend fun checkEmailVerified(@Query("email") email: String): Response<Boolean>
+
     @GET("users/{email}/cards")
     suspend fun getCardsByEmail(@Path("email") email: String): List<CardDto>
 
@@ -42,7 +54,7 @@ interface ApiService {
     suspend fun addCard(@Body card: CardSchema): CardDto
 
     @GET("cards/{id}")
-    suspend fun getCard(@Path("id") cardId: Int): CardDto
+    suspend fun getCard(@Path("id") cardId: Long): CardDto
 
     @PATCH("cards")
     suspend fun updateCardBalance(@Body updateSchema: BalanceCardUpdateSchema): CardDto
