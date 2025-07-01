@@ -9,5 +9,6 @@ data class User(
     val email: String,
     val password: String,
     val registrationDate: Long = System.currentTimeMillis(),
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
+    val isVerified: Boolean = false
 )
