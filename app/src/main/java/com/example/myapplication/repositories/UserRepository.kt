@@ -1,4 +1,5 @@
 package com.example.myapplication.repositories
+import com.example.myapplication.dataClasses.ResendVerificationRequest
 import com.example.myapplication.dto.UserDto
 import com.example.myapplication.network.ApiService
 import com.example.myapplication.schemas.UserSchema
@@ -27,7 +28,7 @@ class UserRepository(private val apiService: ApiService) {
     }
 
     suspend fun resendVerificationEmail(email: String): Response<Unit> {
-        return apiService.resendVerification(email)
+        return apiService.resendVerification(ResendVerificationRequest(email))
     }
 
     suspend fun checkEmailVerified(email: String): Response<Boolean> {

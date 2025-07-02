@@ -1,5 +1,6 @@
 package com.example.myapplication.network
 
+import com.example.myapplication.dataClasses.ResendVerificationRequest
 import com.example.myapplication.dto.BackupData
 import com.example.myapplication.dto.CardDto
 import com.example.myapplication.dto.CategoryDto
@@ -44,7 +45,7 @@ interface ApiService {
     suspend fun verifyEmail(@Query("token") token: String): Response<Unit>
 
     @POST("users/resend-verification")
-    suspend fun resendVerification(@Body email: String): Response<Unit>
+    suspend fun resendVerification(@Body request: ResendVerificationRequest): Response<Unit>
 
     @GET("users/check-verified")
     suspend fun checkEmailVerified(@Query("email") email: String): Response<Boolean>

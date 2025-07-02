@@ -81,7 +81,9 @@ class AuthController(private val context: Context, private val database: MainDat
 //            loginAccount(email, password, onSuccess, onFailure)
 
             context.runOnUiThread {
-                showVerificationEmailSent(email, onSuccess, onFailure)
+                showVerificationEmailSent(email, {
+                    loginAccount(email, password, onSuccess, onFailure)
+                }, onFailure)
             }
         }
     }
