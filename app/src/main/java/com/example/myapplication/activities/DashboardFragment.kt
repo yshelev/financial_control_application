@@ -112,26 +112,56 @@ class DashboardFragment : Fragment() {
             db.transactionDao().getAllTransactions(),
             db.categoryDao().getAllCategories(),
             onDeleteClicked = { transaction ->
-                lifecycleScope.launch {
-                    val card = cardRepository.getCard(transaction.cardId)
-                    val cardEntity = card.toEntity()
-                    if (card != null) {
-                        val newBalance = if (transaction.isIncome) {
-                            card.balance - transaction.amount
-                        } else {
-                            card.balance + transaction.amount
+                authController.getCurrentUser {
+                    user ->
+                    if (user?.email == null) {
+                        lifecycleScope.launch {
+                            val card = db.cardDao().getCardById(transaction.cardId)
+                            if (card != null) {
+                                val newBalance = if (transaction.isIncome) {
+                                    card.balance - transaction.amount
+                                } else {
+                                    card.balance + transaction.amount
+                                }
+
+                                db.cardDao().update(card.copy(balance = newBalance))
+                                db.transactionDao().delete(transaction)
+                            }
+                        }
+                        return@getCurrentUser
+                    }
+                    lifecycleScope.launch {
+                        val card = db.cardDao().getCardById(transaction.cardId)
+
+                        if (card != null) {
+                            val newBalance = if (transaction.isIncome) {
+                                card.balance - transaction.amount
+                            } else {
+                                card.balance + transaction.amount
+                            }
+
+                            val ubs = BalanceCardUpdateSchema(
+                                card.id,
+                                new_balance = newBalance
+                            )
+                            try {
+                                cardRepository.updateBalanceCard(ubs)
+                            }
+                            catch (e: Exception) {
+                                Log.d("update card balance", "cant update card on server")
+                            }
+                            db.cardDao().update(card.copy(balance = newBalance))
+                            try {
+                                transactionRepository.deleteTransaction(transaction.id)
+                            }
+                            catch (e: Exception) {
+                                Log.d("delete transaction", "cannot delete transaction on server")
+                            }
+                            db.transactionDao().delete(transaction)
                         }
 
-                        val ubs = BalanceCardUpdateSchema(
-                            card.id,
-                            new_balance = newBalance
-                        )
 
-                        cardRepository.updateBalanceCard(ubs)
-                        db.cardDao().update(cardEntity.copy(balance = newBalance))
                     }
-                    transactionRepository.deleteTransaction(transaction.id)
-                    db.transactionDao().delete(transaction)
                 }
             }
         )
@@ -153,27 +183,56 @@ class DashboardFragment : Fragment() {
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     val position = viewHolder.adapterPosition
                     val transaction = transactionsAdapter.transactions[position]
+                    authController.getCurrentUser {
+                        user ->
+                        if (user?.email == null) {
+                            lifecycleScope.launch {
+                                val card = db.cardDao().getCardById(transaction.cardId)
+                                if (card != null) {
+                                    val newBalance = if (transaction.isIncome) {
+                                        card.balance - transaction.amount
+                                    } else {
+                                        card.balance + transaction.amount
+                                    }
 
-                    lifecycleScope.launch {
-                        val card = cardRepository.getCard(transaction.cardId)
-                        val cardEntity = card.toEntity()
-                        if (card != null) {
-                            val newBalance = if (transaction.isIncome) {
-                                card.balance - transaction.amount
-                            } else {
-                                card.balance + transaction.amount
+                                    db.cardDao().update(card.copy(balance = newBalance))
+                                    db.transactionDao().delete(transaction)
+                                }
+                            }
+                            return@getCurrentUser
+                        }
+                        lifecycleScope.launch {
+                            val card = db.cardDao().getCardById(transaction.cardId)
+
+                            if (card != null) {
+                                val newBalance = if (transaction.isIncome) {
+                                    card.balance - transaction.amount
+                                } else {
+                                    card.balance + transaction.amount
+                                }
+
+                                val ubs = BalanceCardUpdateSchema(
+                                    card.id,
+                                    new_balance = newBalance
+                                )
+                                try {
+                                    cardRepository.updateBalanceCard(ubs)
+                                }
+                                catch (e: Exception) {
+                                    Log.d("update card balance", "cant update card on server")
+                                }
+                                db.cardDao().update(card.copy(balance = newBalance))
+                                try {
+                                    transactionRepository.deleteTransaction(transaction.id)
+                                }
+                                catch (e: Exception) {
+                                    Log.d("delete transaction", "cannot delete transaction on server")
+                                }
+                                db.transactionDao().delete(transaction)
                             }
 
-                            val ubs = BalanceCardUpdateSchema(
-                                card.id,
-                                new_balance = newBalance
-                            )
 
-                            cardRepository.updateBalanceCard(ubs)
-                            db.cardDao().update(cardEntity.copy(balance = newBalance))
                         }
-                        transactionRepository.deleteTransaction(transaction.id)
-                        db.transactionDao().delete(transaction)
                     }
                 }
 
@@ -266,10 +325,29 @@ class DashboardFragment : Fragment() {
                 addCardLauncher.launch(Intent(requireContext(), AddCardActivity::class.java))
             },
             onDeleteCardClicked = { card ->
-                lifecycleScope.launch {
-                    cardRepository.deleteCard(card.id)
-                    db.cardDao().delete(card)
-                    updateBalanceStats(emptyList())
+                authController.getCurrentUser {
+                user ->
+                    if (user?.email == null) {
+                        lifecycleScope.launch {
+                            db.cardDao().delete(card)
+                            updateBalanceStats(emptyList())
+                        }
+                        return@getCurrentUser
+                    }
+                    else {
+                        lifecycleScope.launch {
+                            db.cardDao().delete(card)
+                            updateBalanceStats(emptyList())
+                        }
+                        lifecycleScope.launch {
+                            try {
+                                cardRepository.deleteCard(card.id)
+                            }
+                            catch (e: Exception) {
+                                Log.d("delete card", "cannot delete card on backend, \n$e")
+                            }
+                        }
+                    }
                 }
             }
         )
