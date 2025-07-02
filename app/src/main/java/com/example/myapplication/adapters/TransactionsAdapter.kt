@@ -14,6 +14,8 @@ import com.example.myapplication.database.entities.UserTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -69,16 +71,30 @@ class TransactionsAdapter(
         return TransactionViewHolder(view)
     }
 
+    fun formatAmount(amount: Double): String {
+        val symbols = DecimalFormatSymbols(Locale.getDefault()).apply {
+            groupingSeparator = ' '
+            decimalSeparator = '.'
+        }
+        val decimalFormat = DecimalFormat("#,###.##", symbols).apply {
+            minimumFractionDigits = 2
+            maximumFractionDigits = 2
+        }
+        return decimalFormat.format(amount)
+    }
+
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val tx = transactions[position]
 
-        // Находим категорию по ID
         val category = categories.find { it.id == tx.categoryId }
 
-        holder.title.text = category?.title ?: "Unknown" // Используем название категории
+        holder.title.text = category?.title ?: "Unknown"
         holder.date.text = dateFormatter.format(Date(tx.date))
         val symbol = currencySymbols[tx.currency] ?: "₽"
-        holder.amount.text = if (tx.isIncome) "+${tx.amount}${symbol}" else "-${tx.amount}${symbol}"
+
+        val formattedAmount = formatAmount(tx.amount)
+        holder.amount.text = if (tx.isIncome) "+$formattedAmount$symbol" else "-$formattedAmount$symbol"
+
         holder.amount.setTextColor(
             holder.itemView.context.getColor(
                 if (tx.isIncome) R.color.green else R.color.red
@@ -87,7 +103,7 @@ class TransactionsAdapter(
 
         category?.iconResId?.let { resId ->
             holder.icon.setImageResource(resId)
-        } ?: holder.icon.setImageResource(R.drawable.ic_default) // Иконка по умолчанию
+        } ?: holder.icon.setImageResource(R.drawable.ic_default)
 
         holder.deleteButton.setOnClickListener {
             onDeleteClicked(tx)

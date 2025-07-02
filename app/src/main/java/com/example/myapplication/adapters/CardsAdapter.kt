@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -59,6 +61,7 @@ class CardsAdapter(
         }
     }
 
+
     class CardViewHolder(
         view: View,
         private val onDeleteCardClicked: (Card) -> Unit
@@ -71,23 +74,33 @@ class CardsAdapter(
         val incomeText: TextView = view.findViewById(R.id.cardIncome)
         val expenseText: TextView = view.findViewById(R.id.cardExpenses)
 
+
+        fun formatAmount(amount: Double): String {
+            val symbols = DecimalFormatSymbols(Locale.getDefault()).apply {
+                groupingSeparator = ' '
+                decimalSeparator = '.'
+            }
+            val decimalFormat = DecimalFormat("#,###.##", symbols).apply {
+                minimumFractionDigits = 2
+                maximumFractionDigits = 2
+            }
+            return decimalFormat.format(amount)
+        }
+
         fun bind(card: Card, transactions: List<UserTransaction>, currencySymbol: String) {
-            balanceText.text = "${card.balance}${currencySymbol}"
+            balanceText.text = "${formatAmount(card.balance)}$currencySymbol"
 
             cardName.text = card.name
             cardNumber.text = card.maskedNumber
             cardDate.text = card.date
             deleteButton.setOnClickListener { onDeleteCardClicked(card) }
 
-            // Calculate income and expenses for this card
             val cardTransactions = transactions.filter { it.cardId == card.id }
             val income = cardTransactions.filter { it.isIncome }.sumOf { it.amount }
             val expenses = cardTransactions.filter { !it.isIncome }.sumOf { it.amount }
 
-            val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
-
-            incomeText.text = "+${numberFormat.format(income)}$currencySymbol"
-            expenseText.text = "-${numberFormat.format(expenses)}$currencySymbol"
+            incomeText.text = "+${formatAmount(income)}$currencySymbol"
+            expenseText.text = "-${formatAmount(expenses)}$currencySymbol"
         }
     }
 

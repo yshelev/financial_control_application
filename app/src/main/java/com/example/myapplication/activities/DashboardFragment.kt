@@ -44,6 +44,8 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.DateValidatorPointForward
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 
 class DashboardFragment : Fragment() {
 
@@ -552,14 +554,12 @@ class DashboardFragment : Fragment() {
             cards.forEach { card ->
                 val convertedAmount = if (card.currency != userPrefCurrency) {
                     convertCurrency(card.balance, card.currency, userPrefCurrency)
-                }
-                else {
+                } else {
                     card.balance
                 }
                 totalBalance += convertedAmount
             }
             transactions.forEach { transaction ->
-
                 val convertedAmount = if (transaction.currency != userPrefCurrency) {
                     convertCurrency(transaction.amount, transaction.currency, userPrefCurrency)
                 } else {
@@ -573,20 +573,29 @@ class DashboardFragment : Fragment() {
                 }
             }
 
-            val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
+            val symbols = DecimalFormatSymbols(Locale.getDefault()).apply {
+                groupingSeparator = ' '
+                decimalSeparator = '.'
+            }
+
+            val decimalFormat = DecimalFormat("#,###.##", symbols).apply {
+                minimumFractionDigits = 2
+                maximumFractionDigits = 2
+            }
+
             val currencySymbol = getCurrencySymbol(userPrefCurrency)
 
             totalBalanceTextView.text = getString(
                 R.string.label_balance,
-                numberFormat.format(totalBalance), currencySymbol
+                decimalFormat.format(totalBalance), currencySymbol
             )
             incomeTextView.text = getString(
                 R.string.label_income,
-                numberFormat.format(totalIncome), currencySymbol
+                decimalFormat.format(totalIncome), currencySymbol
             )
             expensesTextView.text = getString(
                 R.string.label_expenses,
-                numberFormat.format(totalExpenses), currencySymbol
+                decimalFormat.format(totalExpenses), currencySymbol
             )
         }
     }

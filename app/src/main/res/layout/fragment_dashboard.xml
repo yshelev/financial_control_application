@@ -48,7 +48,7 @@
                 android:text="Balance: \n0₽"
                 android:textColor="@color/buttonTextColor"
                 android:textStyle="bold"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:gravity="center"
                 android:layout_weight="1" />
 

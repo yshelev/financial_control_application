@@ -17,7 +17,7 @@ import com.example.myapplication.database.entities.ExchangeRateEntity
 
 @Database(
     entities = [User::class, UserTransaction::class, Card::class, ExchangeRateEntity::class, Category::class],
-    version = 16,
+    version = 17,
     exportSchema = false
 )
 abstract class MainDatabase : RoomDatabase() {
