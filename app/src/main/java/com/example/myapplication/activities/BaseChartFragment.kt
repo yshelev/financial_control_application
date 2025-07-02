@@ -66,7 +66,7 @@ abstract class BaseChartFragment : Fragment() {
     ) {
         pieChart.setNoDataText("")
 
-        val entries = data.map { PieEntry(it.category_sum.toFloat(), it.category) }
+        val entries = data.map { PieEntry(it.category_sum.toFloat(), it.categoryId.toString()) }
 
         // Тема
         val isDark = resources.configuration.uiMode and
@@ -194,12 +194,12 @@ abstract class BaseChartFragment : Fragment() {
         container.removeAllViews()
 
         for (i in data.indices) {
-            val category = data[i].category
+            val category = data[i].categoryId
             val baseColor = colors[i % colors.size]
             val color = (baseColor and 0x00FFFFFF) or (0xAA shl 24) // прозрачность 170/255 (~67%)
 
             val chip = layoutInflater.inflate(R.layout.item_legend_chip, container, false) as TextView
-            chip.text = category
+            chip.text = category.toString()
 
             val drawable = chip.background.mutate()
             if (drawable is GradientDrawable) {

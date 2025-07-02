@@ -224,7 +224,7 @@ class AddTransactionActivity : AppCompatActivity() {
                     description = description,
                     card_id = cardId,
                     currency = card.currency,
-                    category_id = category.id  // передаем ID категории
+                    category_id = category.id
                 )
 
                 val responseTransaction = transactionRepository.addTransaction(transactionSchema)

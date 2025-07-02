@@ -45,21 +45,21 @@ interface TransactionDao {
     ): List<UserTransaction>
 
 
-    @Query("SELECT category, SUM(amount) as category_sum " +
+    @Query("SELECT categoryId, SUM(amount) as category_sum " +
             "FROM transactions " +
             "WHERE (date BETWEEN :startDate AND :endDate)" +
             "AND isIncome = 1 " +
-            "GROUP BY category")
+            "GROUP BY categoryId")
     suspend fun getSumIncomeForChart(
         startDate: Long,
         endDate: Long
     ): List<CategorySum>
 
-    @Query("SELECT category, SUM(amount) as category_sum " +
+    @Query("SELECT categoryId, SUM(amount) as category_sum " +
             "FROM transactions " +
             "WHERE (date BETWEEN :startDate AND :endDate) " +
             "AND isIncome = 0 " +
-            "GROUP BY category")
+            "GROUP BY categoryId")
     suspend fun getSumExpenseForChart(
         startDate: Long,
         endDate: Long

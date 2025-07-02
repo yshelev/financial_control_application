@@ -4,12 +4,17 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class WelcomeActivity : AuthBaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_welcome)
+//        lifecycleScope.launch {
+//            App.database.userDao().deleteAll()
+//        }
 
         val startButton = findViewById<Button>(R.id.startButton)
         val skipRegistrationButton = findViewById<Button>(R.id.startWithoutRegistrationButton)

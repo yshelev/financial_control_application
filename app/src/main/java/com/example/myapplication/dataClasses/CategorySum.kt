@@ -1,6 +1,6 @@
 package com.example.myapplication
 
 data class CategorySum (
-    val category: String,
+    val categoryId: Int,
     val category_sum: Double
 )
