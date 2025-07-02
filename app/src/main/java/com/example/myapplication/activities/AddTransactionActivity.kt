@@ -17,7 +17,9 @@ import com.example.myapplication.schemas.BalanceCardUpdateSchema
 import com.example.myapplication.schemas.TransactionSchema
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -203,57 +205,104 @@ class AddTransactionActivity : AppCompatActivity() {
         val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
         val cardId = cardsMap[cardSpinner.selectedItem.toString()] ?: return
 
+        val loaderContainer = findViewById<View>(R.id.loaderContainer)
+        setUiEnabled(false)
+        loaderContainer.visibility = View.VISIBLE
+
         lifecycleScope.launch {
-            val card = App.database.cardDao().getCardById(cardId)
-            val category = App.database.categoryDao().getCategoryByNameAndType(categoryName, isIncomeSelected)
+            try {
 
-            if (card != null && category != null) {
-                val updatedBalance = if (isIncomeSelected) card.balance + amount else card.balance - amount
-                cardDao.update(card.copy(balance = updatedBalance))
+                val card = App.database.cardDao().getCardById(cardId)
+                val category = App.database.categoryDao()
+                    .getCategoryByNameAndType(categoryName, isIncomeSelected)
 
-                val ubs = BalanceCardUpdateSchema(
-                    card_id = card.id,
-                    new_balance = updatedBalance
-                )
-                try {
-                    cardRepository.updateBalanceCard(ubs)
-                }
-                catch(e: Exception) {
-                    Log.d("add transaction", "cannot sync update balance with" +
-                            " backend \n error: $e")
-                }
+                if (card != null && category != null) {
+                    val updatedBalance =
+                        if (isIncomeSelected) card.balance + amount else card.balance - amount
+                    cardDao.update(card.copy(balance = updatedBalance))
 
-                val transactionSchema = TransactionSchema(
-                    is_income = isIncomeSelected,
-                    amount = amount,
-                    description = description,
-                    card_id = cardId,
-                    currency = card.currency,
-                    category_id = category.id
-                )
-                var transaction: UserTransaction
-                try {
-                    val responseTransaction = transactionRepository.addTransaction(transactionSchema)
-                    transaction = responseTransaction.toEntity()
-                } catch (e: Exception) {
-                    Log.d("add transaction", "cannot sync create transaction with" +
-                            " backend \n error: $e")
+                    val ubs = BalanceCardUpdateSchema(
+                        card_id = card.id,
+                        new_balance = updatedBalance
+                    )
+                    try {
+                        cardRepository.updateBalanceCard(ubs)
+                    } catch (e: Exception) {
+                        Log.d(
+                            "add transaction", "cannot sync update balance with" +
+                                    " backend \n error: $e"
+                        )
+                    }
 
-                    transaction = UserTransaction(
-                        isIncome = isIncomeSelected,
+                    val transactionSchema = TransactionSchema(
+                        is_income = isIncomeSelected,
                         amount = amount,
                         description = description,
-                        cardId = cardId,
+                        card_id = cardId,
                         currency = card.currency,
-                        categoryId = category.id
+                        category_id = category.id,
+                        date = selectedDate.timeInMillis
                     )
+                    var transaction: UserTransaction
+                    try {
+                        val responseTransaction =
+                            transactionRepository.addTransaction(transactionSchema)
+                        transaction = responseTransaction.toEntity()
+                    } catch (e: Exception) {
+                        Log.d(
+                            "add transaction", "cannot sync create transaction with" +
+                                    " backend \n error: $e"
+                        )
+
+                        transaction = UserTransaction(
+                            isIncome = isIncomeSelected,
+                            amount = amount,
+                            description = description,
+                            cardId = cardId,
+                            currency = card.currency,
+                            categoryId = category.id,
+                            date = selectedDate.timeInMillis
+                        )
+                    }
+                    transactionDao.insert(transaction)
+                    finish()
+                } else {
+                    Toast.makeText(
+                        this@AddTransactionActivity,
+                        "Ошибка: карта или категория не найдены",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-                transactionDao.insert(transaction)
-                finish()
-            } else {
-                Toast.makeText(this@AddTransactionActivity, "Ошибка: карта или категория не найдены", Toast.LENGTH_SHORT).show()
+            } finally {
+                withContext(Dispatchers.Main) {
+                    loaderContainer.visibility = View.GONE
+                    setUiEnabled(true)
+                }
             }
         }
+
+    }
+
+    private fun setUiEnabled(enabled: Boolean) {
+        val alpha = if (enabled) 1f else 0.5f
+        dateCard.isEnabled = enabled
+        dateCard.alpha = alpha
+        cardSpinner.isEnabled = enabled
+        cardSpinner.alpha = alpha
+        incomeToggle.isEnabled = enabled
+        incomeToggle.alpha = alpha
+        expenseToggle.isEnabled = enabled
+        expenseToggle.alpha = alpha
+        categorySpinner.isEnabled = enabled
+        categorySpinner.alpha = alpha
+        descriptionEditText.isEnabled = enabled
+        descriptionEditText.alpha = alpha
+        amountEditText.isEnabled = enabled
+        amountEditText.alpha = alpha
+        backButton.isEnabled = enabled
+        backButton.alpha = alpha
+        saveButton.isEnabled = enabled
+        saveButton.alpha = alpha
     }
 
     private fun showDatePicker() {

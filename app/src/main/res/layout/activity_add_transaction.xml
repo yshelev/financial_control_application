@@ -191,4 +191,19 @@
             android:text="@string/save" />
     </LinearLayout>
 </ScrollView>
+
+    <FrameLayout
+        android:id="@+id/loaderContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="@color/transparent"> <!-- Полупрозрачный черный фон -->
+
+        <ProgressBar
+            android:id="@+id/loader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true" />
+    </FrameLayout>
 </FrameLayout>

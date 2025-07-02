@@ -6,5 +6,6 @@ data class TransactionSchema(
     val currency: String,
     val description: String?,
     val card_id: Long,
-    val category_id: Long
+    val category_id: Long,
+    val date: Long
 )
