@@ -6,7 +6,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "cards")
 data class Card(
-    @PrimaryKey() val id: Long = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
     val name: String,
     val maskedNumber: String,
     val date: String,

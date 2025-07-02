@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
@@ -199,24 +200,28 @@ class AddTransactionActivity : AppCompatActivity() {
         val amount = amountEditText.text.toString().toDouble()
         val selected = getCategoriesList()[categorySpinner.selectedItemPosition]
         val categoryName = extractCategoryName(selected)
-        val iconResId = selected.substringAfter("|").toIntOrNull() ?: R.drawable.ic_default
         val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
         val cardId = cardsMap[cardSpinner.selectedItem.toString()] ?: return
 
         lifecycleScope.launch {
-            val card = cardRepository.getCard(cardId)
+            val card = App.database.cardDao().getCardById(cardId)
             val category = App.database.categoryDao().getCategoryByNameAndType(categoryName, isIncomeSelected)
 
             if (card != null && category != null) {
-                val cardEntity = card.toEntity()
                 val updatedBalance = if (isIncomeSelected) card.balance + amount else card.balance - amount
-                cardDao.update(cardEntity.copy(balance = updatedBalance))
+                cardDao.update(card.copy(balance = updatedBalance))
 
                 val ubs = BalanceCardUpdateSchema(
                     card_id = card.id,
                     new_balance = updatedBalance
                 )
-                cardRepository.updateBalanceCard(ubs)
+                try {
+                    cardRepository.updateBalanceCard(ubs)
+                }
+                catch(e: Exception) {
+                    Log.d("add transaction", "cannot sync update balance with" +
+                            " backend \n error: $e")
+                }
 
                 val transactionSchema = TransactionSchema(
                     is_income = isIncomeSelected,
@@ -226,9 +231,23 @@ class AddTransactionActivity : AppCompatActivity() {
                     currency = card.currency,
                     category_id = category.id
                 )
+                var transaction: UserTransaction
+                try {
+                    val responseTransaction = transactionRepository.addTransaction(transactionSchema)
+                    transaction = responseTransaction.toEntity()
+                } catch (e: Exception) {
+                    Log.d("add transaction", "cannot sync create transaction with" +
+                            " backend \n error: $e")
 
-                val responseTransaction = transactionRepository.addTransaction(transactionSchema)
-                val transaction = responseTransaction.toEntity()
+                    transaction = UserTransaction(
+                        isIncome = isIncomeSelected,
+                        amount = amount,
+                        description = description,
+                        cardId = cardId,
+                        currency = card.currency,
+                        categoryId = category.id
+                    )
+                }
                 transactionDao.insert(transaction)
                 finish()
             } else {

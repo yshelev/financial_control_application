@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.graphics.Color
+import android.net.http.NetworkException
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,6 +12,8 @@ import android.widget.*
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.MainDatabase
 import com.example.myapplication.database.entities.Card
+import com.example.myapplication.dto.CardDto
+import com.example.myapplication.mappers.toEntity
 import com.example.myapplication.schemas.CardSchema
 import kotlinx.coroutines.launch
 
@@ -145,7 +148,18 @@ class AddCardActivity : AuthBaseActivity() {
                 authController.getCurrentUser {
                     user ->
                     if (user == null) {
-                        Log.d("add card activity", "user.email not found")
+                        lifecycleScope.launch{
+                            val card = Card(
+                                name = name,
+                                balance = balance,
+                                maskedNumber = last4,
+                                date = date,
+                                currency = selectedCurrency
+                            )
+                            db.cardDao().insert(card)
+                            setResult(RESULT_OK)
+                            finish()
+                        }
                         return@getCurrentUser
                     }
 
@@ -158,15 +172,20 @@ class AddCardActivity : AuthBaseActivity() {
                         owner_id = user.id
                     )
                     lifecycleScope.launch{
-                        val res = cardRepository.addCard(cardSchema)
-                        val card = Card(
-                            id = res.id,
-                            name = name,
-                            balance = balance,
-                            maskedNumber = last4,
-                            date = date,
-                            currency = selectedCurrency
-                        )
+                        var card: Card
+                        try {
+                            val res = cardRepository.addCard(cardSchema)
+                            card = res.toEntity()
+                        }
+                        catch(e: Exception) {
+                            card = Card(
+                                name = name,
+                                balance = balance,
+                                maskedNumber = last4,
+                                date = date,
+                                currency = selectedCurrency
+                            )
+                        }
 
                         db.cardDao().insert(card)
                         setResult(RESULT_OK)

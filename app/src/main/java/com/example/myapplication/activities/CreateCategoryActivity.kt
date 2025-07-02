@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import android.widget.GridView
 import android.widget.ImageButton
@@ -123,6 +124,7 @@ class CreateCategoryActivity : AuthBaseActivity() {
 
         saveButton.setOnClickListener {
             val name = nameEditText.text.toString().trim()
+            val categoryDao = App.database.categoryDao()
 
             if (name.isEmpty()) {
                 nameEditText.error = getString(R.string.enter_category_name)
@@ -132,6 +134,25 @@ class CreateCategoryActivity : AuthBaseActivity() {
             authController.getCurrentUser {
                 user ->
                 if (user?.id == null) {
+                    Log.d("create category", "user email not found, anon work по eu")
+                    lifecycleScope.launch {
+                        val category = Category(
+                            title = name,
+                            iconResId = selectedIconResId,
+                            isIncome = isIncomeSelected,
+                            color = "#000000"
+                        )
+                        categoryDao.insert(category)
+                        val resultIntent = Intent().apply {
+                            putExtra("newCategory", name)
+                            putExtra("iconResId", selectedIconResId)
+                            putExtra("isIncome", isIncomeSelected)
+                        }
+                        setResult(RESULT_OK, resultIntent)
+                        finish()
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    }
+
                     return@getCurrentUser
                 }
                 val categoryS = CreateCategorySchema(
@@ -143,8 +164,6 @@ class CreateCategoryActivity : AuthBaseActivity() {
                 )
                 lifecycleScope.launch {
                     val categoryDto = categoryRepository.addCategory(categoryS)
-
-                    val categoryDao = App.database.categoryDao()
 
                     val category = categoryDto.toEntity()
 
