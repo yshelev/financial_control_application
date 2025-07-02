@@ -12,7 +12,9 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.MainDatabase
+import kotlinx.coroutines.launch
 import java.util.*
 
 class SettingsFragment : Fragment() {
@@ -150,6 +152,10 @@ class SettingsFragment : Fragment() {
 
         logoutButton.setOnClickListener {
             authController.logout()
+            lifecycleScope.launch {
+                db.transactionDao().deleteAll()
+                db.cardDao().deleteAll()
+            }
             startActivity(Intent(requireActivity(), LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             })

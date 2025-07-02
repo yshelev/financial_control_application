@@ -9,14 +9,29 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.database.MainDatabase
+import com.example.myapplication.mappers.toEntityList
+import kotlinx.coroutines.launch
 
 class LoginActivity : AuthBaseActivity() {
 
     private var isPasswordVisible = false
+    private lateinit var db: MainDatabase
+    val transactionRepository by lazy {
+        (applicationContext as App).transactionRepository
+    }
+
+    val cardRepository by lazy {
+        (applicationContext as App).cardRepository
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        db = App.database
 
         val emailInput = findViewById<EditText>(R.id.emailInput)
         val passwordInput = findViewById<EditText>(R.id.passwordInput)
@@ -49,6 +64,15 @@ class LoginActivity : AuthBaseActivity() {
                 email = email,
                 password = password,
                 onSuccess = {
+                    lifecycleScope.launch {
+                        val cards = cardRepository.getCards(email)
+                        val cardsEntity = cards.toEntityList()
+                        db.cardDao().refreshCards(cardsEntity)
+
+                        val transactions = transactionRepository.getTransactions(email)
+                        val transactionsEntity = transactions.toEntityList()
+                        db.transactionDao().refreshTransactions(transactionsEntity)
+                    }
                     Toast.makeText(this, getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)

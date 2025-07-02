@@ -10,10 +10,10 @@ fun TransactionDto.toEntity(): UserTransaction {
         id = this.id,
         isIncome = this.isIncome,
         amount = this.amount,
-        category = this.category,
+        categoryId = this.categoryId,
         description = this.description,
         date = this.date.toTimestamp(),
-        iconResId = this.iconResId,
+//        iconResId = this.iconResId,
         currency = this.currency,
         cardId = this.cardId
     )
