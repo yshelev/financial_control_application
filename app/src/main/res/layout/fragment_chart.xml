@@ -75,14 +75,6 @@
             app:alignItems="flex_start"
             app:alignContent="flex_start" />
 
-        <ProgressBar
-            android:id="@+id/barChartLoader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            android:layout_marginTop="8dp"/>
-
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/typeGroup"
             android:layout_width="match_parent"
@@ -124,6 +116,13 @@
                 app:cornerRadius="12dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
+        <ProgressBar
+            android:id="@+id/barChartLoader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:layout_marginTop="10dp"/>
 
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/barChart"

@@ -151,6 +151,7 @@
     <string name="day">День</string>
     <string name="month">Месяц</string>
     <string name="year">Год</string>
+    <string name="no_data_available">Нет доступных транзакций</string>
 
     <string-array name="stats_tab_titles">
         <item>Доходы</item>

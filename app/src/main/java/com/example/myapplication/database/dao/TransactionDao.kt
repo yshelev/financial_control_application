@@ -48,21 +48,25 @@ interface TransactionDao {
     ): List<UserTransaction>
 
 
-    @Query("SELECT categoryId, SUM(amount) as category_sum " +
+    @Query("SELECT categories.name as category, SUM(amount) as category_sum " +
             "FROM transactions " +
+            "LEFT JOIN categories ON transactions.categoryId = categories.id " +
             "WHERE (date BETWEEN :startDate AND :endDate)" +
-            "AND isIncome = 1 " +
-            "GROUP BY categoryId")
+            "AND transactions.isIncome = 1 " +
+            "GROUP BY categories.id " +
+            "ORDER BY category_sum DESC")
     suspend fun getSumIncomeForChart(
         startDate: Long,
         endDate: Long
     ): List<CategorySum>
 
-    @Query("SELECT categoryId, SUM(amount) as category_sum " +
+    @Query("SELECT categories.name as category, SUM(amount) as category_sum " +
             "FROM transactions " +
-            "WHERE (date BETWEEN :startDate AND :endDate) " +
-            "AND isIncome = 0 " +
-            "GROUP BY categoryId")
+            "LEFT JOIN categories ON transactions.categoryId = categories.id " +
+            "WHERE (date BETWEEN :startDate AND :endDate)" +
+            "AND transactions.isIncome = 0 " +
+            "GROUP BY categories.id "+
+            "ORDER BY category_sum DESC")
     suspend fun getSumExpenseForChart(
         startDate: Long,
         endDate: Long
@@ -71,7 +75,7 @@ interface TransactionDao {
     @Query("SELECT " +
             "    strftime('%d.%m.%Y', datetime(date / 1000, 'unixepoch')) AS period, " +
             "    SUM(amount) AS sum " +
-            "FROM transactions\n" +
+            "FROM transactions " +
             "WHERE date BETWEEN :startDate AND :endDate " +
             "AND isIncome = 0 " +
             "GROUP BY period " +
@@ -110,7 +114,7 @@ interface TransactionDao {
     @Query("SELECT " +
             "    strftime('%d.%m.%Y', datetime(date / 1000, 'unixepoch')) AS period, " +
             "    SUM(amount) AS sum " +
-            "FROM transactions\n" +
+            "FROM transactions " +
             "WHERE date BETWEEN :startDate AND :endDate " +
             "AND isIncome = 1 " +
             "GROUP BY period " +

@@ -57,6 +57,7 @@ abstract class BaseChartFragment : Fragment() {
         val db = MainDatabase.getDatabase(requireContext().applicationContext)
         val dao = db.transactionDao()
         val loader = view.findViewById<View>(R.id.chartLoader)
+        val loader2 = view.findViewById<View>(R.id.barChartLoader)
         val pieChart = view.findViewById<PieChart>(R.id.pieChart)
         val dateCard = view.findViewById<View>(R.id.dateCard)
         val dateText = view.findViewById<TextView>(R.id.selectDateText)
@@ -64,7 +65,7 @@ abstract class BaseChartFragment : Fragment() {
         val start = getStartOfMonth()
         val end = getEndOfMonth()
         loadAndDisplayChart(start, end, pieChart, loader)
-        loadAndDisplayBarChart(loader)
+        loadAndDisplayBarChart(loader2)
 
         dateCard.setOnClickListener {
             val picker = com.google.android.material.datepicker.MaterialDatePicker.Builder
@@ -91,6 +92,7 @@ abstract class BaseChartFragment : Fragment() {
 
 
         val typeGroup = view.findViewById<MaterialButtonToggleGroup>(R.id.typeGroup)
+        typeGroup.visibility = View.INVISIBLE
         typeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 currentPeriodType = when (checkedId) {
@@ -99,7 +101,7 @@ abstract class BaseChartFragment : Fragment() {
                     R.id.yearToggle -> PeriodType.YEAR
                     else -> PeriodType.MONTH
                 }
-                loadAndDisplayBarChart(loader)
+                loadAndDisplayBarChart(loader2)
             }
         }
     }
@@ -143,9 +145,17 @@ abstract class BaseChartFragment : Fragment() {
         data: List<CategorySum>,
         title: String
     ) {
-        pieChart.setNoDataText("")
 
-        val entries = data.map { PieEntry(it.category_sum.toFloat(), it.categoryId.toString()) }
+        pieChart.setNoDataText(getString(R.string.no_data_available))
+        pieChart.setNoDataTextColor(ContextCompat.getColor(requireContext(), R.color.buttonTextColor))
+
+        if (data.isEmpty()) {
+            pieChart.visibility = View.VISIBLE // Оставляем видимым для показа сообщения
+            pieChart.clear() // Очищаем предыдущие данные
+            return
+        }
+
+        val entries = data.map { PieEntry(it.category_sum.toFloat(), it.category.toString()) }
 
         // Тема
         val isDark = resources.configuration.uiMode and
@@ -188,12 +198,18 @@ abstract class BaseChartFragment : Fragment() {
 
     private fun setupBarChart(
         barChart: BarChart,
-        data: List<PeriodTransaction>
+        data: List<PeriodTransaction>,
+        typeGroup: MaterialButtonToggleGroup
     ) {
         if (data.isEmpty()) {
             barChart.visibility = View.GONE
+            typeGroup.visibility = View.GONE // Скрываем группу кнопок
             return
+        } else {
+            typeGroup.visibility = View.VISIBLE // Показываем группу кнопок при наличии данных
         }
+        barChart.setNoDataText(getString(R.string.no_data_available))
+        barChart.setNoDataTextColor(ContextCompat.getColor(requireContext(), R.color.buttonTextColor))
 
         // Получаем цвета из текущей темы
         val isDark = resources.configuration.uiMode and
@@ -312,6 +328,7 @@ abstract class BaseChartFragment : Fragment() {
         lifecycleScope.launch {
             loader.visibility = View.VISIBLE
             val barChart = view?.findViewById<BarChart>(R.id.barChart)
+            val typeGroup = view?.findViewById<MaterialButtonToggleGroup>(R.id.typeGroup)
             barChart?.visibility = View.INVISIBLE
 
             // Загрузка данных для столбчатой диаграммы за ВСЕ время
@@ -326,7 +343,10 @@ abstract class BaseChartFragment : Fragment() {
             loader.visibility = View.GONE
             barChart?.visibility = View.VISIBLE
 
-            barChart?.let { setupBarChart(it, allData) }
+            // Передаем typeGroup в setupBarChart
+            if (barChart != null && typeGroup != null) {
+                setupBarChart(barChart, allData, typeGroup)
+            }
         }
     }
 
@@ -444,7 +464,7 @@ abstract class BaseChartFragment : Fragment() {
         container.removeAllViews()
 
         for (i in data.indices) {
-            val category = data[i].categoryId
+            val category = data[i].category
             val baseColor = colors[i % colors.size]
             val color = (baseColor and 0x00FFFFFF) or (0xAA shl 24) // прозрачность 170/255 (~67%)
 
