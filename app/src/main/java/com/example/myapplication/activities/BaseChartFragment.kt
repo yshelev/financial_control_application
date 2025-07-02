@@ -207,6 +207,7 @@ abstract class BaseChartFragment : Fragment() {
             return
         } else {
             typeGroup.visibility = View.VISIBLE // Показываем группу кнопок при наличии данных
+            barChart.visibility = View.VISIBLE
         }
         barChart.setNoDataText(getString(R.string.no_data_available))
         barChart.setNoDataTextColor(ContextCompat.getColor(requireContext(), R.color.buttonTextColor))
@@ -341,7 +342,7 @@ abstract class BaseChartFragment : Fragment() {
             }
 
             loader.visibility = View.GONE
-            barChart?.visibility = View.VISIBLE
+//            barChart?.visibility = View.VISIBLE
 
             // Передаем typeGroup в setupBarChart
             if (barChart != null && typeGroup != null) {

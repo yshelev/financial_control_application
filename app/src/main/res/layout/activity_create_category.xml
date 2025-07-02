@@ -119,12 +119,12 @@
             android:id="@+id/iconGridView"
             android:layout_width="wrap_content"
             android:layout_height="232dp"
+            android:layout_marginTop="24dp"
             android:gravity="center"
             android:horizontalSpacing="12dp"
             android:numColumns="4"
             android:stretchMode="columnWidth"
-            android:verticalSpacing="12dp"
-            android:layout_marginTop="24dp"/>
+            android:verticalSpacing="12dp" />
 
         <Button
             android:id="@+id/saveCategoryButton"

@@ -78,9 +78,9 @@
 
     <string name="error_end_date_before_start">End date cannot be before start date</string>
 
-    <string name="label_balance">Balance: %1$s %2$s</string>
-    <string name="label_income">Income: %1$s %2$s</string>
-    <string name="label_expenses">Expenses: %1$s %2$s</string>
+    <string name="label_balance">Balance: \n %1$s %2$s</string>
+    <string name="label_income">Income: \n %1$s %2$s</string>
+    <string name="label_expenses">Expenses: \n %1$s %2$s</string>
     <string name="enter_category_name">Enter category name</string>
     <string name="icon_selected">Icon selected</string>
 
