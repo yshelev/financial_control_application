@@ -100,18 +100,8 @@ class AddTransactionActivity : AppCompatActivity() {
                 val iconResId = result.data?.getIntExtra("iconResId", R.drawable.ic_default)
 
                 if (newCategory != null && iconResId != null) {
-                    val fullCategory = "$newCategory|$iconResId"
-
-                    if (isIncomeSelected) {
-                        incomeCategories.add(incomeCategories.size - 1, fullCategory)
-                    } else {
-                        expenseCategories.add(expenseCategories.size - 1, fullCategory)
-                    }
-
-                    updateCategorySpinner()
-
-                    val index = getCategoriesList().indexOf(fullCategory)
-                    if (index != -1) categorySpinner.setSelection(index)
+                    newCategoryToSelect = newCategory
+                    updateCategoriesFromDb()
                 }
             }
         }
@@ -126,9 +116,16 @@ class AddTransactionActivity : AppCompatActivity() {
         }
 
         dateCard.setOnClickListener { showDatePicker() }
-        incomeToggle.setOnClickListener { isIncomeSelected = true; updateToggleButtons(); updateCategorySpinner() }
-        expenseToggle.setOnClickListener { isIncomeSelected = false; updateToggleButtons(); updateCategorySpinner() }
-
+        incomeToggle.setOnClickListener {
+            isIncomeSelected = true
+            updateToggleButtons()
+            updateCategoriesFromDb()
+        }
+        expenseToggle.setOnClickListener {
+            isIncomeSelected = false
+            updateToggleButtons()
+            updateCategoriesFromDb()
+        }
         categorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (extractCategoryName(getCategoriesList()[position]) == getString(R.string.category_add_new)) {
@@ -158,15 +155,18 @@ class AddTransactionActivity : AppCompatActivity() {
                     val list = categories.map { "${it.title}|${it.iconResId}" }.toMutableList()
                     list.add("${getString(R.string.category_add_new)}|${R.drawable.ic_default}")
                     if (isIncomeSelected) incomeCategories = list else expenseCategories = list
-                    updateCategorySpinner()
+
+                    val categoriesNames = getCategoriesList().map { extractCategoryName(it) }
+                    val adapter = ArrayAdapter(this@AddTransactionActivity, android.R.layout.simple_spinner_item, categoriesNames)
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    categorySpinner.adapter = adapter
+
+                    newCategoryToSelect?.let { categoryName ->
+                        val index = categoriesNames.indexOfFirst { it == categoryName }
+                        if (index >= 0) categorySpinner.setSelection(index)
+                        newCategoryToSelect = null
+                    }
                 }
-            if (newCategoryToSelect != null) {
-                val index = getCategoriesList().indexOfFirst { extractCategoryName(it) == newCategoryToSelect }
-                if (index >= 0) {
-                    categorySpinner.setSelection(index)
-                }
-                newCategoryToSelect = null
-            }
         }
     }
 
