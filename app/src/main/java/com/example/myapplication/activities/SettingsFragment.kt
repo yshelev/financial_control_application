@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -33,6 +34,15 @@ class SettingsFragment : Fragment() {
     private lateinit var currencySpinner: Spinner
     private lateinit var themeNameTextView: TextView
     private lateinit var languageSpinner: Spinner
+
+    private val categoryRepository by lazy {
+        (requireActivity().applicationContext as App).categoryRepository
+    }
+
+    private val cardRepository by lazy {
+        (requireActivity().applicationContext as App).cardRepository
+    }
+
 
     private fun applyThemeFromPreferences() {
         val prefs = requireActivity().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
@@ -148,16 +158,29 @@ class SettingsFragment : Fragment() {
 
         clearDataButton.setOnClickListener {
             Toast.makeText(requireContext(), getString(R.string.data_cleared), Toast.LENGTH_SHORT).show()
-        }
-
-        logoutButton.setOnClickListener {
-            authController.logout()
             lifecycleScope.launch {
                 db.transactionDao().deleteAll()
                 db.cardDao().deleteAll()
                 db.categoryDao().deleteAll()
+                Log.d("123", "cleared")
             }
-            startActivity(Intent(requireActivity(), LoginActivity::class.java).apply {
+            lifecycleScope.launch {
+                authController.getCurrentUser {
+                        user ->
+                    if (user?.email != null) {
+                        lifecycleScope.launch {
+                            cardRepository.deleteUserCards(user.id)
+                            categoryRepository.deleteUserCategories(user.id)
+                            Log.d("123", "backend data cleared")
+                        }
+                    }
+                }
+            }
+        }
+
+        logoutButton.setOnClickListener {
+            authController.logout()
+            startActivity(Intent(requireActivity(), WelcomeActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             })
             requireActivity().finish()

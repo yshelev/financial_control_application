@@ -25,4 +25,7 @@ class CardRepository(private val apiService: ApiService) {
     suspend fun deleteCard(cardId: Long): Response<Void> {
         return apiService.deleteCard(cardId)
     }
+    suspend fun deleteUserCards(userId: Long): Response<Void> {
+        return apiService.deleteUserCards(userId)
+    }
 }

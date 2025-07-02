@@ -20,4 +20,8 @@ class CategoryRepository(private val apiService: ApiService) {
     suspend fun getCategories(email: String): List<CategoryDto> {
         return apiService.getCategories(email)
     }
+
+    suspend fun deleteUserCategories(userId: Long): Response<Void> {
+        return apiService.deleteUserCategories(userId)
+    }
 }

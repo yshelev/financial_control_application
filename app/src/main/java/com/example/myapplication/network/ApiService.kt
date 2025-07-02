@@ -92,4 +92,10 @@ interface ApiService {
 
     @DELETE("categories/{id}/")
     suspend fun deleteCategory(@Path("id") categoryId: Long): Response<Void>
+
+    @DELETE("users/{id}/cards")
+    suspend fun deleteUserCards(@Path("id") userId: Long): Response<Void>
+
+    @DELETE("users/{id}/categories")
+    suspend fun deleteUserCategories(@Path("id") userId: Long): Response<Void>
 }
