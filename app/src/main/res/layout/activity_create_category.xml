@@ -92,6 +92,10 @@
                 android:layout_height="wrap_content"
                 android:text="@string/income"
                 android:textColor="@color/green"
+                android:shadowColor="@color/bottomColor"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="0.3"
                 app:backgroundTint="@color/transparent"
                 app:cornerRadius="12dp" />
 
@@ -102,6 +106,10 @@
                 android:layout_height="wrap_content"
                 android:text="@string/expense"
                 android:textColor="@color/red"
+                android:shadowColor="@color/bottomColor"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="0.3"
                 app:backgroundTint="@color/transparent"
                 app:cornerRadius="12dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
