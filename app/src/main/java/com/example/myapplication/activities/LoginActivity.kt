@@ -65,13 +65,13 @@ class LoginActivity : AuthBaseActivity() {
                 password = password,
                 onSuccess = {
                     lifecycleScope.launch {
-                        val transactions = transactionRepository.getTransactions(email)
-                        val transactionsEntity = transactions.toEntityList()
-                        db.transactionDao().refreshTransactions(transactionsEntity)
-
                         val cards = cardRepository.getCards(email)
                         val cardsEntity = cards.toEntityList()
                         db.cardDao().refreshCards(cardsEntity)
+
+                        val transactions = transactionRepository.getTransactions(email)
+                        val transactionsEntity = transactions.toEntityList()
+                        db.transactionDao().refreshTransactions(transactionsEntity)
                     }
                     Toast.makeText(this, getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
