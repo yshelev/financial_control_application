@@ -8,7 +8,7 @@ data class Category(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val isIncome: Boolean,
-    val name: String,
+    val title: String,
     val iconResId: Int,
     val color: String
 )

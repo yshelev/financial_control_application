@@ -11,11 +11,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.entities.Category
+import com.example.myapplication.mappers.toEntity
+import com.example.myapplication.schemas.CreateCategorySchema
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import kotlinx.coroutines.launch
 
-class CreateCategoryActivity : AppCompatActivity() {
+class CreateCategoryActivity : AuthBaseActivity() {
 
     private lateinit var nameEditText: EditText
     private lateinit var iconGridView: GridView
@@ -31,6 +33,10 @@ class CreateCategoryActivity : AppCompatActivity() {
     private val inactiveBg = Color.TRANSPARENT
     private val inactiveIncomeText = Color.parseColor("#50FF9D")
     private val inactiveExpenseText = Color.parseColor("#FF6E6E")
+
+    private val categoryRepository by lazy {
+        (applicationContext as App).categoryRepository
+    }
 
     private var selectedIconResId: Int = R.drawable.ic_default
     private var isIncomeSelected: Boolean = true
@@ -123,26 +129,36 @@ class CreateCategoryActivity : AppCompatActivity() {
                 shakeView(nameEditText)
                 return@setOnClickListener
             }
-
-            val category = Category(
-                name = name,
-                iconResId = selectedIconResId,
-                isIncome = isIncomeSelected,
-                color = "#000000"
-            )
-
-            lifecycleScope.launch {
-                val categoryDao = App.database.categoryDao()
-                categoryDao.insert(category)
-
-                val resultIntent = Intent().apply {
-                    putExtra("newCategory", name)
-                    putExtra("iconResId", selectedIconResId)
-                    putExtra("isIncome", isIncomeSelected)
+            authController.getCurrentUser {
+                user ->
+                if (user?.id == null) {
+                    return@getCurrentUser
                 }
-                setResult(RESULT_OK, resultIntent)
-                finish()
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                val categoryS = CreateCategorySchema(
+                    title = name,
+                    icon_res_id = selectedIconResId,
+                    is_income = isIncomeSelected,
+                    user_id = user.id,
+                    color = "#000000"
+                )
+                lifecycleScope.launch {
+                    val categoryDto = categoryRepository.addCategory(categoryS)
+
+                    val categoryDao = App.database.categoryDao()
+
+                    val category = categoryDto.toEntity()
+
+                    categoryDao.insert(category)
+
+                    val resultIntent = Intent().apply {
+                        putExtra("newCategory", name)
+                        putExtra("iconResId", selectedIconResId)
+                        putExtra("isIncome", isIncomeSelected)
+                    }
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                }
             }
         }
     }

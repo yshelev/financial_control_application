@@ -2,12 +2,14 @@ package com.example.myapplication.network
 
 import com.example.myapplication.dto.BackupData
 import com.example.myapplication.dto.CardDto
+import com.example.myapplication.dto.CategoryDto
 import com.example.myapplication.dto.CreateBackupRequest
 import com.example.myapplication.dto.GetBackupRequest
 import com.example.myapplication.dto.TransactionDto
 import com.example.myapplication.dto.UserDto
 import com.example.myapplication.schemas.BalanceCardUpdateSchema
 import com.example.myapplication.schemas.CardSchema
+import com.example.myapplication.schemas.CreateCategorySchema
 import com.example.myapplication.schemas.TransactionSchema
 import com.example.myapplication.schemas.UserSchema
 import retrofit2.Response
@@ -50,6 +52,9 @@ interface ApiService {
     @GET("users/{email}/cards")
     suspend fun getCardsByEmail(@Path("email") email: String): List<CardDto>
 
+    @GET("users/{email}/categories/")
+    suspend fun getCategories(@Path("email") email: String): List<CategoryDto>
+
     @POST("cards")
     suspend fun addCard(@Body card: CardSchema): CardDto
 
@@ -74,4 +79,16 @@ interface ApiService {
 
     @POST("transactions/")
     suspend fun addTransaction(@Body transaction: TransactionSchema): TransactionDto
+
+    @POST("categories/")
+    suspend fun addCategories(@Body category: CreateCategorySchema): CategoryDto
+
+    @GET("categories/{id}")
+    suspend fun getCategoryById(@Path("id") categoryId: Long): CategoryDto
+
+    @GET("categories/")
+    suspend fun getCategories(@Path("id") categoryId: Long): CategoryDto
+
+    @DELETE("categories/{id}/")
+    suspend fun deleteCategory(@Path("id") categoryId: Long): Response<Void>
 }

@@ -154,7 +154,7 @@ class AddTransactionActivity : AppCompatActivity() {
             App.database.categoryDao()
                 .getCategoriesByType(isIncomeSelected)
                 .collect { categories ->
-                    val list = categories.map { "${it.name}|${it.iconResId}" }.toMutableList()
+                    val list = categories.map { "${it.title}|${it.iconResId}" }.toMutableList()
                     list.add("${getString(R.string.category_add_new)}|${R.drawable.ic_default}")
                     if (isIncomeSelected) incomeCategories = list else expenseCategories = list
                     updateCategorySpinner()

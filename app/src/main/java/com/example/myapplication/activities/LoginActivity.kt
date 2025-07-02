@@ -26,6 +26,10 @@ class LoginActivity : AuthBaseActivity() {
         (applicationContext as App).cardRepository
     }
 
+    val categoryRepository by lazy {
+        (applicationContext as App).categoryRepository
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +69,10 @@ class LoginActivity : AuthBaseActivity() {
                 password = password,
                 onSuccess = {
                     lifecycleScope.launch {
+                        val categories = categoryRepository.getCategories(email)
+                        val categoriesEntity = categories.toEntityList()
+                        db.categoryDao().refreshCategories(categoriesEntity)
+
                         val cards = cardRepository.getCards(email)
                         val cardsEntity = cards.toEntityList()
                         db.cardDao().refreshCards(cardsEntity)

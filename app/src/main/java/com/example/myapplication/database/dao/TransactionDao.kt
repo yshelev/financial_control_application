@@ -48,7 +48,7 @@ interface TransactionDao {
     ): List<UserTransaction>
 
 
-    @Query("SELECT categories.name as category, SUM(amount) as category_sum " +
+    @Query("SELECT categories.title as category, SUM(amount) as category_sum " +
             "FROM transactions " +
             "LEFT JOIN categories ON transactions.categoryId = categories.id " +
             "WHERE (date BETWEEN :startDate AND :endDate)" +
@@ -60,7 +60,7 @@ interface TransactionDao {
         endDate: Long
     ): List<CategorySum>
 
-    @Query("SELECT categories.name as category, SUM(amount) as category_sum " +
+    @Query("SELECT categories.title as category, SUM(amount) as category_sum " +
             "FROM transactions " +
             "LEFT JOIN categories ON transactions.categoryId = categories.id " +
             "WHERE (date BETWEEN :startDate AND :endDate)" +

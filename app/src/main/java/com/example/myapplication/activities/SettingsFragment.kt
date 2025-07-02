@@ -155,6 +155,7 @@ class SettingsFragment : Fragment() {
             lifecycleScope.launch {
                 db.transactionDao().deleteAll()
                 db.cardDao().deleteAll()
+                db.categoryDao().deleteAll()
             }
             startActivity(Intent(requireActivity(), LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

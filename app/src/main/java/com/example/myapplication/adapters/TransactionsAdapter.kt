@@ -75,7 +75,7 @@ class TransactionsAdapter(
         // Находим категорию по ID
         val category = categories.find { it.id == tx.categoryId }
 
-        holder.title.text = category?.name ?: "Unknown" // Используем название категории
+        holder.title.text = category?.title ?: "Unknown" // Используем название категории
         holder.date.text = dateFormatter.format(Date(tx.date))
         val symbol = currencySymbols[tx.currency] ?: "₽"
         holder.amount.text = if (tx.isIncome) "+${tx.amount}${symbol}" else "-${tx.amount}${symbol}"

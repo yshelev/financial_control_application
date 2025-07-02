@@ -10,6 +10,7 @@ import com.example.myapplication.repositories.TransactionRepository
 import android.content.Context
 import com.example.myapplication.database.entities.Category
 import com.example.myapplication.repositories.BackupRepository
+import com.example.myapplication.repositories.CategoryRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ class App : Application() {
     val userRepository by lazy { UserRepository(apiService) }
     val cardRepository by lazy { CardRepository(apiService) }
     val transactionRepository by lazy { TransactionRepository(apiService) }
+    val categoryRepository by lazy { CategoryRepository(apiService) }
     val backupRepository by lazy { BackupRepository(apiService) }
 
 
@@ -38,16 +40,16 @@ class App : Application() {
             if (dao.getAll().isEmpty()) {
                 dao.insertAll(
                     listOf(
-                        Category(name = "Зарплата", iconResId = R.drawable.ic_salary, color = "#50FF9D", isIncome = true),
-                        Category(name = "Подарок", iconResId = R.drawable.ic_gift, color = "#50FF9D", isIncome = true),
-                        Category(name = "Инвестиции", iconResId = R.drawable.ic_investment, color = "#50FF9D", isIncome = true),
+                        Category(title = "Зарплата", iconResId = R.drawable.ic_salary, color = "#50FF9D", isIncome = true),
+                        Category(title = "Подарок", iconResId = R.drawable.ic_gift, color = "#50FF9D", isIncome = true),
+                        Category(title = "Инвестиции", iconResId = R.drawable.ic_investment, color = "#50FF9D", isIncome = true),
 
-                        Category(name = "Еда", iconResId = R.drawable.ic_food, color = "#FF6E6E", isIncome = false),
-                        Category(name = "Транспорт", iconResId = R.drawable.ic_transport, color = "#FF6E6E", isIncome = false),
-                        Category(name = "Одежда", iconResId = R.drawable.ic_clothes, color = "#FF6E6E", isIncome = false),
-                        Category(name = "Образование", iconResId = R.drawable.ic_education, color = "#FF6E6E", isIncome = false),
-                        Category(name = "Здоровье", iconResId = R.drawable.ic_health, color = "#FF6E6E", isIncome = false),
-                        Category(name = "Развлечения", iconResId = R.drawable.ic_entertainment, color = "#FF6E6E", isIncome = false)
+                        Category(title = "Еда", iconResId = R.drawable.ic_food, color = "#FF6E6E", isIncome = false),
+                        Category(title = "Транспорт", iconResId = R.drawable.ic_transport, color = "#FF6E6E", isIncome = false),
+                        Category(title = "Одежда", iconResId = R.drawable.ic_clothes, color = "#FF6E6E", isIncome = false),
+                        Category(title = "Образование", iconResId = R.drawable.ic_education, color = "#FF6E6E", isIncome = false),
+                        Category(title = "Здоровье", iconResId = R.drawable.ic_health, color = "#FF6E6E", isIncome = false),
+                        Category(title = "Развлечения", iconResId = R.drawable.ic_entertainment, color = "#FF6E6E", isIncome = false)
                     )
                 )
             }
