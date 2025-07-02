@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -23,8 +24,12 @@ import java.util.Calendar
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
+import android.util.Log
 import androidx.core.content.ContentProviderCompat.requireContext
+import com.example.myapplication.currency.ExchangeRateClient
+import com.example.myapplication.dataClasses.PeriodCurrencyTransaction
 import com.example.myapplication.dataClasses.PeriodTransaction
+import com.example.myapplication.database.entities.ExchangeRateEntity
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.AxisBase
@@ -39,10 +44,10 @@ import java.util.TimeZone
 
 abstract class BaseChartFragment : Fragment() {
     protected abstract val chartTitle: String
-    protected abstract suspend fun loadData(start: Long, end: Long): List<CategorySum>
-    protected abstract suspend fun loadBarData(start: Long, end: Long): List<PeriodTransaction>
-    protected abstract suspend fun loadBarDataDays(start: Long, end: Long): List<PeriodTransaction>
-    protected abstract suspend fun loadBarDataYears(start: Long, end: Long): List<PeriodTransaction>
+    protected abstract suspend fun loadData(start: Long, end: Long): List<CategoryCurrencySum>
+    protected abstract suspend fun loadBarData(start: Long, end: Long): List<PeriodCurrencyTransaction>
+    protected abstract suspend fun loadBarDataDays(start: Long, end: Long): List<PeriodCurrencyTransaction>
+    protected abstract suspend fun loadBarDataYears(start: Long, end: Long): List<PeriodCurrencyTransaction>
     private var currentPeriodType = PeriodType.MONTH // По умолчанию месяц
 
     enum class PeriodType { DAY, MONTH, YEAR }
@@ -226,11 +231,22 @@ abstract class BaseChartFragment : Fragment() {
             BarEntry(index.toFloat(), item.sum.toFloat())
         }
 
-        val dataSet = BarDataSet(entries, "Доходы по месяцам").apply {
+        val dataSet = BarDataSet(entries, "").apply {
             color = randomColor
             valueTextColor = ContextCompat.getColor(requireContext(), R.color.buttonTextColor)
             valueTextSize = 12f
             highLightAlpha = 0
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    val currencySymbol = when (getPreferredCurrency()) {
+                        "RUB" -> "₽"
+                        "USD" -> "$"
+                        "EUR" -> "€"
+                        else -> getPreferredCurrency()
+                    }
+                    return "${value.toInt()} $currencySymbol"
+                }
+            }
         }
 
         // Форматирование значений
@@ -307,6 +323,66 @@ abstract class BaseChartFragment : Fragment() {
         barChart.invalidate()
     }
 
+    private suspend fun convertCategorySumsToPreferredCurrency(
+        data: List<CategoryCurrencySum>,
+        preferredCurrency: String
+    ): List<CategorySum> {
+        val exchangeRates = getExchangeRates(data.map { it.currency }.toSet(), preferredCurrency)
+
+        return data.groupBy { it.category }
+            .map { (category, items) ->
+                val sum = items.sumOf { item ->
+                    (exchangeRates[item.currency] ?: 1.0) * item.category_sum
+                }
+                CategorySum(category, sum)
+            }
+    }
+
+    private suspend fun convertPeriodTransactionsToPreferredCurrency(
+        data: List<PeriodCurrencyTransaction>,
+        preferredCurrency: String
+    ): List<PeriodTransaction> {
+        val exchangeRates = getExchangeRates(data.map { it.currency }.toSet(), preferredCurrency)
+
+        return data.groupBy { it.period }
+            .map { (period, items) ->
+                val sum = items.sumOf { item ->
+                    (exchangeRates[item.currency] ?: 1.0) * item.sum
+                }
+                PeriodTransaction(period, sum)
+            }
+            .sortedBy { it.period }
+    }
+
+    private suspend fun getExchangeRates(
+        currencies: Set<String>,
+        targetCurrency: String
+    ): Map<String, Double> {
+        val rates = mutableMapOf<String, Double>()
+        val db = App.database
+
+        for (currency in currencies) {
+            when {
+                currency == targetCurrency -> rates[currency] = 1.0
+                else -> {
+                    try {
+                        rates[currency] = convertCurrency(1.0, currency, targetCurrency)
+                    } catch (e: Exception) {
+                        Log.e("ExchangeRate", "Error converting $currency to $targetCurrency", e)
+                        rates[currency] = 1.0 // Fallback
+                    }
+                }
+            }
+        }
+        return rates
+    }
+
+    private fun getPreferredCurrency(): String {
+        val prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        val userPrefCurrency = prefs.getString("PreferredCurrency", "RUB") ?: "RUB"
+        return userPrefCurrency
+    }
+
     private fun loadAndDisplayChart(start: Long, end: Long, pieChart: PieChart, loader: View) {
         lifecycleScope.launch {
             loader.visibility = View.VISIBLE
@@ -314,14 +390,21 @@ abstract class BaseChartFragment : Fragment() {
             val barChart = view?.findViewById<BarChart>(R.id.barChart)
             barChart?.visibility = View.INVISIBLE
 
-            // Загрузка данных для круговой диаграммы с выбранным диапазоном
-            val pieData = loadData(start, end)
+            try {
+                val preferredCurrency = getPreferredCurrency()
+                val rawData = loadData(start, end)
+                val pieData = convertCategorySumsToPreferredCurrency(rawData, preferredCurrency)
 
-            loader.visibility = View.GONE
-            pieChart.visibility = View.VISIBLE
-            barChart?.visibility = View.VISIBLE
+                loader.visibility = View.GONE
+                pieChart.visibility = View.VISIBLE
+                barChart?.visibility = View.VISIBLE
 
-            setupChart(pieChart, pieData, chartTitle)
+                setupChart(pieChart, pieData, chartTitle)
+            } catch (e: Exception) {
+                Log.e("ChartError", "Error loading chart data", e)
+                loader.visibility = View.GONE
+                pieChart.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -332,39 +415,73 @@ abstract class BaseChartFragment : Fragment() {
             val typeGroup = view?.findViewById<MaterialButtonToggleGroup>(R.id.typeGroup)
             barChart?.visibility = View.INVISIBLE
 
-            // Загрузка данных для столбчатой диаграммы за ВСЕ время
-            val allData = when (currentPeriodType) {
-                PeriodType.DAY -> loadBarDataDays(0, Long.MAX_VALUE)
+            try {
+                val preferredCurrency = getPreferredCurrency()
+                val allData = when (currentPeriodType) {
+                    PeriodType.DAY -> convertPeriodTransactionsToPreferredCurrency(
+                        loadBarDataDays(0, Long.MAX_VALUE),
+                        preferredCurrency
+                    )
+                    PeriodType.MONTH -> convertPeriodTransactionsToPreferredCurrency(
+                        loadBarData(0, Long.MAX_VALUE),
+                        preferredCurrency
+                    )
+                    PeriodType.YEAR -> convertPeriodTransactionsToPreferredCurrency(
+                        loadBarDataYears(0, Long.MAX_VALUE),
+                        preferredCurrency
+                    )
+                }
 
-                PeriodType.MONTH -> loadBarData(0, Long.MAX_VALUE)
-
-                PeriodType.YEAR -> loadBarDataYears(0, Long.MAX_VALUE)
-            }
-
-            loader.visibility = View.GONE
-//            barChart?.visibility = View.VISIBLE
-
-            // Передаем typeGroup в setupBarChart
-            if (barChart != null && typeGroup != null) {
-                setupBarChart(barChart, allData, typeGroup)
+                loader.visibility = View.GONE
+                if (barChart != null && typeGroup != null) {
+                    setupBarChart(barChart, allData, typeGroup)
+                }
+            } catch (e: Exception) {
+                Log.e("ChartError", "Error loading bar chart data", e)
+                loader.visibility = View.GONE
             }
         }
     }
 
-//
-//    private fun loadAndDisplayChart(start: Long, end: Long, pieChart: PieChart, loader: View) {
-//        lifecycleScope.launch {
-//            loader.visibility = View.VISIBLE
-//            pieChart.visibility = View.INVISIBLE
-//
-//            val data = loadData(start, end)
-//
-//            loader.visibility = View.GONE
-//            pieChart.visibility = View.VISIBLE
-//
-//            setupChart(pieChart, data, chartTitle)
-//        }
-//    }
+
+    private suspend fun convertCurrency(
+        amount: Double,
+        fromCurrency: String,
+        toCurrency: String
+    ): Double {
+        val db = App.database
+
+        try {
+            val response = ExchangeRateClient.api.getRates(fromCurrency)
+            Log.d("convert currency", "${response.result} ${response.rates}")
+
+            if (response.result == "success" && response.rates != null) {
+                val now = System.currentTimeMillis()
+                val rates = response.rates.mapNotNull { (currency, rateAny) ->
+                    val rate = rateAny as? Double ?: return@mapNotNull null
+                    ExchangeRateEntity(
+                        currencyCode = currency,
+                        rate = rate,
+                        baseCurrency = fromCurrency,
+                        lastUpdated = now
+                    )
+                }
+                db.exchangeRateDao().insertAll(rates)
+
+                val rate = response.rates[toCurrency] as? Double
+                    ?: throw IllegalArgumentException("Currency not found: $toCurrency")
+
+                return amount * rate
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        val cachedRate = db.exchangeRateDao().getRate(fromCurrency, toCurrency)
+            ?: throw RuntimeException("Нет доступа к курсу $fromCurrency → $toCurrency")
+
+        return amount * cachedRate.rate
+    }
 
     private fun formatDate(timestamp: Long): String {
         val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
