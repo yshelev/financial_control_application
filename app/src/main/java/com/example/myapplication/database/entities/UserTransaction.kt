@@ -24,7 +24,7 @@ import androidx.room.Index
     ]
 )
 data class UserTransaction(
-    @PrimaryKey val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val isIncome: Boolean,
     val amount: Double,
     val currency: String,
