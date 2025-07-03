@@ -24,7 +24,7 @@ import java.util.*
 class TransactionsAdapter(
     lifecycleOwner: LifecycleOwner,
     transactionsFlow: Flow<List<UserTransaction>>,
-    categoriesFlow: Flow<List<Category>>, // Добавляем Flow категорий
+    categoriesFlow: Flow<List<Category>>,
     private val onDeleteClicked: (UserTransaction) -> Unit
 ) : RecyclerView.Adapter<TransactionsAdapter.TransactionViewHolder>() {
 
@@ -38,12 +38,11 @@ class TransactionsAdapter(
     var transactions: List<UserTransaction> = emptyList()
         private set
 
-    var categories: List<Category> = emptyList() // Добавляем список категорий
+    var categories: List<Category> = emptyList()
         private set
 
     init {
         lifecycleOwner.lifecycleScope.launch {
-            // Подписываемся на обновления транзакций
             transactionsFlow.collectLatest { newTransactions ->
                 transactions = newTransactions
                 notifyDataSetChanged()
@@ -51,7 +50,6 @@ class TransactionsAdapter(
         }
 
         lifecycleOwner.lifecycleScope.launch {
-            // Подписываемся на обновления категорий
             categoriesFlow.collectLatest { newCategories ->
                 categories = newCategories
                 notifyDataSetChanged()
@@ -89,20 +87,27 @@ class TransactionsAdapter(
         val tx = transactions[position]
         Log.d("TransactionsAdapter", "Transaction date millis: ${tx.date}, formatted: ${dateFormatter.format(Date(tx.date))}")
 
-
         val category = categories.find { it.id == tx.categoryId }
 
-        holder.title.text = category?.title ?: "Unknown"
-        holder.date.text = dateFormatter.format(Date(tx.date))
-        val symbol = currencySymbols[tx.currency] ?: "₽"
+        val context = holder.itemView.context
+        val localizedTitle = category?.let {
+            if (!it.code.isNullOrEmpty()) {
+                val resId = context.resources.getIdentifier("category_${it.code}", "string", context.packageName)
+                if (resId != 0) context.getString(resId) else it.title
+            } else {
+                it.title
+            }
+        }
 
+        holder.title.text = localizedTitle
+        holder.date.text = dateFormatter.format(Date(tx.date))
+
+        val symbol = currencySymbols[tx.currency] ?: "₽"
         val formattedAmount = formatAmount(tx.amount)
         holder.amount.text = if (tx.isIncome) "+$formattedAmount$symbol" else "-$formattedAmount$symbol"
 
         holder.amount.setTextColor(
-            holder.itemView.context.getColor(
-                if (tx.isIncome) R.color.green else R.color.red
-            )
+            context.getColor(if (tx.isIncome) R.color.green else R.color.red)
         )
 
         category?.iconResId?.let { resId ->

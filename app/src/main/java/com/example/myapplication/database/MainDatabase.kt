@@ -18,7 +18,7 @@ import com.example.myapplication.database.entities.ExchangeRateEntity
 
 @Database(
     entities = [User::class, UserTransaction::class, Card::class, ExchangeRateEntity::class, Category::class],
-    version = 18,
+    version = 20,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

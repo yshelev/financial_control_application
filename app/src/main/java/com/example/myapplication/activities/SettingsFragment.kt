@@ -22,7 +22,9 @@ class SettingsFragment : Fragment() {
 
     private lateinit var authController: AuthController
     private lateinit var nameEditText: EditText
+    private lateinit var emailText: TextView
     private lateinit var emailTextView: TextView
+    private lateinit var nameTextView: TextView
     private lateinit var themeSwitch: Switch
     private lateinit var editNameButton: ImageButton
     private lateinit var saveSettingsButton: Button
@@ -61,6 +63,8 @@ class SettingsFragment : Fragment() {
 
         nameEditText = view.findViewById(R.id.nameEditText)
         emailTextView = view.findViewById(R.id.emailTextView)
+        emailText = view.findViewById(R.id.emailText)
+        nameTextView = view.findViewById(R.id.nameTextView)
         themeSwitch = view.findViewById(R.id.themeSwitch)
         editNameButton = view.findViewById(R.id.editNameButton)
         saveSettingsButton = view.findViewById(R.id.saveSettingsButton)
@@ -78,8 +82,45 @@ class SettingsFragment : Fragment() {
 
         authController.getCurrentUser { user ->
             requireActivity().runOnUiThread {
-                emailTextView.text = user?.email.orEmpty()
-                nameEditText.setText(user?.username.orEmpty())
+                if (user?.email == null) {
+
+                    nameEditText.visibility = View.GONE
+                    emailText.visibility = View.GONE
+                    nameTextView.visibility = View.GONE
+                    emailTextView.visibility = View.GONE
+
+                    logoutButton.text = getString(R.string.login)
+
+                    logoutButton.setOnClickListener {
+                        startActivity(Intent(requireActivity(), LoginActivity::class.java))
+                    }
+
+                    nameEditText.isEnabled = false
+
+                    editNameButton.visibility = View.GONE
+                    saveSettingsButton.visibility = View.GONE
+                    changePass.visibility = View.GONE
+
+                } else {
+                    nameEditText.visibility = View.VISIBLE
+                    emailTextView.visibility = View.VISIBLE
+                    emailTextView.text = user.email
+                    nameEditText.setText(user.username.orEmpty())
+
+                    logoutButton.text = getString(R.string.logout)
+
+                    logoutButton.setOnClickListener {
+                        authController.logout()
+                        startActivity(Intent(requireActivity(), WelcomeActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        })
+                        requireActivity().finish()
+                    }
+
+                    editNameButton.visibility = View.VISIBLE
+                    saveSettingsButton.visibility = View.VISIBLE
+                    changePass.visibility = View.VISIBLE
+                }
             }
         }
 
@@ -149,7 +190,6 @@ class SettingsFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-
         setupLanguageSpinner()
 
         exportDataButton.setOnClickListener {
@@ -165,8 +205,7 @@ class SettingsFragment : Fragment() {
                 Log.d("123", "cleared")
             }
             lifecycleScope.launch {
-                authController.getCurrentUser {
-                        user ->
+                authController.getCurrentUser { user ->
                     if (user?.email != null) {
                         lifecycleScope.launch {
                             cardRepository.deleteUserCards(user.id)
@@ -176,14 +215,6 @@ class SettingsFragment : Fragment() {
                     }
                 }
             }
-        }
-
-        logoutButton.setOnClickListener {
-            authController.logout()
-            startActivity(Intent(requireActivity(), WelcomeActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            })
-            requireActivity().finish()
         }
 
         changePass.setOnClickListener { showChangePasswordDialog() }

@@ -3,8 +3,11 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Index
+import com.example.myapplication.serializers.BigDecimalSerializer
 import java.math.BigDecimal
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(
     tableName = "transactions",
     foreignKeys = [
@@ -27,6 +30,7 @@ import java.math.BigDecimal
 data class UserTransaction(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val isIncome: Boolean,
+    @Serializable(with = BigDecimalSerializer::class)
     val amount: BigDecimal,
     val currency: String,
     val description: String?,

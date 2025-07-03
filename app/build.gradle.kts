@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id ("org.jetbrains.kotlin.kapt")
+    id ("kotlin-parcelize")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -47,10 +49,12 @@ dependencies {
     implementation ("androidx.room:room-runtime:2.7.1")
     implementation(libs.androidx.activity)
     kapt ("androidx.room:room-compiler:2.7.1")
+//    implementation ("androidx.work:work-runtime-ktx:2.10.2")
     implementation ("androidx.room:room-ktx:2.7.1")
     implementation ("com.google.android.material:material:1.11.0")
     implementation ("androidx.viewpager2:viewpager2:1.0.0")
     implementation ("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation (libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
