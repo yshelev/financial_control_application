@@ -3,6 +3,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Index
+import java.math.BigDecimal
 
 @Entity(
     tableName = "transactions",
@@ -26,7 +27,7 @@ import androidx.room.Index
 data class UserTransaction(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val isIncome: Boolean,
-    val amount: Double,
+    val amount: BigDecimal,
     val currency: String,
     val description: String?,
     var date: Long = System.currentTimeMillis(),

@@ -20,6 +20,8 @@ import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -204,8 +206,13 @@ class AddTransactionActivity : AuthBaseActivity() {
     }
 
     private fun validateInputs(): Boolean {
-        val amount = amountEditText.text.toString().toDoubleOrNull()
-        if (amount == null || amount <= 0) {
+        val amountText = amountEditText.text.toString()
+        val amount = try {
+            BigDecimal(amountText).setScale(2, RoundingMode.HALF_UP)
+        } catch (e: NumberFormatException) {
+            null
+        }
+        if (amount == null || amount <= BigDecimal.ZERO) {
             amountEditText.error = getString(R.string.error_enter_amount)
             return false
         }
@@ -217,7 +224,7 @@ class AddTransactionActivity : AuthBaseActivity() {
     }
 
     private fun saveTransaction() {
-        val amount = amountEditText.text.toString().toDouble()
+        val amount = BigDecimal(amountEditText.text.toString()).setScale(2, RoundingMode.HALF_UP)
         val selected = getCategoriesList()[categorySpinner.selectedItemPosition]
         val categoryName = extractCategoryName(selected)
         val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }

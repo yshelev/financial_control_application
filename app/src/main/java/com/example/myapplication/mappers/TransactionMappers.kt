@@ -2,6 +2,7 @@ package com.example.myapplication.mappers
 
 import com.example.myapplication.database.entities.UserTransaction
 import com.example.myapplication.dto.TransactionDto
+import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -9,7 +10,7 @@ fun TransactionDto.toEntity(): UserTransaction {
     return UserTransaction(
         id = this.id,
         isIncome = this.isIncome,
-        amount = this.amount,
+        amount = this.amount.setScale(2, BigDecimal.ROUND_HALF_UP),
         categoryId = this.categoryId,
         description = this.description,
         date = this.date.toTimestamp(),

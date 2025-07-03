@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.myapplication.database.dao.CardDao
 import com.example.myapplication.database.dao.CategoryDao
 import com.example.myapplication.database.dao.ExchangeRateDao
@@ -17,9 +18,10 @@ import com.example.myapplication.database.entities.ExchangeRateEntity
 
 @Database(
     entities = [User::class, UserTransaction::class, Card::class, ExchangeRateEntity::class, Category::class],
-    version = 17,
+    version = 18,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class MainDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun transactionDao(): TransactionDao

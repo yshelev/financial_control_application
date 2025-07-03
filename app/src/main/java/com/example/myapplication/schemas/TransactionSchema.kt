@@ -1,8 +1,10 @@
 package com.example.myapplication.schemas
 
+import java.math.BigDecimal
+
 data class TransactionSchema(
     val is_income: Boolean,
-    val amount: Double,
+    val amount: BigDecimal,
     val currency: String,
     val description: String?,
     val card_id: Long,

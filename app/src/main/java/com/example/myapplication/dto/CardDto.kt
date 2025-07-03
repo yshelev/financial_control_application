@@ -1,6 +1,7 @@
 package com.example.myapplication.dto
 
 import com.google.gson.annotations.SerializedName
+import java.math.BigDecimal
 
 data class CardDto(
     @SerializedName("id") val id: Long,
@@ -8,5 +9,5 @@ data class CardDto(
     @SerializedName("masked_number") val maskedNumber: String,
     @SerializedName("date") val date: String,
     @SerializedName("currency") val currency: String,
-    @SerializedName("balance") val balance: Double
+    @SerializedName("balance") val balance: BigDecimal
 )

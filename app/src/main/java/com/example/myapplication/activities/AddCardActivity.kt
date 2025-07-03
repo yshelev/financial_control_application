@@ -16,6 +16,7 @@ import com.example.myapplication.dto.CardDto
 import com.example.myapplication.mappers.toEntity
 import com.example.myapplication.schemas.CardSchema
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 class AddCardActivity : AuthBaseActivity() {
 
@@ -143,7 +144,7 @@ class AddCardActivity : AuthBaseActivity() {
             }
 
             try {
-                val balance = if (balanceStr.isNotEmpty()) balanceStr.toDouble() else 0.0
+                val balance = if (balanceStr.isNotEmpty()) BigDecimal(balanceStr) else BigDecimal.ZERO
 
                 authController.getCurrentUser {
                     user ->
@@ -219,7 +220,7 @@ class AddCardActivity : AuthBaseActivity() {
 
         if (balanceStr.isNotEmpty()) {
             try {
-                balanceStr.toDouble()
+                BigDecimal(balanceStr)
             } catch (e: NumberFormatException) {
                 balanceEditText.error = getString(R.string.balance_must_be_number)
                 isValid = false
@@ -235,7 +236,7 @@ class AddCardActivity : AuthBaseActivity() {
         if (!date.matches(Regex("""^(0[1-9]|1[0-2])\/\d{2}$"""))) animateShake(expiryDateEditText)
         if (balanceStr.isNotEmpty()) {
             try {
-                balanceStr.toDouble()
+                BigDecimal(balanceStr)
             } catch (e: NumberFormatException) {
                 animateShake(balanceEditText)
             }

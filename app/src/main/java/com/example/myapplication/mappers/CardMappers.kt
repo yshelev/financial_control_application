@@ -2,6 +2,7 @@ package com.example.myapplication.mappers
 
 import com.example.myapplication.database.entities.Card
 import com.example.myapplication.dto.CardDto
+import java.math.BigDecimal
 
 fun CardDto.toEntity(): Card {
     return Card(
@@ -10,7 +11,7 @@ fun CardDto.toEntity(): Card {
         maskedNumber = this.maskedNumber,
         date = this.date,
         currency = this.currency,
-        balance = this.balance
+        balance = this.balance.setScale(2, BigDecimal.ROUND_HALF_UP)
     )
 }
 

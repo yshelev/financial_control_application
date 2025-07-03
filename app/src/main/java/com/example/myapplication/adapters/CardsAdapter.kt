@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
@@ -75,7 +76,7 @@ class CardsAdapter(
         val expenseText: TextView = view.findViewById(R.id.cardExpenses)
 
 
-        fun formatAmount(amount: Double): String {
+        fun formatAmount(amount: BigDecimal): String {
             val symbols = DecimalFormatSymbols(Locale.getDefault()).apply {
                 groupingSeparator = ' '
                 decimalSeparator = '.'
@@ -96,8 +97,10 @@ class CardsAdapter(
             deleteButton.setOnClickListener { onDeleteCardClicked(card) }
 
             val cardTransactions = transactions.filter { it.cardId == card.id }
-            val income = cardTransactions.filter { it.isIncome }.sumOf { it.amount }
-            val expenses = cardTransactions.filter { !it.isIncome }.sumOf { it.amount }
+            val income = cardTransactions.filter { it.isIncome }
+                .fold(BigDecimal.ZERO) { acc, tx -> acc.add(tx.amount) }
+            val expenses = cardTransactions.filter { !it.isIncome }
+                .fold(BigDecimal.ZERO) { acc, tx -> acc.add(tx.amount) }
 
             incomeText.text = "+${formatAmount(income)}$currencySymbol"
             expenseText.text = "-${formatAmount(expenses)}$currencySymbol"

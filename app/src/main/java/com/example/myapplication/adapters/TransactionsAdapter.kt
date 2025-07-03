@@ -15,6 +15,7 @@ import com.example.myapplication.database.entities.UserTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
@@ -72,7 +73,7 @@ class TransactionsAdapter(
         return TransactionViewHolder(view)
     }
 
-    fun formatAmount(amount: Double): String {
+    fun formatAmount(amount: BigDecimal): String {
         val symbols = DecimalFormatSymbols(Locale.getDefault()).apply {
             groupingSeparator = ' '
             decimalSeparator = '.'

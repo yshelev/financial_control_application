@@ -44,6 +44,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.DateValidatorPointForward
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
@@ -121,9 +122,9 @@ class DashboardFragment : Fragment() {
                             val card = db.cardDao().getCardById(transaction.cardId)
                             if (card != null) {
                                 val newBalance = if (transaction.isIncome) {
-                                    card.balance - transaction.amount
+                                    card.balance.subtract(transaction.amount)
                                 } else {
-                                    card.balance + transaction.amount
+                                    card.balance.add(transaction.amount)
                                 }
 
                                 db.cardDao().update(card.copy(balance = newBalance))
@@ -137,9 +138,9 @@ class DashboardFragment : Fragment() {
 
                         if (card != null) {
                             val newBalance = if (transaction.isIncome) {
-                                card.balance - transaction.amount
+                                card.balance.subtract(transaction.amount)
                             } else {
-                                card.balance + transaction.amount
+                                card.balance.add(transaction.amount)
                             }
 
                             val ubs = BalanceCardUpdateSchema(
@@ -503,10 +504,10 @@ class DashboardFragment : Fragment() {
 //    }
 
     private suspend fun convertCurrency(
-        amount: Double,
+        amount: BigDecimal,
         fromCurrency: String,
         toCurrency: String
-    ): Double {
+    ): BigDecimal {
         val db = App.database
 
         try {
@@ -526,10 +527,13 @@ class DashboardFragment : Fragment() {
                 }
                 db.exchangeRateDao().insertAll(rates)
 
-                val rate = response.rates[toCurrency] as? Double
-                    ?: throw IllegalArgumentException("Currency not found: $toCurrency")
+                val rate = when (val rateAny = response.rates[toCurrency]) {
+                    is Double -> BigDecimal.valueOf(rateAny)
+                    is Int -> BigDecimal.valueOf(rateAny.toDouble())
+                    else -> throw IllegalArgumentException("Currency not found or invalid rate: $toCurrency")
+                }
 
-                return amount * rate
+                return amount.multiply(rate)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -538,7 +542,7 @@ class DashboardFragment : Fragment() {
         val cachedRate = db.exchangeRateDao().getRate(fromCurrency, toCurrency)
             ?: throw RuntimeException("Нет доступа к курсу $fromCurrency → $toCurrency")
 
-        return amount * cachedRate.rate
+        return amount.multiply(BigDecimal.valueOf(cachedRate.rate))
     }
 
     private fun updateBalanceStats(transactions: List<UserTransaction>) {
@@ -546,9 +550,9 @@ class DashboardFragment : Fragment() {
             val prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
             val userPrefCurrency = prefs.getString("PreferredCurrency", "RUB") ?: "RUB"
             val db = App.database
-            var totalBalance = 0.0
-            var totalIncome = 0.0
-            var totalExpenses = 0.0
+            var totalBalance = BigDecimal.ZERO
+            var totalIncome = BigDecimal.ZERO
+            var totalExpenses = BigDecimal.ZERO
 
             val cards = db.cardDao().getAllCardsOnce()
             cards.forEach { card ->
@@ -557,7 +561,7 @@ class DashboardFragment : Fragment() {
                 } else {
                     card.balance
                 }
-                totalBalance += convertedAmount
+                totalBalance = totalBalance.add(convertedAmount)
             }
             transactions.forEach { transaction ->
                 val convertedAmount = if (transaction.currency != userPrefCurrency) {
@@ -567,9 +571,9 @@ class DashboardFragment : Fragment() {
                 }
 
                 if (transaction.isIncome) {
-                    totalIncome += convertedAmount
+                    totalIncome = totalIncome.add(convertedAmount)
                 } else {
-                    totalExpenses += convertedAmount
+                    totalExpenses = totalExpenses.add(convertedAmount)
                 }
             }
 
