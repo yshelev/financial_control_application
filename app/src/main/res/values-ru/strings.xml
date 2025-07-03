@@ -75,9 +75,9 @@
 
     <string name="error_end_date_before_start">Дата окончания не может быть раньше даты начала</string>
 
-    <string name="label_balance">Баланс: %1$s %2$s</string>
-    <string name="label_income">Доходы: %1$s %2$s</string>
-    <string name="label_expenses">Расходы: %1$s %2$s</string>
+    <string name="label_balance">Баланс: \n %1$s %2$s</string>
+    <string name="label_income">Доходы: \n %1$s %2$s</string>
+    <string name="label_expenses">Расходы: \n  %1$s %2$s</string>
     <string name="enter_category_name">Пожалуйста, введите название категории</string>
     <string name="icon_selected">Иконка выбрана</string>
     <string name="fill_all_fields">Пожалуйста, заполните все поля</string>
