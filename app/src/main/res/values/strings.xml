@@ -58,6 +58,7 @@
     <string name="error_empty_name">Name cannot be empty</string>
     <string name="settings_saved">Settings saved</string>
     <string name="export_complete">Data export completed</string>
+    <string name="export_denied">Data export not completed</string>
     <string name="data_cleared">All data cleared</string>
     <string name="error_generic">Error: %1$s</string>
     <string name="light_theme">Light theme</string>

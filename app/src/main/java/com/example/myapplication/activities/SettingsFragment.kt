@@ -3,19 +3,27 @@ package com.example.myapplication
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Environment
 import android.text.InputType
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.dataClasses.ExportData
 import com.example.myapplication.database.MainDatabase
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import java.io.File
+import java.io.FileWriter
+import java.text.SimpleDateFormat
 import java.util.*
 
 class SettingsFragment : Fragment() {
@@ -153,6 +161,46 @@ class SettingsFragment : Fragment() {
         setupLanguageSpinner()
 
         exportDataButton.setOnClickListener {
+            authController.getCurrentUser {
+                user ->
+                val username: String = if (user?.email == null) {
+                    "anonymous user"
+                } else {
+                    user.username
+                }
+                lifecycleScope.launch {
+                    val transactionData = db.transactionDao().getAllTransactionsOnce()
+                    val cardData = db.cardDao().getAllCardsOnce()
+                    val categoryData = db.categoryDao().getAllCategoriesOnce()
+
+                    val exportData = ExportData(
+                        username = username,
+                        categories = categoryData,
+                        transactions = transactionData,
+                        cards = cardData
+                    )
+                    val jsonString = Json { prettyPrint = true }.encodeToString(ExportDataSerializer, exportData)
+                    Log.d("data", jsonString)
+
+                    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                    val fileName = "finance_export_$timeStamp.json"
+                    try {
+                        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                        val exportFile = File(downloadsDir, fileName)
+
+                        FileWriter(exportFile).use { writer ->
+                            writer.write(jsonString)
+                        }
+
+                        Toast.makeText(requireContext(), getString(R.string.export_complete), Toast.LENGTH_SHORT).show()
+
+                    }
+                    catch (e: Exception) {
+                        Log.d("data export ", "Export failed: ${e.localizedMessage}")
+                        Toast.makeText(requireContext(), getString(R.string.export_denied), Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
             Toast.makeText(requireContext(), getString(R.string.export_complete), Toast.LENGTH_SHORT).show()
         }
 
@@ -179,6 +227,11 @@ class SettingsFragment : Fragment() {
         }
 
         logoutButton.setOnClickListener {
+            lifecycleScope.launch {
+                db.transactionDao().deleteAll()
+                db.cardDao().deleteAll()
+                db.categoryDao().deleteAll()
+            }
             authController.logout()
             startActivity(Intent(requireActivity(), WelcomeActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -307,6 +360,13 @@ class SettingsFragment : Fragment() {
 
         dialog.show()
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+    }
+
+    fun hasStoragePermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
     }
 }
 
