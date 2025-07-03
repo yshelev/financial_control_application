@@ -156,6 +156,9 @@
     <string name="month">Month</string>
     <string name="year">Year</string>
     <string name="no_data_available">No available transactions</string>
+    <string name="balance_">Balance:</string>
+    <string name="income_">Income:</string>
+    <string name="expenses_">Expenses:</string>
 
 
     <string-array name="currencies">

@@ -12,5 +12,6 @@ data class Category(
     val isIncome: Boolean,
     val title: String,
     val iconResId: Int,
-    val color: String
+    val color: String,
+    val code: String? = null
 )

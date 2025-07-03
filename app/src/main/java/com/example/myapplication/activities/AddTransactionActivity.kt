@@ -12,12 +12,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.entities.UserTransaction
-import com.example.myapplication.mappers.toEntity
-import com.example.myapplication.schemas.BalanceCardUpdateSchema
-import com.example.myapplication.schemas.TransactionSchema
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -54,20 +52,13 @@ class AddTransactionActivity : AuthBaseActivity() {
     private val inactiveIncomeText = Color.parseColor("#50FF9D")
     private val inactiveExpenseText = Color.parseColor("#FF6E6E")
 
-    private lateinit var incomeCategories: MutableList<String>
-    private lateinit var expenseCategories: MutableList<String>
-
-    val transactionRepository by lazy {
-        (applicationContext as App).transactionRepository
-    }
-
-    val cardRepository by lazy {
-        (applicationContext as App).cardRepository
-    }
+    // Хранит объекты категорий из базы (для текущего типа)
+    private var categoriesList: List<com.example.myapplication.database.entities.Category> = emptyList()
 
     private val db = App.database
     private val transactionDao = db.transactionDao()
     private val cardDao = db.cardDao()
+    private val categoryDao = db.categoryDao()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,9 +75,6 @@ class AddTransactionActivity : AuthBaseActivity() {
         amountEditText = findViewById(R.id.amountEditText)
         backButton = findViewById(R.id.backButton)
         saveButton = findViewById(R.id.saveButton)
-
-        incomeCategories = mutableListOf()
-        expenseCategories = mutableListOf()
 
         updateCategoriesFromDb()
 
@@ -141,7 +129,8 @@ class AddTransactionActivity : AuthBaseActivity() {
                 position: Int,
                 id: Long
             ) {
-                if (extractCategoryName(getCategoriesList()[position]) == getString(R.string.category_add_new)) {
+                // Если пользователь выбрал "Добавить новую категорию"
+                if (position == categoriesList.size) {
                     openCreateCategoryScreen()
                 }
             }
@@ -158,41 +147,57 @@ class AddTransactionActivity : AuthBaseActivity() {
         }
     }
 
-    private fun getCategoriesList(): List<String> =
-        if (isIncomeSelected) incomeCategories else expenseCategories
-
-    private fun extractCategoryName(full: String) = full.substringBefore("|")
-
     private fun updateCategoriesFromDb() {
         lifecycleScope.launch {
-            App.database.categoryDao()
-                .getCategoriesByType(isIncomeSelected)
-                .collect { categories ->
-                    val list = categories.map { "${it.title}|${it.iconResId}" }.toMutableList()
-                    list.add("${getString(R.string.category_add_new)}|${R.drawable.ic_default}")
-                    if (isIncomeSelected) incomeCategories = list else expenseCategories = list
+            // Загружаем категории из базы по типу
+            val categoriesFromDb = categoryDao.getCategoriesByType(isIncomeSelected).first()
 
-                    val categoriesNames = getCategoriesList().map { extractCategoryName(it) }
-                    val adapter = ArrayAdapter(
-                        this@AddTransactionActivity,
-                        android.R.layout.simple_spinner_item,
-                        categoriesNames
-                    )
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    categorySpinner.adapter = adapter
+            categoriesList = categoriesFromDb
 
-                    newCategoryToSelect?.let { categoryName ->
-                        val index = categoriesNames.indexOfFirst { it == categoryName }
-                        if (index >= 0) categorySpinner.setSelection(index)
-                        newCategoryToSelect = null
-                    }
+            // Локализуем категории по коду
+            val categoryTitles = categoriesList.map { category ->
+                if (!category.code.isNullOrEmpty()) {
+                    val resId = resources.getIdentifier("category_${category.code}", "string", packageName)
+                    if (resId != 0) getString(resId) else category.title
+                } else {
+                    category.title
                 }
+            }.toMutableList()
+
+            // Добавляем опцию "Добавить новую категорию"
+            categoryTitles.add(getString(R.string.category_add_new))
+
+            withContext(Dispatchers.Main) {
+                val adapter = ArrayAdapter(
+                    this@AddTransactionActivity,
+                    android.R.layout.simple_spinner_item,
+                    categoryTitles
+                )
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                categorySpinner.adapter = adapter
+
+                // Если после создания новой категории нужно её выбрать
+                newCategoryToSelect?.let { newCategoryName ->
+                    val index = categoryTitles.indexOf(newCategoryName)
+                    if (index >= 0) categorySpinner.setSelection(index)
+                    newCategoryToSelect = null
+                }
+            }
         }
     }
 
     private fun updateCategorySpinner() {
-        val categories = getCategoriesList().map { extractCategoryName(it) }
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        val categoryTitles = categoriesList.map { category ->
+            if (!category.code.isNullOrEmpty()) {
+                val resId = resources.getIdentifier("category_${category.code}", "string", packageName)
+                if (resId != 0) getString(resId) else category.title
+            } else {
+                category.title
+            }
+        }.toMutableList()
+        categoryTitles.add(getString(R.string.category_add_new))
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoryTitles)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         categorySpinner.adapter = adapter
     }
@@ -217,133 +222,74 @@ class AddTransactionActivity : AuthBaseActivity() {
     }
 
     private fun saveTransaction() {
-        val amount = amountEditText.text.toString().toDouble()
-        val selected = getCategoriesList()[categorySpinner.selectedItemPosition]
-        val categoryName = extractCategoryName(selected)
-        val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
-        val cardId = cardsMap[cardSpinner.selectedItem.toString()] ?: return
+        val amount = amountEditText.text.toString().toDoubleOrNull()
+        if (amount == null || amount <= 0) {
+            amountEditText.error = getString(R.string.error_enter_amount)
+            return
+        }
 
-        val loaderContainer = findViewById<View>(R.id.loaderContainer)
-        setUiEnabled(false)
-        loaderContainer.visibility = View.VISIBLE
+        val selectedCardPosition = cardSpinner.selectedItemPosition
+        val selectedCategoryPosition = categorySpinner.selectedItemPosition
 
-        Log.d("SAVE_TRANSACTION", "Дата для сохранения: ${Date(selectedDate.timeInMillis)}")
-
-
-        authController.getCurrentUser { user ->
-            if (user?.email == null) {
-                lifecycleScope.launch {
-                    try {
-                        val card = App.database.cardDao().getCardById(cardId)
-                        val category = App.database.categoryDao()
-                            .getCategoryByNameAndType(categoryName, isIncomeSelected)
-
-                        if (card != null && category != null) {
-                            val updatedBalance =
-                                if (isIncomeSelected) card.balance + amount else card.balance - amount
-                            cardDao.update(card.copy(balance = updatedBalance))
-
-                            val transaction = UserTransaction(
-                                isIncome = isIncomeSelected,
-                                amount = amount,
-                                description = description,
-                                cardId = cardId,
-                                currency = card.currency,
-                                categoryId = category.id,
-                                date = selectedDate.timeInMillis
-                            )
-                            transactionDao.insert(transaction)
-                            finish()
-                        }
-                    } finally {
-                        withContext(Dispatchers.Main) {
-                            loaderContainer.visibility = View.GONE
-                            setUiEnabled(true)
-                        }
-                    }
+        lifecycleScope.launch {
+            val cards = cardDao.getAllCards().first()
+            if (cards.isEmpty() || selectedCardPosition !in cards.indices) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AddTransactionActivity, "Ошибка: карта не найдена", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                lifecycleScope.launch {
-                    try {
-                        val card = App.database.cardDao().getCardById(cardId)
-                        val category = App.database.categoryDao()
-                            .getCategoryByNameAndType(categoryName, isIncomeSelected)
+                return@launch
+            }
+            val selectedCard = cards[selectedCardPosition]
 
-                        if (card != null && category != null) {
-                            val updatedBalance =
-                                if (isIncomeSelected) card.balance + amount else card.balance - amount
-                            cardDao.update(card.copy(balance = updatedBalance))
+            // Проверяем, что выбрана корректная категория, и не "Добавить новую"
+            if (selectedCategoryPosition !in categoriesList.indices) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AddTransactionActivity, "Ошибка: категория не найдена", Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
+            val selectedCategory = categoriesList[selectedCategoryPosition]
 
-                            val ubs = BalanceCardUpdateSchema(
-                                card_id = card.id,
-                                new_balance = updatedBalance
-                            )
-                            try {
-                                cardRepository.updateBalanceCard(ubs)
-                            } catch (e: Exception) {
-                                Log.d(
-                                    "add transaction", "cannot sync update balance with" +
-                                            " backend \n error: $e"
-                                )
-                            }
-                            Log.d("ggg", Date(selectedDate.timeInMillis).toString())
-                            val transactionSchema = TransactionSchema(
-                                is_income = isIncomeSelected,
-                                amount = amount,
-                                description = description,
-                                card_id = cardId,
-                                currency = card.currency,
-                                category_id = category.id,
-                                date = selectedDate.timeInMillis
-                            )
-                            var transaction: UserTransaction
+            val description = descriptionEditText.text.toString().takeIf { it.isNotBlank() }
 
-                            try {
-                                Log.d(
-                                    "SAVE_TRANSACTION",
-                                    "Сохраняем дату: ${Date(selectedDate.timeInMillis)}"
-                                )
+            val loaderContainer = findViewById<View>(R.id.loaderContainer)
+            withContext(Dispatchers.Main) {
+                setUiEnabled(false)
+                loaderContainer.visibility = View.VISIBLE
+            }
 
-                                val responseTransaction =
-                                    transactionRepository.addTransaction(transactionSchema)
-                                transaction = responseTransaction.toEntity()
-                                transaction.date = selectedDate.timeInMillis
-                            } catch (e: Exception) {
-                                Log.d(
-                                    "add transaction", "cannot sync create transaction with" +
-                                            " backend \n error: $e"
-                                )
+            try {
+                val updatedBalance = if (isIncomeSelected) selectedCard.balance + amount else selectedCard.balance - amount
+                cardDao.update(selectedCard.copy(balance = updatedBalance))
 
-                                transaction = UserTransaction(
-                                    isIncome = isIncomeSelected,
-                                    amount = amount,
-                                    description = description,
-                                    cardId = cardId,
-                                    currency = card.currency,
-                                    categoryId = category.id,
-                                    date = selectedDate.timeInMillis
-                                )
-                            }
-                            transactionDao.insert(transaction)
-                            finish()
-                        } else {
-                            Toast.makeText(
-                                this@AddTransactionActivity,
-                                "Ошибка: карта или категория не найдены",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    } finally {
-                        withContext(Dispatchers.Main) {
-                            loaderContainer.visibility = View.GONE
-                            setUiEnabled(true)
-                        }
-                    }
+                val transaction = UserTransaction(
+                    isIncome = isIncomeSelected,
+                    amount = amount,
+                    description = description,
+                    cardId = selectedCard.id,
+                    currency = selectedCard.currency,
+                    categoryId = selectedCategory.id,
+                    date = selectedDate.timeInMillis
+                )
+                transactionDao.insert(transaction)
+
+                withContext(Dispatchers.Main) {
+                    finish()
+                }
+
+            } catch (e: Exception) {
+                Log.e("SAVE_TRANSACTION", "Ошибка при сохранении: $e")
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AddTransactionActivity, "Ошибка при сохранении транзакции", Toast.LENGTH_SHORT).show()
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    loaderContainer.visibility = View.GONE
+                    setUiEnabled(true)
                 }
             }
         }
     }
-
 
     private fun setUiEnabled(enabled: Boolean) {
         val alpha = if (enabled) 1f else 0.5f
@@ -389,7 +335,6 @@ class AddTransactionActivity : AuthBaseActivity() {
         ).show()
     }
 
-
     private fun updateDateText() {
         val format = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
         selectDateText.text = format.format(selectedDate.time)
@@ -409,3 +354,4 @@ class AddTransactionActivity : AuthBaseActivity() {
         }
     }
 }
+

@@ -40,16 +40,16 @@ class App : Application() {
             if (dao.getAll().isEmpty()) {
                 dao.insertAll(
                     listOf(
-                        Category(title = "Зарплата", iconResId = R.drawable.ic_salary, color = "#50FF9D", isIncome = true),
-                        Category(title = "Подарок", iconResId = R.drawable.ic_gift, color = "#50FF9D", isIncome = true),
-                        Category(title = "Инвестиции", iconResId = R.drawable.ic_investment, color = "#50FF9D", isIncome = true),
+                        Category(title = "Зарплата", iconResId = R.drawable.ic_salary, color = "#50FF9D", isIncome = true, code = "salary"),
+                        Category(title = "Подарок", iconResId = R.drawable.ic_gift, color = "#50FF9D", isIncome = true, code = "gift"),
+                        Category(title = "Инвестиции", iconResId = R.drawable.ic_investment, color = "#50FF9D", isIncome = true, code = "investment"),
 
-                        Category(title = "Еда", iconResId = R.drawable.ic_food, color = "#FF6E6E", isIncome = false),
-                        Category(title = "Транспорт", iconResId = R.drawable.ic_transport, color = "#FF6E6E", isIncome = false),
-                        Category(title = "Одежда", iconResId = R.drawable.ic_clothes, color = "#FF6E6E", isIncome = false),
-                        Category(title = "Образование", iconResId = R.drawable.ic_education, color = "#FF6E6E", isIncome = false),
-                        Category(title = "Здоровье", iconResId = R.drawable.ic_health, color = "#FF6E6E", isIncome = false),
-                        Category(title = "Развлечения", iconResId = R.drawable.ic_entertainment, color = "#FF6E6E", isIncome = false)
+                        Category(title = "Еда", iconResId = R.drawable.ic_food, color = "#FF6E6E", isIncome = false, code = "food"),
+                        Category(title = "Транспорт", iconResId = R.drawable.ic_transport, color = "#FF6E6E", isIncome = false, code = "transport"),
+                        Category(title = "Одежда", iconResId = R.drawable.ic_clothes, color = "#FF6E6E", isIncome = false, code = "clothes"),
+                        Category(title = "Образование", iconResId = R.drawable.ic_education, color = "#FF6E6E", isIncome = false, code = "education"),
+                        Category(title = "Здоровье", iconResId = R.drawable.ic_health, color = "#FF6E6E", isIncome = false, code = "health"),
+                        Category(title = "Развлечения", iconResId = R.drawable.ic_entertainment, color = "#FF6E6E", isIncome = false, code = "entertainment")
                     )
                 )
             }
