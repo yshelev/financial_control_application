@@ -55,6 +55,7 @@
     <string name="error_empty_name">Имя не может быть пустым</string>
     <string name="settings_saved">Настройки сохранены</string>
     <string name="export_complete">Экспорт данных завершён</string>
+    <string name="export_denied">Экспорт данных не завершён</string>
     <string name="data_cleared">Все данные удалены</string>
     <string name="error_generic">Ошибка: %1$s</string>
     <string name="light_theme">Светлая тема</string>

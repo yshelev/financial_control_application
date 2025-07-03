@@ -3,7 +3,9 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Index
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(
     tableName = "transactions",
     foreignKeys = [
