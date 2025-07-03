@@ -155,7 +155,7 @@ class AuthController(private val context: Context, private val database: MainDat
         }
 
         (context as? AppCompatActivity)?.lifecycleScope?.launch(Dispatchers.IO) {
-            val user = database.userDao().getUserByEmail(email)
+            val user = userRepository.getUserByEmail(email).body()
 
             if (user == null) {
                 context.runOnUiThread { onFailure(context.getString(R.string.error_invalid_email)) }
