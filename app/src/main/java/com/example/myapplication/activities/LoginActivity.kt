@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.database.MainDatabase
 import com.example.myapplication.mappers.toEntityList
 import kotlinx.coroutines.launch
+import android.util.Log
 
 class LoginActivity : AuthBaseActivity() {
 
@@ -68,18 +69,26 @@ class LoginActivity : AuthBaseActivity() {
                 email = email,
                 password = password,
                 onSuccess = {
+                    Log.d("chhh", "not fail")
                     lifecycleScope.launch {
-                        val categories = categoryRepository.getCategories(email)
-                        val categoriesEntity = categories.toEntityList()
-                        db.categoryDao().refreshCategories(categoriesEntity)
+                        Log.d("chhh", "not fail 2")
+
+//                        val categories = categoryRepository.getCategories(email)
+//                        val categoriesEntity = categories.toEntityList()
+//                        db.categoryDao().refreshCategories(categoriesEntity)
+
+                        Log.d("chhh", "not fail 3")
 
                         val cards = cardRepository.getCards(email)
                         val cardsEntity = cards.toEntityList()
                         db.cardDao().refreshCards(cardsEntity)
-
+                        Log.d("chhh", "not fail 4")
                         val transactions = transactionRepository.getTransactions(email)
+                        Log.d("chhh", transactions.toString())
                         val transactionsEntity = transactions.toEntityList()
                         db.transactionDao().refreshTransactions(transactionsEntity)
+                        Log.d("chhh", "not fail 5")
+
                     }
                     Toast.makeText(this, getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
@@ -87,6 +96,7 @@ class LoginActivity : AuthBaseActivity() {
                     finish()
                 },
                 onFailure = { errorMessage ->
+                    Log.d("chhh", "fail")
                     Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
                 }
             )

@@ -90,6 +90,8 @@ class AddTransactionActivity : AuthBaseActivity() {
 
         updateCategoriesFromDb()
 
+        Log.d("ON_CREATE", "Начальная дата: ${selectedDate.time}")
+
         updateDateText()
 
         backButton.setOnClickListener { finish() }
@@ -111,7 +113,11 @@ class AddTransactionActivity : AuthBaseActivity() {
         lifecycleScope.launch {
             cardDao.getAllCards().collect { cards ->
                 cardsMap = cards.associate { "${it.name} (${it.maskedNumber})" to it.id }
-                val adapter = ArrayAdapter(this@AddTransactionActivity, android.R.layout.simple_spinner_item, cardsMap.keys.toList())
+                val adapter = ArrayAdapter(
+                    this@AddTransactionActivity,
+                    android.R.layout.simple_spinner_item,
+                    cardsMap.keys.toList()
+                )
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 cardSpinner.adapter = adapter
             }
@@ -129,11 +135,17 @@ class AddTransactionActivity : AuthBaseActivity() {
             updateCategoriesFromDb()
         }
         categorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 if (extractCategoryName(getCategoriesList()[position]) == getString(R.string.category_add_new)) {
                     openCreateCategoryScreen()
                 }
             }
+
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
@@ -141,11 +153,13 @@ class AddTransactionActivity : AuthBaseActivity() {
         updateCategorySpinner()
 
         saveButton.setOnClickListener {
+            Log.d("SAVE_BUTTON", "Дата при нажатии Сохранить: ${selectedDate.time}")
             if (validateInputs()) saveTransaction()
         }
     }
 
-    private fun getCategoriesList(): List<String> = if (isIncomeSelected) incomeCategories else expenseCategories
+    private fun getCategoriesList(): List<String> =
+        if (isIncomeSelected) incomeCategories else expenseCategories
 
     private fun extractCategoryName(full: String) = full.substringBefore("|")
 
@@ -159,7 +173,11 @@ class AddTransactionActivity : AuthBaseActivity() {
                     if (isIncomeSelected) incomeCategories = list else expenseCategories = list
 
                     val categoriesNames = getCategoriesList().map { extractCategoryName(it) }
-                    val adapter = ArrayAdapter(this@AddTransactionActivity, android.R.layout.simple_spinner_item, categoriesNames)
+                    val adapter = ArrayAdapter(
+                        this@AddTransactionActivity,
+                        android.R.layout.simple_spinner_item,
+                        categoriesNames
+                    )
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     categorySpinner.adapter = adapter
 
@@ -209,6 +227,9 @@ class AddTransactionActivity : AuthBaseActivity() {
         setUiEnabled(false)
         loaderContainer.visibility = View.VISIBLE
 
+        Log.d("SAVE_TRANSACTION", "Дата для сохранения: ${Date(selectedDate.timeInMillis)}")
+
+
         authController.getCurrentUser { user ->
             if (user?.email == null) {
                 lifecycleScope.launch {
@@ -228,7 +249,8 @@ class AddTransactionActivity : AuthBaseActivity() {
                                 description = description,
                                 cardId = cardId,
                                 currency = card.currency,
-                                categoryId = category.id
+                                categoryId = category.id,
+                                date = selectedDate.timeInMillis
                             )
                             transactionDao.insert(transaction)
                             finish()
@@ -264,7 +286,7 @@ class AddTransactionActivity : AuthBaseActivity() {
                                             " backend \n error: $e"
                                 )
                             }
-
+                            Log.d("ggg", Date(selectedDate.timeInMillis).toString())
                             val transactionSchema = TransactionSchema(
                                 is_income = isIncomeSelected,
                                 amount = amount,
@@ -275,10 +297,17 @@ class AddTransactionActivity : AuthBaseActivity() {
                                 date = selectedDate.timeInMillis
                             )
                             var transaction: UserTransaction
+
                             try {
+                                Log.d(
+                                    "SAVE_TRANSACTION",
+                                    "Сохраняем дату: ${Date(selectedDate.timeInMillis)}"
+                                )
+
                                 val responseTransaction =
                                     transactionRepository.addTransaction(transactionSchema)
                                 transaction = responseTransaction.toEntity()
+                                transaction.date = selectedDate.timeInMillis
                             } catch (e: Exception) {
                                 Log.d(
                                     "add transaction", "cannot sync create transaction with" +
@@ -292,24 +321,28 @@ class AddTransactionActivity : AuthBaseActivity() {
                                     cardId = cardId,
                                     currency = card.currency,
                                     categoryId = category.id,
-                        date = selectedDate.timeInMillis
-                    )
-                }
-                transactionDao.insert(transaction)
-                finish()
-            } else {
-                Toast.makeText(this@AddTransactionActivity, "Ошибка: карта или категория не найдены", Toast.LENGTH_SHORT).show()
-            }
-                }  finally {
+                                    date = selectedDate.timeInMillis
+                                )
+                            }
+                            transactionDao.insert(transaction)
+                            finish()
+                        } else {
+                            Toast.makeText(
+                                this@AddTransactionActivity,
+                                "Ошибка: карта или категория не найдены",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } finally {
                         withContext(Dispatchers.Main) {
                             loaderContainer.visibility = View.GONE
                             setUiEnabled(true)
                         }
                     }
-        }
-    }
+                }
             }
         }
+    }
 
 
     private fun setUiEnabled(enabled: Boolean) {
@@ -335,11 +368,27 @@ class AddTransactionActivity : AuthBaseActivity() {
     }
 
     private fun showDatePicker() {
-        DatePickerDialog(this, { _, y, m, d ->
-            selectedDate.set(y, m, d)
-            updateDateText()
-        }, selectedDate.get(Calendar.YEAR), selectedDate.get(Calendar.MONTH), selectedDate.get(Calendar.DAY_OF_MONTH)).show()
+        DatePickerDialog(
+            this,
+            { _, y, m, d ->
+                selectedDate.set(Calendar.YEAR, y)
+                selectedDate.set(Calendar.MONTH, m)
+                selectedDate.set(Calendar.DAY_OF_MONTH, d)
+                selectedDate.set(Calendar.HOUR_OF_DAY, 0)
+                selectedDate.set(Calendar.MINUTE, 0)
+                selectedDate.set(Calendar.SECOND, 0)
+                selectedDate.set(Calendar.MILLISECOND, 0)
+
+                Log.d("DATE_PICKER", "Выбрана дата: ${selectedDate.time}")
+
+                updateDateText()
+            },
+            selectedDate.get(Calendar.YEAR),
+            selectedDate.get(Calendar.MONTH),
+            selectedDate.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
+
 
     private fun updateDateText() {
         val format = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())

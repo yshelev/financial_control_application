@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -85,6 +86,8 @@ class TransactionsAdapter(
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val tx = transactions[position]
+        Log.d("TransactionsAdapter", "Transaction date millis: ${tx.date}, formatted: ${dateFormatter.format(Date(tx.date))}")
+
 
         val category = categories.find { it.id == tx.categoryId }
 

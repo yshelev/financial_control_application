@@ -29,7 +29,7 @@ data class UserTransaction(
     val amount: Double,
     val currency: String,
     val description: String?,
-    val date: Long = System.currentTimeMillis(),
+    var date: Long = System.currentTimeMillis(),
     val cardId: Long,
     val categoryId: Long?
 )
